@@ -26,7 +26,7 @@ This is the **Inspinia v4x** admin dashboard template — a large multi-framewor
 - **Drag & Drop:** dnd-kit, @hello-pangea/dnd
 - **Maps:** Google Maps (`@vis.gl/react-google-maps`)
 - **Routing:** React Router
-- **State:** likely local/context (no Redux/Zustand visible in quick scan)
+- **State:** local/context (no Redux/Zustand)
 
 ### Structure per framework
 Each framework folder typically contains:
@@ -34,4 +34,4 @@ Each framework folder typically contains:
 - `Seed/` — starter/boilerplate version
 - `Documentation/` — HTML docs
 
-This is a **template product repo** (not a custom app), containing the source for all framework flavors of the Inspinia dashboard. What would you like to work on?
+This is a **template product repo** (not a custom app), containing the source for all framework flavors of the Inspinia dashboard.
