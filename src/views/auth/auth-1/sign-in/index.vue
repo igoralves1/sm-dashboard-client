@@ -312,6 +312,7 @@ async function handleLogin() {
   gap: 10px;
   color: rgba(255,255,255,0.5);
   font-size: 0.78rem;
+  margin-top: 24px;
 }
 
 .sm-status-dot {
