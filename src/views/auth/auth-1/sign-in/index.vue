@@ -29,7 +29,7 @@
         <!-- Logo -->
         <div class="sm-auth__logo">
           <RouterLink to="/">
-            <svg viewBox="170 140 490 320" height="56" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg">
+            <svg viewBox="170 140 490 320" height="90" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <linearGradient id="lg1"><stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#a8d8f0"/></linearGradient>
                 <linearGradient xlink:href="#lg1" id="lg2" x1="0" y1="0" x2="0" y2="1" gradientTransform="rotate(28,0.5,0.5)" gradientUnits="objectBoundingBox"/>
@@ -233,6 +233,8 @@ async function handleLogin() {
 
 .sm-auth__logo {
   margin-bottom: 48px;
+  display: flex;
+  justify-content: center;
 }
 
 .sm-auth__tagline h1 {
