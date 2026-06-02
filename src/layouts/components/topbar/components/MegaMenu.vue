@@ -17,7 +17,7 @@
           <BCol cols="12">
             <div class="p-3 text-center bg-light bg-opacity-50">
               <h4 class="mb-0 fs-lg fw-semibold">
-                Welcome to <span class="text-primary">INSPINIA+</span> Admin Theme.
+                Welcome to <span class="text-primary">SIMEMAP+</span> Admin Theme.
               </h4>
             </div>
           </BCol>

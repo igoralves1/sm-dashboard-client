@@ -195,7 +195,7 @@ import Sidebar from './components/Sidebar.vue';
 import FolderCard from './components/FolderCard.vue';
 import simplebar from 'simplebar-vue';
 
-const folders: FolderType[] = [{ name: 'INSPINIA Multi', size: 2300000000 }, { name: 'Material Design', size: 105300000 }, { name: 'DashPro UI Kit', size: 512000000 }, { name: 'VueStudio Pack', size: 880000000 }, { name: 'Nextify Pro', size: 1100000000 }, { name: 'Blazor Studio', size: 780000000 }, { name: 'Angular Prime', size: 940000000 }, { name: 'React Kit Pro', size: 1600000000 },]
+const folders: FolderType[] = [{ name: 'SIMEMAP Multi', size: 2300000000 }, { name: 'Material Design', size: 105300000 }, { name: 'DashPro UI Kit', size: 512000000 }, { name: 'VueStudio Pack', size: 880000000 }, { name: 'Nextify Pro', size: 1100000000 }, { name: 'Blazor Studio', size: 780000000 }, { name: 'Angular Prime', size: 940000000 }, { name: 'React Kit Pro', size: 1600000000 },]
 
 const show = ref(false)
 

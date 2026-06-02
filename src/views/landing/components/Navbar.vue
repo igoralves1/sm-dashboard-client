@@ -6,7 +6,7 @@
     body-class="d-flex align-items-center justify-content-center w-100"
   >
     <div class="fst-italic fw-medium text-center">
-      🚀 INSPINIA 4.x is here! Now with Bootstrap 5, dark mode, and a refreshed UI. Upgrade today
+      🚀 SIMEMAP 4.x is here! Now with Bootstrap 5, dark mode, and a refreshed UI. Upgrade today
       for the best experience!
       <RouterLink
         to="https://wrapbootstrap.com/theme/inspinia-multipurpose-admin-dashboard-template-WB0R5L90S?ref=inspinia"

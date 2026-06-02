@@ -64,7 +64,7 @@ const filterChartRange = (range: string) => {
 
 // Chart series computed property
 const series = computed(() => [
-  { name: 'Inspinia', data: filteredData.value }
+  { name: 'SIMEMAP', data: filteredData.value }
 ])
 </script>
 

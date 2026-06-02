@@ -5,7 +5,7 @@
         <BCol cols="12" sm="8" md="6" xxl="4">
           <div class="auth-brand text-center mb-4">
             <AuthLogo />
-            <h4 class="fw-bold mt-3">Welcome to IN+</h4>
+            <h4 class="fw-bold mt-3">Welcome to SIMEMAP</h4>
             <p class="text-muted w-lg-75 mx-auto">
               Let's get you signed in. Enter your email and password to continue.
             </p>
@@ -72,7 +72,7 @@
           </BCard>
 
           <p class="text-center text-muted mt-4 mb-0">
-            © 2014 - {{ currentYear }} INSPINIA — by
+            © 2014 - {{ currentYear }} SIMEMAP — by
             <span class="fw-semibold">{{ author }}</span>
           </p>
         </BCol>

@@ -19,9 +19,9 @@ type SearchResultType = {
 
 export const searchResults: SearchResultType[] = [
   {
-    title: 'INSPINIA - Multipurpose Admin Dashboard Template',
+    title: 'SIMEMAP - Multipurpose Admin Dashboard Template',
     description:
-      'INSPINIA is a premium admin dashboard template built with Bootstrap. It offers a wide range of UI components, layouts, and features for building modern web apps like CRMs, SaaS dashboards, and admin panels.',
+      'SIMEMAP is a premium admin dashboard template built with Bootstrap. It offers a wide range of UI components, layouts, and features for building modern web apps like CRMs, SaaS dashboards, and admin panels.',
     url: 'https://wrapbootstrap.com/theme/inspinia-multipurpose-admin-dashboard-template-WB0R5L90S?ref=inspinia',
     image: user4,
     author: 'WebAppLayers',

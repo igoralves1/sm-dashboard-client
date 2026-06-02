@@ -81,7 +81,7 @@
           </BCard>
 
           <p class="text-center text-muted mt-4 mb-0">
-            © 2014 - {{ currentYear }} INSPINIA — by
+            © 2014 - {{ currentYear }} SIMEMAP — by
             <span class="fw-semibold">{{ author }}</span>
           </p>
         </BCol>

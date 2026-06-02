@@ -49,7 +49,7 @@
               <div>
                 <span class="text-muted">Address</span>
                 <h5 class="my-1 lh-lg">
-                  INSPINIA HQ, 123 Market Street, 5th Floor, Financial District, San Francisco, CA
+                  SIMEMAP HQ, 123 Market Street, 5th Floor, Financial District, San Francisco, CA
                   94103, United States
                 </h5>
               </div>

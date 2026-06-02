@@ -41,7 +41,7 @@
                             <BToast class="fade" :model-value="true" :noCloseButton="true" role="alert">
                                 <template #title>
                                     <img :src="logoSm" alt="brand-logo" height="16" class="me-1" />
-                                    <strong class="me-auto text-body">INSPINIA</strong>
+                                    <strong class="me-auto text-body">SIMEMAP</strong>
                                     <small>11 mins ago</small>
                                     <button type="button" class="ms-2 btn-close" data-bs-dismiss="toast"
                                         aria-label="Close"></button>
@@ -64,7 +64,7 @@
                                 <BToast class="fade" :model-value="true" :noCloseButton="true" role="alert">
                                     <template #title>
                                         <img :src="logoSm" alt="brand-logo" height="16" class="me-1" />
-                                        <strong class="me-auto text-body">INSPINIA</strong>
+                                        <strong class="me-auto text-body">SIMEMAP</strong>
                                         <small>11 mins ago</small>
                                         <button type="button" class="ms-2 btn-close" data-bs-dismiss="toast"
                                             aria-label="Close"></button>
@@ -96,7 +96,7 @@
                                 <BToast class="fade" :model-value="true" :noCloseButton="true" role="alert">
                                     <template #title>
                                         <img :src="logoSm" alt="brand-logo" height="16" class="me-1" />
-                                        <strong class="me-auto text-body">INSPINIA</strong>
+                                        <strong class="me-auto text-body">SIMEMAP</strong>
                                         <small>11 mins ago</small>
                                         <button type="button" class="ms-2 btn-close" data-bs-dismiss="toast"
                                             aria-label="Close"></button>
@@ -123,7 +123,7 @@
                             <BToast class="fade" :model-value="active" :noCloseButton="true" role="alert">
                                 <template #title>
                                     <img :src="logoSm" alt="brand-logo" height="16" class="me-1" />
-                                    <strong class="me-auto text-body">INSPINIA</strong>
+                                    <strong class="me-auto text-body">SIMEMAP</strong>
                                     <small>11 mins ago</small>
                                     <button type="button" class="ms-2 btn-close" @click="active = !active"
                                         aria-label="Close"></button>
@@ -145,7 +145,7 @@
                             <BToast class="fade" :model-value="true" :noCloseButton="true" role="alert">
                                 <template #title>
                                     <img :src="logoSm" alt="brand-logo" height="16" class="me-1" />
-                                    <strong class="me-auto text-body">INSPINIA</strong>
+                                    <strong class="me-auto text-body">SIMEMAP</strong>
                                     <small>11 mins ago</small>
                                     <button type="button" class="ms-2 btn-close" data-bs-dismiss="toast"
                                         aria-label="Close"></button>
@@ -168,7 +168,7 @@
                                     <BToast class="fade" :model-value="true" :noCloseButton="true" role="alert">
                                         <template #title>
                                             <img :src="logoSm" alt="brand-logo" height="16" class="me-1" />
-                                            <strong class="me-auto text-body">INSPINIA</strong>
+                                            <strong class="me-auto text-body">SIMEMAP</strong>
                                             <small>just now</small>
                                             <button type="button" class="ms-2 btn-close" data-bs-dismiss="toast"
                                                 aria-label="Close"></button>
@@ -180,7 +180,7 @@
                                     <BToast class="fade" :model-value="true" :noCloseButton="true" role="alert">
                                         <template #title>
                                             <img :src="logoSm" alt="brand-logo" height="16" class="me-1" />
-                                            <strong class="me-auto text-body">INSPINIA</strong>
+                                            <strong class="me-auto text-body">SIMEMAP</strong>
                                             <small>2 seconds ago</small>
                                             <button type="button" class="ms-2 btn-close" data-bs-dismiss="toast"
                                                 aria-label="Close"></button>

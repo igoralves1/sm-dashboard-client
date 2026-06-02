@@ -24,7 +24,7 @@ export const invoices: InvoiceType[] = [
     name: 'Emily Parker',
     image: user7,
     email: 'emily@startupwave.io',
-    purchase: 'Inspinia - Extended License',
+    purchase: 'SIMEMAP - Extended License',
     amount: 999,
     status: 'paid',
   },

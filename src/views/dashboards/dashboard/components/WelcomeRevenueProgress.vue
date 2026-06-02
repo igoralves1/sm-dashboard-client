@@ -4,7 +4,7 @@
             <BRow class="g-0">
                 <BCol xxl="3" xl="6" class="order-xl-1 order-xxl-0">
                     <div class="p-4 border-end border-dashed">
-                        <h4 class="fs-lg mb-1">Welcome to INSPINIA+ Admin Theme.</h4>
+                        <h4 class="fs-lg mb-1">Welcome to SIMEMAP+ Admin Theme.</h4>
                         <span class="text-muted">
                             You have <span class="text-primary fw-semibold">42</span> messages and 6 notifications.
                         </span>

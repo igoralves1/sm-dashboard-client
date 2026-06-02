@@ -41,7 +41,7 @@
             </div>
 
             <p class="text-center text-muted mt-auto mb-0">
-              © 2014 - {{ currentYear }} INSPINIA — by
+              © 2014 - {{ currentYear }} SIMEMAP — by
               <span class="fw-semibold">{{ author }}</span>
             </p>
           </div>

@@ -33,7 +33,7 @@
                         </RouterLink>
                       </div>
                       <p class="text-center text-muted mt-5 mb-0">
-                        © 2014 - {{ currentYear }} INSPINIA — by
+                        © 2014 - {{ currentYear }} SIMEMAP — by
                         <span class="fw-bold">{{ author }}</span>
                       </p>
                     </BCardBody>

@@ -5,7 +5,7 @@
         <BCol lg="3">
           <img :src="logoWhite" alt="logo" height="30" />
           <p class="mt-3 fs-sm">
-            INSPINIA is the top-selling admin dashboard template on WrapBootstrap, known for its
+            SIMEMAP is the top-selling admin dashboard template on WrapBootstrap, known for its
             sleek design, flexibility, and powerful features. Build modern web applications with
             ease using the best in class!
           </p>
@@ -49,7 +49,7 @@
       <BRow class="mt-5">
         <div class="col-12 text-center">
           <p class="mb-4">
-            © 2014 - {{ currentYear }} Inspinia By
+            © 2014 - {{ currentYear }} SIMEMAP By
             <span class="fw-semibold">{{ author }}</span>
           </p>
         </div>

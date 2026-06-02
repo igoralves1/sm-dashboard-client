@@ -20,7 +20,7 @@ export const getBasicAreaChart = (): ApexOptions => ({
   colors: [getColor('primary')],
   series: [
     {
-      name: 'Inspinia',
+      name: 'SIMEMAP',
       data: [110, 110, 95, 95, 85, 85, 95, 95, 115, 115, 100, 100, 115, 116, 95, 95, 65, 85, 90],
     },
   ],
@@ -487,7 +487,7 @@ export const getAreaChartDateTimeChart = (filteredData = datetimeData): ApexOpti
   },
   series: [
     {
-      name: 'Inspinia',
+      name: 'SIMEMAP',
       data: filteredData,
     },
   ],
