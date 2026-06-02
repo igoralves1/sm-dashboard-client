@@ -99,14 +99,14 @@
           </BAlert>
 
           <div class="sm-field mb-4">
-            <label for="userEmail">Email address</label>
+            <label for="userEmail">Username</label>
             <div class="sm-field__input-wrap">
               <Icon icon="tabler:mail" class="sm-field__icon" />
               <BFormInput
                 id="userEmail"
                 v-model="email"
-                type="email"
-                placeholder="you@company.com"
+                type="text"
+                placeholder="admin"
                 required
                 class="sm-input"
               />
@@ -185,15 +185,15 @@ const deviceCount = ref(2847)
 async function handleLogin() {
   error.value = ''
   loading.value = true
-  try {
-    auth.login(email.value, password.value)
+  await new Promise((r) => setTimeout(r, 400))
+  const ok = auth.login(email.value, password.value)
+  if (ok) {
     const redirect = (route.query.redirect as string) || '/dashboard'
     router.push(redirect)
-  } catch {
-    error.value = 'Invalid email or password.'
-  } finally {
-    loading.value = false
+  } else {
+    error.value = 'Invalid username or password.'
   }
+  loading.value = false
 }
 </script>
 
