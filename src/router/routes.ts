@@ -1,8 +1,40 @@
 export const allRoutes = [
-    // Default route
+    // Default route — guard in router/index.ts handles redirect
     {
         path: '/',
         redirect: '/dashboard',
+    },
+
+    // Auth routes
+    {
+        path: '/login',
+        name: 'login',
+        component: () => import('@/views/auth/auth-1/sign-in/index.vue'),
+        meta: { title: 'Sign In', public: true },
+    },
+    {
+        path: '/register',
+        name: 'register',
+        component: () => import('@/views/auth/auth-1/sign-up/index.vue'),
+        meta: { title: 'Register', public: true },
+    },
+    {
+        path: '/forgot-password',
+        name: 'forgot-password',
+        component: () => import('@/views/auth/auth-1/reset-password/index.vue'),
+        meta: { title: 'Forgot Password', public: true },
+    },
+    {
+        path: '/reset-password',
+        name: 'reset-password',
+        component: () => import('@/views/auth/auth-1/new-password/index.vue'),
+        meta: { title: 'Reset Password', public: true },
+    },
+    {
+        path: '/password-changed',
+        name: 'password-changed',
+        component: () => import('@/views/auth/auth-1/success-mail/index.vue'),
+        meta: { title: 'Password Changed', public: true },
     },
 
     // Dashboard

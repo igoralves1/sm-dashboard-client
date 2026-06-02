@@ -27,6 +27,16 @@
 
           <BDropdownDivider v-else-if="item.isDivider" />
 
+          <button
+            v-else-if="item.label === 'Log Out'"
+            class="dropdown-item d-flex align-items-center"
+            :class="item.class"
+            @click="handleLogout"
+          >
+            <Icon v-if="item.icon" :icon="item.icon" class="me-2 fs-17 align-middle" />
+            <span class="align-middle">{{ item.label }}</span>
+          </button>
+
           <RouterLink
             v-else
             :to="item.url ?? '#'"
@@ -44,6 +54,16 @@
 
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
+import { useRouter } from 'vue-router'
 import user2 from '@/assets/images/users/user-2.jpg'
 import { userDropdownItems } from '@/layouts/components/data'
+import { useAuthStore } from '@/stores/auth.ts'
+
+const auth = useAuthStore()
+const router = useRouter()
+
+function handleLogout() {
+  auth.logout()
+  router.push({ name: 'login' })
+}
 </script>
