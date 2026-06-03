@@ -31,6 +31,12 @@ export const allRoutes = [
         meta: { title: 'Reset Password', public: true },
     },
     {
+        path: '/new-password',
+        name: 'new-password',
+        component: () => import('@/views/auth/auth-1/set-new-password/index.vue'),
+        meta: { title: 'Set New Password', public: true },
+    },
+    {
         path: '/password-changed',
         name: 'password-changed',
         component: () => import('@/views/auth/auth-1/success-mail/index.vue'),
@@ -61,6 +67,14 @@ export const allRoutes = [
             title: 'Dashboard 3',
         },
         component: () => import('@/views/dashboards/dashboard3/index.vue'),
+    },
+    {
+        path: '/dashboard-sm',
+        name: 'dashboard-sm',
+        meta: {
+            title: 'HidroForte SM',
+        },
+        component: () => import('@/views/dashboards/dashboard-sm/index.vue'),
     },
 
     //ecommerce Routes

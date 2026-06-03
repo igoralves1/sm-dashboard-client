@@ -8,12 +8,17 @@ const router = createRouter({
   routes: allRoutes,
 })
 
-router.beforeEach((to, _from, next) => {
+router.beforeEach(async (to, _from, next) => {
   const title = to.meta.title ? to.meta.title + ' | ' + appTitle : appTitle
   document.title = title.toString()
 
   const auth = useAuthStore()
   const isPublic = to.meta.public === true
+
+  // If token exists but expired → try silent refresh first
+  if (auth.tokenExpiry && Date.now() >= auth.tokenExpiry) {
+    await auth.refreshSession()
+  }
 
   if (!auth.isAuthenticated && !isPublic) {
     return next({ name: 'login', query: { redirect: to.fullPath } })

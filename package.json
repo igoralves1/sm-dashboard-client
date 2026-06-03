@@ -13,6 +13,10 @@
         "format": "prettier --write src/"
     },
     "dependencies": {
+        "@aws-sdk/client-cognito-identity": "^3.1061.0",
+        "@aws-sdk/client-timestream-query": "^3.1061.0",
+        "@aws-sdk/credential-provider-cognito-identity": "^3.972.40",
+        "@aws-sdk/credential-providers": "^3.1061.0",
         "@fullcalendar/core": "^6.1.19",
         "@fullcalendar/daygrid": "^6.1.19",
         "@fullcalendar/interaction": "^6.1.19",
@@ -26,6 +30,7 @@
         "@vueup/vue-quill": "^1.2.0",
         "@vueuse/head": "^2.0.0",
         "@yeger/vue-masonry-wall": "^5.1.0",
+        "amazon-cognito-identity-js": "^6.3.16",
         "animate.css": "^4.1.1",
         "apexcharts": "^5.3.4",
         "apextree": "^1.4.3",
@@ -33,6 +38,7 @@
         "bootstrap-vue-next": "^0.30.0",
         "choices.js": "^11.1.0",
         "clsx": "^2.1.1",
+        "d3": "^7.9.0",
         "dayjs": "^1.11.18",
         "diff": "^8.0.2",
         "echarts": "^5.6.0",

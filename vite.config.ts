@@ -8,7 +8,7 @@ import { BootstrapVueNextResolver } from 'bootstrap-vue-next'
 
 // https://vite.dev/config/
 export default defineConfig({
-    base: '',
+    base: '/sm-dashboard-client/',
     plugins: [
         vue(),
         vueDevTools(),
@@ -20,5 +20,16 @@ export default defineConfig({
         alias: {
             '@': fileURLToPath(new URL('./src', import.meta.url))
         },
+    },
+    define: {
+        global: 'globalThis',
+    },
+    optimizeDeps: {
+        include: [
+            '@aws-sdk/client-timestream-query',
+            '@aws-sdk/credential-provider-cognito-identity',
+            '@aws-sdk/client-cognito-identity',
+            'amazon-cognito-identity-js',
+        ],
     },
 })
