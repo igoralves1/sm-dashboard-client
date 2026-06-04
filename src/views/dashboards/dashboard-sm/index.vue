@@ -50,21 +50,32 @@
       <!-- Flow PTPs -->
       <div class="col-12">
         <div class="chart-card">
-          <div class="chart-title">Vazao PTPs Silvanópolis</div>
           <FlowTimeSeries :data="silvanopolis.flowSeries" />
         </div>
       </div>
       <!-- Bar charts -->
       <div class="col-lg-6">
         <div class="chart-card">
-          <div class="chart-title">PTPs Silvanópolis - Produção m³/h - 24h</div>
-          <ProductionBar :data="silvanopolis.production24h" x-field="hour" />
+          <ProductionBar
+            :data="silvanopolis.production24h"
+            x-field="hour"
+            title="Produção em m³/h nas últimas 24h · PTPs · Silvanópolis"
+          />
+          <div class="chart-notes">
+            <div class="chart-alert">
+              <span class="alert-blink">⚠</span>
+              <span class="alert-text">PTP_07 (Miranorte) sem dados desde aproximadamente 12:00 — verificar conectividade do sensor ou falha na bomba.</span>
+            </div>
+          </div>
         </div>
       </div>
       <div class="col-lg-6">
         <div class="chart-card">
-          <div class="chart-title">PTPs Silvanópolis - Produção m³ diária</div>
-          <ProductionBar :data="silvanopolis.productionDaily" x-field="day" />
+          <ProductionBar
+            :data="silvanopolis.productionDaily"
+            x-field="day"
+            title="Produção em m³ diária · PTPs · Silvanópolis"
+          />
         </div>
       </div>
     </div>
@@ -189,4 +200,38 @@ onUnmounted(() => {
   transition: background 0.15s;
 }
 .export-btn:hover { background: #252c3f; }
+
+/* ── Chart notes / alerts ── */
+.chart-notes {
+  margin-top: 0.75rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid #252525;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.chart-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  background: rgba(232, 64, 64, 0.08);
+  border: 1px solid rgba(232, 64, 64, 0.25);
+  border-radius: 5px;
+  padding: 0.45rem 0.7rem;
+}
+.alert-blink {
+  font-size: 0.9rem;
+  color: #e84040;
+  flex-shrink: 0;
+  animation: blink-warn 1.1s ease-in-out infinite;
+}
+.alert-text {
+  font-size: 0.76rem;
+  color: #c08080;
+  line-height: 1.45;
+}
+@keyframes blink-warn {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.15; }
+}
 </style>

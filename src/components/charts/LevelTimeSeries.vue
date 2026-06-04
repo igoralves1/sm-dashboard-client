@@ -107,11 +107,16 @@ function draw() {
   }
 
   // Axes
+  const currentHour = new Date().getHours()
   g.append('g').attr('transform', `translate(0,${H})`)
     .call(d3.axisBottom(x).ticks(6).tickFormat(d => d3.timeFormat('%H:%M')(d as Date)))
     .call(gr => gr.select('.domain').attr('stroke', '#444'))
-    .call(gr => gr.selectAll('text').attr('fill', '#888').attr('font-size', '10px'))
     .call(gr => gr.selectAll('.tick line').attr('stroke', '#444'))
+    .call(gr => gr.selectAll<SVGTextElement, Date>('text')
+      .attr('fill', d => (d as Date).getHours() === currentHour ? '#fade2a' : '#888')
+      .attr('font-size', '10px')
+      .attr('font-weight', d => (d as Date).getHours() === currentHour ? '700' : 'normal')
+    )
 
   g.append('g')
     .call(d3.axisLeft(y).ticks(5).tickFormat(d => `${d}%`))
