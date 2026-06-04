@@ -1,0 +1,1 @@
+function u(t,e=1){if(typeof window>"u"||!document.documentElement)return"";const n=getComputedStyle(document.documentElement).getPropertyValue(`--ins-${t}`).trim();return t.includes("-rgb")?`rgba(${n}, ${e})`:n}function r(){const t=document.body;return t?getComputedStyle(t).fontFamily??"":""}export{r as a,u as g};
