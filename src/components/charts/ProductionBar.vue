@@ -26,9 +26,7 @@
     <!-- Dynamic alerts section -->
     <div v-if="computedAlerts.length" class="chart-notes">
       <div v-for="(alert, i) in computedAlerts" :key="i" :class="['chart-alert', `chart-alert--${alert.level}`]">
-        <span :class="['alert-icon', alert.level === 'missing' ? 'alert-blink' : '']">
-          {{ alert.level === 'missing' ? '⚠' : '○' }}
-        </span>
+        <span :class="['alert-icon', 'alert-blink']">⚠</span>
         <span class="alert-text">{{ alert.message }}</span>
       </div>
     </div>
@@ -75,8 +73,10 @@ const computedAlerts = computed<AlertItem[]>(() => {
     props.data.forEach(row => {
       const v = row[ptp]
       const h = +row[props.xField]
-      if (v === null || v === undefined) missingHours.push(h)
-      else if (+v === 0) zeroHours.push(h)
+      const isMissing = v === null || v === undefined || (typeof v === 'string' && v.trim() === '')
+      const isZeroOrInvalid = !isMissing && (isNaN(+v) || +v === 0)
+      if (isMissing) missingHours.push(h)
+      else if (isZeroOrInvalid) zeroHours.push(h)
     })
 
     if (missingHours.length) {
@@ -104,10 +104,8 @@ function draw() {
   d3.select(el).select('svg').remove()
 
   const keys = ptpKeys.value
-  // Sort hours 0–23 numerically when xField is 'hour'
-  const sortedData = props.xField === 'hour'
-    ? [...props.data].sort((a, b) => +a[props.xField] - +b[props.xField])
-    : props.data
+  // Keep natural query order — current hour arrives last and stays at the right
+  const sortedData = props.data
   const margin = { top: 10, right: 10, bottom: 36, left: 48 }
   const W = el.clientWidth - margin.left - margin.right
   const H = (props.height ?? 200) - margin.top - margin.bottom
@@ -190,8 +188,10 @@ function draw() {
       const h = +row[props.xField]
       keys.forEach(k => {
         const v = row[k]
-        if (v === null || v === undefined) missingHours.add(h)
-        else if (+v === 0) zeroHours.add(h)
+        const isMissing = v === null || v === undefined || (typeof v === 'string' && v.trim() === '')
+        const isZeroOrInvalid = !isMissing && (isNaN(+v) || +v === 0)
+        if (isMissing) missingHours.add(h)
+        else if (isZeroOrInvalid) zeroHours.add(h)
       })
     })
   }
