@@ -2,6 +2,16 @@
 <html lang="">
   <head>
     <script>window.global = window;</script>
+    <script>
+      // GitHub Pages SPA: restore path from ?p= query param set by 404.html
+      (function() {
+        var p = new URLSearchParams(window.location.search).get('p');
+        if (p) {
+          var url = window.location.pathname + decodeURIComponent(p) + window.location.hash;
+          window.history.replaceState(null, '', url);
+        }
+      })();
+    </script>
     <meta charset="UTF-8">
     <link rel="icon" href="/src/assets/images/favicon.ico">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
