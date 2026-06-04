@@ -85,6 +85,14 @@ const PTP_NAMES: Record<string, string> = {
   smc0qvb: 'PTP_04', smccsl0: 'PTP_07',
 }
 
+const FLOW_FORMULAS: Record<string, string> = {
+  smca4vh: 'cast(flux as double)*60/(12*1000)',      // PTP_01
+  smc9pg7: 'cast(flux as double)*60/(108*1000)',     // PTP_02
+  smc25ku: 'cast(flux as double)*60/(2*12*1000)',    // PTP_03
+  smc0qvb: 'cast(flux as double)*60/(2*12*1000)',    // PTP_04
+  smccsl0: 'cast(flux as double)*60/(12*1000)',      // PTP_07
+}
+
 // ── Types ─────────────────────────────────────────────────────────────────────
 export interface DataPoint { time: Date; value: number }
 export interface FlowSeries { name: string; values: DataPoint[] }
@@ -121,8 +129,9 @@ async function fetchCurrentLevel(endId: string, expr: string): Promise<number> {
 }
 
 async function fetchFlow(endId: string, ptpName: string): Promise<FlowSeries> {
+  const formula = FLOW_FORMULAS[endId] ?? 'cast(flux as double)*60/(12*1000)'
   const rows = await query(`
-    SELECT cast(flux as double)*60/(12*1000) AS value, time
+    SELECT ${formula} AS value, time
     FROM "${DB}"."<TABLE_RT>"
     WHERE time >= ago(24h)
     AND end_id = '${endId}'
