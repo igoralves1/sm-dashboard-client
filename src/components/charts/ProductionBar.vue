@@ -106,7 +106,7 @@ function draw() {
   const keys = ptpKeys.value
   // Keep natural query order — current hour arrives last and stays at the right
   const sortedData = props.data
-  const margin = { top: 10, right: 10, bottom: 36, left: 48 }
+  const margin = { top: 10, right: 10, bottom: 36, left: 62 }
   const W = el.clientWidth - margin.left - margin.right
   const H = (props.height ?? 200) - margin.top - margin.bottom
 
