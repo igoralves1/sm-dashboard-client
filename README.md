@@ -1,19 +1,237 @@
-# sm-dashboard-client
+# SM Dashboard Client
 
-## Claude AI Usage
+<p align="center">
+  <img src="src/assets/images/favicon.ico" width="48" alt="SIMEMAP" />
+</p>
 
-This project uses Claude Code (AI assistant) for development.
+<p align="center">
+  <strong>Real-time IoT monitoring dashboard for water infrastructure</strong><br/>
+  Built with Vue 3 · D3.js · AWS Timestream · AWS Cognito
+</p>
 
-### Retrieving saved plans
+<p align="center">
+  <img src="https://img.shields.io/badge/Vue-3.x-42b883?logo=vue.js&logoColor=white" />
+  <img src="https://img.shields.io/badge/D3.js-v7-f9a03c?logo=d3.js&logoColor=white" />
+  <img src="https://img.shields.io/badge/AWS-Timestream-FF9900?logo=amazonaws&logoColor=white" />
+  <img src="https://img.shields.io/badge/Auth-Cognito-FF9900?logo=amazonaws&logoColor=white" />
+  <img src="https://img.shields.io/badge/Deploy-GitHub%20Pages-181717?logo=github&logoColor=white" />
+</p>
 
-To continue work on a previously planned feature, tell Claude:
+---
 
-> "retrieve the hidroforte dashboard plan"
+## Overview
 
-Claude will read `.claude/hidroforte-dashboard-plan.md` and resume from where we left off, including pending tasks, data mappings, and AWS resource names.
+SM Dashboard Client is a single-page application that provides real-time visibility into water level monitoring infrastructure for the **HidroForte** project. It connects directly to AWS Timestream from the browser using Cognito-authenticated credentials — no backend server required.
 
-### AWS Profile
+**Live demo:** [https://igoralves1.github.io/sm-dashboard-client/](https://igoralves1.github.io/sm-dashboard-client/)
 
-This project uses the `dev-sm` AWS profile (account `650254791912`, region `us-east-2`).  
-Credentials are managed via SSO — run `aws sso login --profile dev-sm` if expired.  
-The profile is auto-loaded when you `cd` into this directory (via direnv + `.envrc`).
+---
+
+## Features
+
+- 🌊 **Animated liquid fill gauge** — D3.js water tank with wave animation and color-coded levels
+- 📈 **Real-time time series** — 24h water level charts with threshold lines and interactive tooltips
+- 📊 **Production bar charts** — hourly and daily pump production (m³/h and m³)
+- 🗺️ **Site map** — OpenStreetMap widget showing sensor locations
+- 🔐 **AWS Cognito authentication** — 30-minute session tokens, forced password change on first login
+- 🔄 **Auto-refresh** — 1-minute countdown timer with live data polling
+- 📤 **JSON export** — snapshot logger with export button
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Framework | Vue 3 + TypeScript + Vite |
+| Charts | D3.js v7 |
+| Map | Leaflet + OpenStreetMap |
+| Auth | AWS Cognito User Pool (`amazon-cognito-identity-js`) |
+| Data | AWS Timestream Query (`@aws-sdk/client-timestream-query`) |
+| Credentials | AWS Cognito Identity Pool (`@aws-sdk/credential-provider-cognito-identity`) |
+| UI | Bootstrap Vue Next |
+| Deploy | GitHub Pages via GitHub Actions |
+
+---
+
+## Architecture
+
+```
+Browser
+  │
+  ├─ Cognito User Pool (<USER_POOL_ID>)
+  │    └─ Authenticates user, issues 30-min JWT tokens
+  │
+  ├─ Cognito Identity Pool (us-east-2:b6dd06c9-...)
+  │    └─ Exchanges JWT for temporary AWS credentials
+  │
+  └─ Timestream Query (HidroForte database, us-east-2)
+       └─ Direct browser → AWS query (no backend needed)
+```
+
+---
+
+## Project Structure
+
+```
+src/
+├── assets/                  # Static assets (images, styles)
+├── components/
+│   └── charts/
+│       ├── TankGauge.vue        # D3 animated liquid fill gauge
+│       ├── LevelTimeSeries.vue  # Time series with thresholds & tooltip
+│       ├── FlowTimeSeries.vue   # Multi-line PTP flow chart
+│       ├── ProductionBar.vue    # Grouped bar chart (24h / daily)
+│       ├── SiteMap.vue          # Leaflet map widget
+│       └── RefreshCountdown.vue # D3 countdown arc timer
+├── composables/
+│   ├── useTimestreamDashboard.ts  # All Timestream queries & data fetching
+│   └── useDashboardLogger.ts      # Snapshot logger & JSON export
+├── stores/
+│   └── auth.ts              # Pinia auth store (Cognito integration)
+├── views/
+│   ├── auth/                # Login & set-new-password pages
+│   └── dashboards/
+│       └── dashboard-sm/    # HidroForte SM main dashboard
+└── router/
+    └── routes.ts            # Route definitions
+```
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 18+
+- AWS account with Cognito User Pool and Timestream configured
+
+### Install & Run
+
+```bash
+git clone https://github.com/igoralves1/sm-dashboard-client.git
+cd sm-dashboard-client
+npm install
+npm run dev
+```
+
+Open [http://localhost:5173/sm-dashboard-client/](http://localhost:5173/sm-dashboard-client/)
+
+### AWS Profile Setup
+
+This project uses the `dev-sm` AWS profile (account `650254791912`, region `us-east-2`).
+
+```bash
+# Configure SSO (one-time setup)
+aws configure sso --profile dev-sm
+
+# Login when credentials expire (every 4h)
+aws sso login --profile dev-sm
+```
+
+The profile auto-loads when you `cd` into this directory (via [direnv](https://direnv.net/) + `.envrc`).
+
+---
+
+## CI/CD Pipeline
+
+The project uses **GitHub Actions** for automated build and deployment to GitHub Pages.
+
+### Workflow file: `.github/workflows/deploy.yml`
+
+```
+Push to main
+     │
+     ▼
+┌─────────────────┐
+│   CI — Build    │  Runs on: ubuntu-latest
+│                 │
+│ 1. Checkout     │  git checkout
+│ 2. Setup Node   │  Node.js 20
+│ 3. Install deps │  npm ci
+│ 4. Type check   │  vue-tsc --build
+│ 5. Vite build   │  npm run build-only
+└────────┬────────┘
+         │ Build artifacts in /dist
+         ▼
+┌─────────────────┐
+│  CD — Deploy    │
+│                 │
+│ 6. Upload dist  │  actions/upload-pages-artifact
+│ 7. Deploy       │  actions/deploy-pages → gh-pages branch
+└─────────────────┘
+         │
+         ▼
+  https://igoralves1.github.io/sm-dashboard-client/
+```
+
+### CI Steps (Continuous Integration)
+
+| Step | What it does |
+|---|---|
+| **Checkout** | Pulls the latest code from the `main` branch |
+| **Node.js setup** | Installs Node.js 20 with npm cache enabled |
+| **npm ci** | Clean install of all dependencies from `package-lock.json` |
+| **Type check** | Runs `vue-tsc --build` to catch TypeScript errors before building |
+| **Vite build** | Compiles and bundles the app for production into `/dist` |
+
+### CD Steps (Continuous Deployment)
+
+| Step | What it does |
+|---|---|
+| **Upload artifact** | Packages the `/dist` folder as a GitHub Pages artifact |
+| **Deploy to Pages** | Publishes the artifact to the `gh-pages` branch |
+| **Live** | App is served at `https://igoralves1.github.io/sm-dashboard-client/` |
+
+### SPA Routing Fix
+
+GitHub Pages serves static files only. A `404.html` redirect trick is used to support Vue Router's history mode — any unmatched URL redirects back to `index.html` with the path encoded as a query parameter, then a script in `index.html` restores the original URL.
+
+---
+
+## Authentication Flow
+
+```
+1. User visits /login
+2. Enters email + password
+3. Cognito User Pool authenticates
+   ├─ First login → redirect to /new-password (forced password change)
+   └─ Success → JWT tokens stored (access + id + refresh)
+4. Access token valid for 30 minutes
+5. On expiry → silent refresh via refresh token
+6. On full expiry → redirect to /login
+```
+
+---
+
+## Data Sources (AWS Timestream)
+
+| Panel | Database | Table | Measure |
+|---|---|---|---|
+| Tank gauge (Silvanópolis) | HidroForte | <TABLE_RT> | `water_level` |
+| Level chart (Silvanópolis) | HidroForte | <TABLE_RT> | `water_level` |
+| Tank gauge (Miranorte) | HidroForte | <TABLE_RT> | `water_level` |
+| Level chart (Miranorte) | HidroForte | <TABLE_RT> | `water_level` |
+| Flow PTPs | HidroForte | <TABLE_RT> | `flux` |
+| Production 24h | HidroForte | <TABLE_HOURLY> | `L_acc` |
+| Production daily | HidroForte | <TABLE_DAILY> | `L_acc` |
+
+---
+
+## Sensor Mapping
+
+| Sensor Name | `end_id` | Location |
+|---|---|---|
+| RAP_Silvanopolis | `smc01ow` | Silvanópolis — main reservoir |
+| PTP_01 | `smca4vh` | Silvanópolis — pump 1 |
+| PTP_02 | `smc9pg7` | Silvanópolis — pump 2 |
+| PTP_03 | `smc25ku` | Silvanópolis — pump 3 |
+| PTP_04 | `smc0qvb` | Silvanópolis — pump 4 |
+| RAP_Miranorte | `smcait1` | Miranorte — main reservoir |
+| PTP_07 | `smccsl0` | Miranorte — pump 7 |
+
+---
+
+## License
+
+Private — SIMEMAP © 2026. All rights reserved.
