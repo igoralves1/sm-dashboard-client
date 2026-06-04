@@ -1,5 +1,18 @@
 {
   "env": {
     "AWS_PROFILE": "dev-sm"
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /Users/ila/Documents/sm-dashboard-client/.claude/turn-counter.sh"
+          }
+        ]
+      }
+    ]
   }
 }
