@@ -19,8 +19,11 @@ const containerRef = ref<HTMLDivElement | null>(null)
 let resizeObserver: ResizeObserver
 
 const COLORS: Record<string, string> = {
-  PTP_01: '#f2cc0c', PTP_02: '#ff9830', PTP_03: '#73bf69',
-  PTP_04: '#8ab8ff', PTP_07: '#e02f44'
+  PTP_01: '#fade2a',  // yellow
+  PTP_02: '#ff9830',  // orange
+  PTP_03: '#5794f2',  // blue
+  PTP_04: '#73bf69',  // green
+  PTP_07: '#f2495c',  // red
 }
 const colorOf = (name: string) => COLORS[name] ?? '#aaa'
 
