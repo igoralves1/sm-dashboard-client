@@ -1,6 +1,26 @@
 <template>
-  <div class="liquid-gauge-wrapper">
-    <svg :id="gaugeId" :width="size" :height="size"></svg>
+  <div class="tank-gauge-outer">
+    <!-- Header: title + legend -->
+    <div v-if="title" class="chart-header">
+      <div class="chart-main-title">{{ title }}</div>
+      <div class="chart-legend">
+        <span class="legend-item">
+          <span class="legend-dot" style="background:#e84040"></span>
+          <span class="legend-text">Crítico &lt; 50%</span>
+        </span>
+        <span class="legend-item">
+          <span class="legend-dot" style="background:#f58b06"></span>
+          <span class="legend-text">Alerta 50–80%</span>
+        </span>
+        <span class="legend-item">
+          <span class="legend-dot" style="background:#37872d"></span>
+          <span class="legend-text">Normal &gt; 80%</span>
+        </span>
+      </div>
+    </div>
+    <div class="liquid-gauge-wrapper">
+      <svg :id="gaugeId" :width="size" :height="size"></svg>
+    </div>
   </div>
 </template>
 
@@ -11,6 +31,7 @@ import * as d3 from 'd3'
 const props = defineProps<{
   value: number   // 0–100 percentage
   size?: number
+  title?: string
 }>()
 
 const size = computed(() => props.size ?? 200)
@@ -289,11 +310,55 @@ watch(() => props.value, (newVal) => {
 </script>
 
 <style scoped>
+.tank-gauge-outer { width: 100%; }
+
+.chart-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 0.6rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #252525;
+}
+
+.chart-main-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #d0d0d0;
+  letter-spacing: 0.3px;
+}
+
+.chart-legend {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.legend-text {
+  font-size: 0.72rem;
+  color: #888;
+  white-space: nowrap;
+}
+
 .liquid-gauge-wrapper {
   display: flex;
   align-items: center;
   justify-content: center;
 }
+
 :global(.liquidFillGaugeText) {
   font-family: inherit;
   font-weight: 700;

@@ -22,8 +22,12 @@
     <div class="row g-3 mb-4">
       <!-- Tank -->
       <div class="col-lg-3 col-md-4">
-        <div class="chart-card d-flex flex-column align-items-center justify-content-center py-3">
-          <TankGauge :value="silvanopolis.level" :size="200" />
+        <div class="chart-card py-3">
+          <TankGauge
+            :value="silvanopolis.level"
+            :size="200"
+            title="Porcentagem de Preenchimento do Nível de Água · RAP01 · Silvanópolis"
+          />
         </div>
       </div>
       <!-- Level time series -->
@@ -70,8 +74,12 @@
     <div class="row g-3">
       <!-- Tank -->
       <div class="col-lg-3 col-md-4">
-        <div class="chart-card d-flex flex-column align-items-center justify-content-center py-3">
-          <TankGauge :value="miranorte.level" :size="200" />
+        <div class="chart-card py-3">
+          <TankGauge
+            :value="miranorte.level"
+            :size="200"
+            title="Porcentagem de Preenchimento do Nível de Água · RAP01 · Miranorte"
+          />
         </div>
       </div>
       <!-- Level time series -->
@@ -109,7 +117,7 @@ const { silvanopolis, miranorte, loading, error, lastUpdated, refresh } = useTim
 const levelThresholds = [
   { value: 25,  color: '#e84040', dash: '6,3' },
   { value: 50,  color: '#f4954e', dash: '6,3' },
-  { value: 75,  color: '#73bf69', dash: '6,3' },
+  { value: 75,  color: '#f4954e', dash: '6,3' },
   { value: 100, color: '#73bf69', dash: '6,3' },
 ]
 
