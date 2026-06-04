@@ -101,7 +101,7 @@ const { silvanopolis, miranorte, loading, error, lastUpdated, refresh } = useTim
 
 // ── Threshold lines (matching Grafana) ──
 const levelThresholds = [
-  { value: 25,  color: '#f4954e', dash: '6,3' },
+  { value: 25,  color: '#e84040', dash: '6,3' },
   { value: 50,  color: '#f4954e', dash: '6,3' },
   { value: 75,  color: '#73bf69', dash: '6,3' },
   { value: 100, color: '#73bf69', dash: '6,3' },
