@@ -1,5 +1,15 @@
 <template>
-  <div ref="containerRef" class="chart-container"></div>
+  <div ref="containerRef" class="chart-container" style="position:relative">
+    <!-- Tooltip -->
+    <div ref="tooltipRef" class="chart-tooltip" style="display:none">
+      <div class="tt-time"></div>
+      <div class="tt-row">
+        <span class="tt-dot"></span>
+        <span class="tt-label">water_level</span>
+        <span class="tt-value"></span>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -16,76 +26,133 @@ const props = defineProps<{
 }>()
 
 const containerRef = ref<HTMLDivElement | null>(null)
+const tooltipRef   = ref<HTMLDivElement | null>(null)
 let resizeObserver: ResizeObserver
+
+const colorScale = (v: number) => {
+  if (v < 50) return '#e84040'
+  if (v < 80) return '#f58b06'
+  return '#73bf69'
+}
 
 function draw() {
   if (!containerRef.value || !props.data.length) return
   const el = containerRef.value
-  d3.select(el).selectAll('*').remove()
+  d3.select(el).select('svg').remove()
 
   const margin = { top: 10, right: 20, bottom: 30, left: 40 }
-  const width = el.clientWidth - margin.left - margin.right
-  const height = (props.height ?? 200) - margin.top - margin.bottom
+  const W = el.clientWidth - margin.left - margin.right
+  const H = (props.height ?? 220) - margin.top - margin.bottom
 
   const svg = d3.select(el).append('svg')
     .attr('width', el.clientWidth)
-    .attr('height', props.height ?? 200)
-    .append('g')
-    .attr('transform', `translate(${margin.left},${margin.top})`)
+    .attr('height', props.height ?? 220)
+    .style('overflow', 'visible')
+
+  const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`)
 
   const x = d3.scaleTime()
     .domain(d3.extent(props.data, d => d.time) as [Date, Date])
-    .range([0, width])
+    .range([0, W])
 
-  const y = d3.scaleLinear().domain([0, 110]).range([height, 0])
+  const y = d3.scaleLinear().domain([0, 110]).range([H, 0])
 
-  // Grid lines
-  svg.append('g').attr('class', 'grid')
-    .call(d3.axisLeft(y).tickSize(-width).tickFormat(() => ''))
-    .call(g => g.select('.domain').remove())
-    .call(g => g.selectAll('.tick line').attr('stroke', '#2a2a2a').attr('stroke-dasharray', '2,2'))
+  // Grid
+  g.append('g')
+    .call(d3.axisLeft(y).tickSize(-W).tickFormat(() => ''))
+    .call(gr => gr.select('.domain').remove())
+    .call(gr => gr.selectAll('.tick line').attr('stroke', '#2a2a2a').attr('stroke-dasharray', '2,2'))
 
   // Threshold lines
   props.thresholds?.forEach(t => {
-    svg.append('line')
-      .attr('x1', 0).attr('x2', width)
+    g.append('line')
+      .attr('x1', 0).attr('x2', W)
       .attr('y1', y(t.value)).attr('y2', y(t.value))
       .attr('stroke', t.color).attr('stroke-width', 1.5)
-      .attr('stroke-dasharray', t.dash)
-      .attr('opacity', 0.7)
+      .attr('stroke-dasharray', t.dash).attr('opacity', 0.7)
   })
 
-  // Color line based on threshold
-  const colorScale = (v: number) => {
-    if (v < 25) return '#e84040'
-    if (v < 50) return '#f58b06'
-    if (v < 75) return '#f58b06'
-    return '#73bf69'
-  }
-
-  // Draw segmented line by color
+  // Segmented colored line — use midpoint value for color
   for (let i = 1; i < props.data.length; i++) {
-    const a = props.data[i - 1]
-    const b = props.data[i]
-    svg.append('line')
+    const a = props.data[i - 1], b = props.data[i]
+    const mid = (a.value + b.value) / 2
+    g.append('line')
       .attr('x1', x(a.time)).attr('y1', y(a.value))
       .attr('x2', x(b.time)).attr('y2', y(b.value))
-      .attr('stroke', colorScale(b.value))
+      .attr('stroke', colorScale(mid))
       .attr('stroke-width', 2)
   }
 
   // Axes
-  svg.append('g').attr('transform', `translate(0,${height})`)
+  g.append('g').attr('transform', `translate(0,${H})`)
     .call(d3.axisBottom(x).ticks(6).tickFormat(d => d3.timeFormat('%H:%M')(d as Date)))
-    .call(g => g.select('.domain').attr('stroke', '#444'))
-    .call(g => g.selectAll('text').attr('fill', '#888').attr('font-size', '10px'))
-    .call(g => g.selectAll('.tick line').attr('stroke', '#444'))
+    .call(gr => gr.select('.domain').attr('stroke', '#444'))
+    .call(gr => gr.selectAll('text').attr('fill', '#888').attr('font-size', '10px'))
+    .call(gr => gr.selectAll('.tick line').attr('stroke', '#444'))
 
-  svg.append('g')
-    .call(d3.axisLeft(y).ticks(5).tickFormat(d => `${d}`))
-    .call(g => g.select('.domain').attr('stroke', '#444'))
-    .call(g => g.selectAll('text').attr('fill', '#888').attr('font-size', '10px'))
-    .call(g => g.selectAll('.tick line').attr('stroke', '#444'))
+  g.append('g')
+    .call(d3.axisLeft(y).ticks(5))
+    .call(gr => gr.select('.domain').attr('stroke', '#444'))
+    .call(gr => gr.selectAll('text').attr('fill', '#888').attr('font-size', '10px'))
+    .call(gr => gr.selectAll('.tick line').attr('stroke', '#444'))
+
+  // ── Tooltip overlay ──────────────────────────────────────────────────────
+  const bisect = d3.bisector((d: DataPoint) => d.time).left
+
+  // Vertical crosshair line
+  const crosshair = g.append('line')
+    .attr('stroke', '#555').attr('stroke-width', 1)
+    .attr('stroke-dasharray', '3,3')
+    .attr('y1', 0).attr('y2', H)
+    .style('display', 'none')
+
+  // Dot on line
+  const dot = g.append('circle')
+    .attr('r', 4).attr('fill', '#fff').attr('stroke', '#aaa').attr('stroke-width', 1.5)
+    .style('display', 'none')
+
+  // Invisible overlay for mouse events
+  g.append('rect')
+    .attr('width', W).attr('height', H)
+    .attr('fill', 'transparent')
+    .on('mousemove', (event: MouseEvent) => {
+      if (!tooltipRef.value) return
+      const [mx] = d3.pointer(event)
+      const date = x.invert(mx)
+      const idx = bisect(props.data, date, 1)
+      const d0 = props.data[idx - 1]
+      const d1 = props.data[idx]
+      if (!d0) return
+      const d = d1 && (date.getTime() - d0.time.getTime()) > (d1.time.getTime() - date.getTime()) ? d1 : d0
+
+      const cx = x(d.time)
+      const cy = y(d.value)
+
+      crosshair.attr('x1', cx).attr('x2', cx).style('display', null)
+      dot.attr('cx', cx).attr('cy', cy)
+        .attr('fill', colorScale(d.value))
+        .style('display', null)
+
+      // Position tooltip
+      const tt = tooltipRef.value
+      tt.style.display = 'block'
+      const ttW = tt.offsetWidth || 160
+      const chartW = el.clientWidth
+      const absX = cx + margin.left
+      tt.style.left = (absX + ttW + 12 > chartW ? absX - ttW - 8 : absX + 12) + 'px'
+      tt.style.top = (cy + margin.top - 10) + 'px'
+
+      // Fill content
+      tt.querySelector('.tt-time')!.textContent = d3.timeFormat('%Y-%m-%d %H:%M:%S')(d.time)
+      const dot2 = tt.querySelector('.tt-dot') as HTMLElement
+      dot2.style.background = colorScale(d.value)
+      tt.querySelector('.tt-value')!.textContent = d.value.toFixed(1)
+    })
+    .on('mouseleave', () => {
+      crosshair.style('display', 'none')
+      dot.style('display', 'none')
+      if (tooltipRef.value) tooltipRef.value.style.display = 'none'
+    })
 }
 
 onMounted(() => {
@@ -99,4 +166,36 @@ watch(() => props.data, draw, { deep: true })
 
 <style scoped>
 .chart-container { width: 100%; }
+
+.chart-tooltip {
+  position: absolute;
+  pointer-events: none;
+  background: #1f2430;
+  border: 1px solid #3a3f55;
+  border-radius: 6px;
+  padding: 8px 12px;
+  min-width: 160px;
+  z-index: 10;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+}
+.tt-time {
+  font-size: 0.75rem;
+  color: #aaa;
+  margin-bottom: 6px;
+  white-space: nowrap;
+}
+.tt-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+}
+.tt-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.tt-label { color: #ccc; flex: 1; }
+.tt-value { color: #fff; font-weight: 600; }
 </style>

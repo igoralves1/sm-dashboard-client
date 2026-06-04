@@ -7,11 +7,14 @@
           ↓ Export JSON
         </button>
       </div>
-      <small class="text-muted">
-        <span v-if="loading">⏳ Loading...</span>
-        <span v-else-if="error" class="text-danger">⚠ {{ error }}</span>
-        <span v-else>Last updated: {{ lastUpdated }} · Auto-refresh every 1 min · {{ getSnapshotCount() }} snapshots logged</span>
-      </small>
+      <div class="d-flex align-items-center gap-3 mt-1">
+        <small class="text-muted">
+          <span v-if="loading">⏳ Loading...</span>
+          <span v-else-if="error" class="text-danger">⚠ {{ error }}</span>
+          <span v-else>Last updated: {{ lastUpdated }} · {{ getSnapshotCount() }} snapshots logged</span>
+        </small>
+        <RefreshCountdown :duration-seconds="60" :seconds-left="secondsLeft" :size="48" />
+      </div>
     </div>
 
     <!-- ═══ SILVANÓPOLIS ═══ -->
@@ -24,10 +27,17 @@
         </div>
       </div>
       <!-- Level time series -->
-      <div class="col-lg-9 col-md-8">
+      <div class="col-lg-6 col-md-4">
         <div class="chart-card">
           <div class="chart-title">Nível RAP01 Silvanópolis</div>
           <LevelTimeSeries :data="silvanopolis.levelSeries" :thresholds="levelThresholds" />
+        </div>
+      </div>
+      <!-- Map -->
+      <div class="col-lg-3 col-md-4">
+        <div class="chart-card" style="height:100%;min-height:260px">
+          <div class="chart-title">Site Location</div>
+          <SiteMap :markers="siteMarkers" style="height:calc(100% - 24px)" />
         </div>
       </div>
       <!-- Flow PTPs -->
@@ -73,31 +83,53 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import TankGauge from '@/components/charts/TankGauge.vue'
 import LevelTimeSeries from '@/components/charts/LevelTimeSeries.vue'
 import FlowTimeSeries from '@/components/charts/FlowTimeSeries.vue'
 import ProductionBar from '@/components/charts/ProductionBar.vue'
+import RefreshCountdown from '@/components/charts/RefreshCountdown.vue'
 import { useTimestreamDashboard } from '@/composables/useTimestreamDashboard'
 import { exportLog, getSnapshotCount } from '@/composables/useDashboardLogger'
+import SiteMap from '@/components/charts/SiteMap.vue'
+
+const siteMarkers = [
+  { lat: -11.15430944152578, lng: -48.172973779141344, label: 'RAP01 Silvanópolis', color: '#4da6ff' },
+]
 
 const { silvanopolis, miranorte, loading, error, lastUpdated, refresh } = useTimestreamDashboard()
 
 // ── Threshold lines (matching Grafana) ──
 const levelThresholds = [
-  { value: 25, color: '#f4954e', dash: '6,3' },
-  { value: 50, color: '#f4954e', dash: '6,3' },
-  { value: 75, color: '#73bf69', dash: '6,3' },
+  { value: 25,  color: '#f4954e', dash: '6,3' },
+  { value: 50,  color: '#f4954e', dash: '6,3' },
+  { value: 75,  color: '#73bf69', dash: '6,3' },
   { value: 100, color: '#73bf69', dash: '6,3' },
 ]
 
-// ── Auto-refresh every 1 min ──
+// ── Auto-refresh every 1 min with countdown ──
+const REFRESH_SECS = 60
+const secondsLeft = ref(REFRESH_SECS)
+
 let refreshTimer: ReturnType<typeof setInterval>
-onMounted(async () => {
+let tickTimer: ReturnType<typeof setInterval>
+
+async function doRefresh() {
+  secondsLeft.value = REFRESH_SECS
   await refresh()
-  refreshTimer = setInterval(refresh, 60 * 1000)
+}
+
+onMounted(async () => {
+  await doRefresh()
+  refreshTimer = setInterval(doRefresh, REFRESH_SECS * 1000)
+  tickTimer = setInterval(() => {
+    if (secondsLeft.value > 0) secondsLeft.value--
+  }, 1000)
 })
-onUnmounted(() => clearInterval(refreshTimer))
+onUnmounted(() => {
+  clearInterval(refreshTimer)
+  clearInterval(tickTimer)
+})
 </script>
 
 <style scoped>

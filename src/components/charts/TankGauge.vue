@@ -19,26 +19,26 @@ const size = computed(() => props.size ?? 200)
 let idCounter = 0
 const gaugeId = `liquid-gauge-${++idCounter}-${Math.random().toString(36).slice(2, 7)}`
 
-// Color thresholds matching Grafana
+// Color thresholds: < 50 red, 50–80 orange, > 80 green
 function circleColor(v: number) {
-  if (v < 25) return '#e84040'
-  if (v < 50) return '#f58b06'
-  return '#178BCA'
+  if (v < 50) return '#e84040'
+  if (v < 80) return '#f58b06'
+  return '#37872d'
 }
 function waveColor(v: number) {
-  if (v < 25) return '#e84040'
-  if (v < 50) return '#f58b06'
-  return '#178BCA'
+  if (v < 50) return '#e84040'
+  if (v < 80) return '#f58b06'
+  return '#37872d'
 }
 function waveTextColor(v: number) {
-  if (v < 25) return '#ffaaaa'
-  if (v < 50) return '#ffe0a0'
-  return '#A4DBf8'
+  if (v < 50) return '#ffaaaa'
+  if (v < 80) return '#ffe0a0'
+  return '#b7f0b1'
 }
 function textColor(v: number) {
-  if (v < 25) return '#c02020'
-  if (v < 50) return '#c07000'
-  return '#045681'
+  if (v < 50) return '#c02020'
+  if (v < 80) return '#c07000'
+  return '#1a5c16'
 }
 
 // ── Liquid fill gauge (ported from Curtis Bratton's gist, D3 v3 → v7) ────────
@@ -269,9 +269,25 @@ function loadGauge(value: number) {
 onMounted(() => loadGauge(props.value))
 onUnmounted(() => { d3.select('#' + gaugeId).selectAll('*').interrupt() })
 
+function colorBand(v: number) {
+  if (v < 50) return 'red'
+  if (v < 80) return 'orange'
+  return 'green'
+}
+
+let lastBand = colorBand(props.value)
+
 watch(() => props.value, (newVal) => {
-  if (gaugeUpdater) gaugeUpdater.update(newVal)
-  else loadGauge(newVal)
+  const band = colorBand(newVal)
+  if (band !== lastBand) {
+    // Color threshold crossed — full redraw to update colors
+    lastBand = band
+    loadGauge(newVal)
+  } else if (gaugeUpdater) {
+    gaugeUpdater.update(newVal)
+  } else {
+    loadGauge(newVal)
+  }
 })
 </script>
 
