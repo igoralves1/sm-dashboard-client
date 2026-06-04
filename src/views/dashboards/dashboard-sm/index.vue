@@ -68,7 +68,7 @@
           <ProductionBar
             :data="silvanopolis.productionDaily"
             x-field="day"
-            title="Produção em m³ diária · PTPs · Silvanópolis"
+            title="Produção dos últimos 5 dias em m³ · PTPs · Silvanópolis"
           />
         </div>
       </div>
