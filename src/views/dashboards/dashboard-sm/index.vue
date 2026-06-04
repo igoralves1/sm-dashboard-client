@@ -10,7 +10,7 @@
       <small class="text-muted">
         <span v-if="loading">⏳ Loading...</span>
         <span v-else-if="error" class="text-danger">⚠ {{ error }}</span>
-        <span v-else>Last updated: {{ lastUpdated }} · Auto-refresh every 5 min · {{ getSnapshotCount() }} snapshots logged</span>
+        <span v-else>Last updated: {{ lastUpdated }} · Auto-refresh every 1 min · {{ getSnapshotCount() }} snapshots logged</span>
       </small>
     </div>
 
