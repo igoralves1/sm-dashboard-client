@@ -1,11 +1,16 @@
 <template>
   <div class="dashboard-sm">
     <div class="page-header mb-4">
-      <h3 class="page-title">HidroForte Dashboard</h3>
+      <div class="d-flex justify-content-between align-items-center">
+        <h3 class="page-title">HidroForte Dashboard</h3>
+        <button class="export-btn" @click="exportLog()" :title="`Export ${getSnapshotCount()} snapshots`">
+          ↓ Export JSON
+        </button>
+      </div>
       <small class="text-muted">
         <span v-if="loading">⏳ Loading...</span>
         <span v-else-if="error" class="text-danger">⚠ {{ error }}</span>
-        <span v-else>Last updated: {{ lastUpdated }} · Auto-refresh every 5 min</span>
+        <span v-else>Last updated: {{ lastUpdated }} · Auto-refresh every 5 min · {{ getSnapshotCount() }} snapshots logged</span>
       </small>
     </div>
 
@@ -74,6 +79,7 @@ import LevelTimeSeries from '@/components/charts/LevelTimeSeries.vue'
 import FlowTimeSeries from '@/components/charts/FlowTimeSeries.vue'
 import ProductionBar from '@/components/charts/ProductionBar.vue'
 import { useTimestreamDashboard } from '@/composables/useTimestreamDashboard'
+import { exportLog, getSnapshotCount } from '@/composables/useDashboardLogger'
 
 const { silvanopolis, miranorte, loading, error, lastUpdated, refresh } = useTimestreamDashboard()
 
@@ -126,4 +132,15 @@ onUnmounted(() => clearInterval(refreshTimer))
   margin-bottom: 0.5rem;
   font-weight: 500;
 }
+.export-btn {
+  background: #1e2330;
+  border: 1px solid #3a3f55;
+  color: #8ab4f8;
+  padding: 0.3rem 0.8rem;
+  border-radius: 5px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.export-btn:hover { background: #252c3f; }
 </style>
