@@ -1,12 +1,34 @@
 <template>
-  <div ref="containerRef" class="chart-container" style="position:relative">
-    <!-- Tooltip -->
-    <div ref="tooltipRef" class="chart-tooltip" style="display:none">
-      <div class="tt-time"></div>
-      <div class="tt-row">
-        <span class="tt-dot"></span>
-        <span class="tt-label">water_level</span>
-        <span class="tt-value"></span>
+  <div class="chart-wrapper">
+    <!-- Header: title + legend -->
+    <div v-if="title" class="chart-header">
+      <div class="chart-main-title">{{ title }}</div>
+      <div class="chart-legend">
+        <span class="legend-item">
+          <span class="legend-dot" style="background:#e84040"></span>
+          <span class="legend-text">Crítico &lt; 50%</span>
+        </span>
+        <span class="legend-item">
+          <span class="legend-dot" style="background:#f58b06"></span>
+          <span class="legend-text">Alerta 50–80%</span>
+        </span>
+        <span class="legend-item">
+          <span class="legend-dot" style="background:#73bf69"></span>
+          <span class="legend-text">Normal &gt; 80%</span>
+        </span>
+      </div>
+    </div>
+
+    <!-- Chart area -->
+    <div ref="containerRef" class="chart-container" style="position:relative">
+      <!-- Tooltip -->
+      <div ref="tooltipRef" class="chart-tooltip" style="display:none">
+        <div class="tt-time"></div>
+        <div class="tt-row">
+          <span class="tt-dot"></span>
+          <span class="tt-label">Nível</span>
+          <span class="tt-value"></span>
+        </div>
       </div>
     </div>
   </div>
@@ -23,6 +45,7 @@ const props = defineProps<{
   data: DataPoint[]
   thresholds?: Threshold[]
   height?: number
+  title?: string
 }>()
 
 const containerRef = ref<HTMLDivElement | null>(null)
@@ -40,7 +63,7 @@ function draw() {
   const el = containerRef.value
   d3.select(el).select('svg').remove()
 
-  const margin = { top: 10, right: 20, bottom: 30, left: 40 }
+  const margin = { top: 10, right: 20, bottom: 36, left: 52 }
   const W = el.clientWidth - margin.left - margin.right
   const H = (props.height ?? 220) - margin.top - margin.bottom
 
@@ -91,10 +114,19 @@ function draw() {
     .call(gr => gr.selectAll('.tick line').attr('stroke', '#444'))
 
   g.append('g')
-    .call(d3.axisLeft(y).ticks(5))
+    .call(d3.axisLeft(y).ticks(5).tickFormat(d => `${d}%`))
     .call(gr => gr.select('.domain').attr('stroke', '#444'))
     .call(gr => gr.selectAll('text').attr('fill', '#888').attr('font-size', '10px'))
     .call(gr => gr.selectAll('.tick line').attr('stroke', '#444'))
+
+  // X-axis label
+  svg.append('text')
+    .attr('x', margin.left + W / 2)
+    .attr('y', margin.top + H + margin.bottom - 2)
+    .attr('text-anchor', 'middle')
+    .attr('fill', '#666')
+    .attr('font-size', '10px')
+    .text('Hora do dia')
 
   // ── Tooltip overlay ──────────────────────────────────────────────────────
   const bisect = d3.bisector((d: DataPoint) => d.time).left
@@ -146,7 +178,7 @@ function draw() {
       tt.querySelector('.tt-time')!.textContent = d3.timeFormat('%Y-%m-%d %H:%M:%S')(d.time)
       const dot2 = tt.querySelector('.tt-dot') as HTMLElement
       dot2.style.background = colorScale(d.value)
-      tt.querySelector('.tt-value')!.textContent = d.value.toFixed(1)
+      tt.querySelector('.tt-value')!.textContent = `${d.value.toFixed(1)}%`
     })
     .on('mouseleave', () => {
       crosshair.style('display', 'none')
@@ -165,7 +197,49 @@ watch(() => props.data, draw, { deep: true })
 </script>
 
 <style scoped>
+.chart-wrapper { width: 100%; }
 .chart-container { width: 100%; }
+
+.chart-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 0.6rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #252525;
+}
+
+.chart-main-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #d0d0d0;
+  letter-spacing: 0.3px;
+}
+
+.chart-legend {
+  display: flex;
+  gap: 1rem;
+  flex-shrink: 0;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.legend-text {
+  font-size: 0.72rem;
+  color: #888;
+  white-space: nowrap;
+}
 
 .chart-tooltip {
   position: absolute;

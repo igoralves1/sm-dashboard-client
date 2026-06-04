@@ -29,8 +29,11 @@
       <!-- Level time series -->
       <div class="col-lg-6 col-md-4">
         <div class="chart-card">
-          <div class="chart-title">Nível RAP01 Silvanópolis</div>
-          <LevelTimeSeries :data="silvanopolis.levelSeries" :thresholds="levelThresholds" />
+          <LevelTimeSeries
+            :data="silvanopolis.levelSeries"
+            :thresholds="levelThresholds"
+            title="Porcentagem de Preenchimento do Nível de Água · RAP01 · Silvanópolis"
+          />
         </div>
       </div>
       <!-- Map -->
@@ -74,8 +77,11 @@
       <!-- Level time series -->
       <div class="col-lg-9 col-md-8">
         <div class="chart-card">
-          <div class="chart-title">Nível RAP01 Miranorte</div>
-          <LevelTimeSeries :data="miranorte.levelSeries" :thresholds="levelThresholds" />
+          <LevelTimeSeries
+            :data="miranorte.levelSeries"
+            :thresholds="levelThresholds"
+            title="Porcentagem de Preenchimento do Nível de Água · RAP01 · Miranorte"
+          />
         </div>
       </div>
     </div>
