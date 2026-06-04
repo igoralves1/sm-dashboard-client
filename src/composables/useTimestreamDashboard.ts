@@ -1,4 +1,4 @@
-import { ref, readonly } from 'vue'
+import { ref } from 'vue'
 import { TimestreamQueryClient, QueryCommand } from '@aws-sdk/client-timestream-query'
 import { fromCognitoIdentityPool } from '@aws-sdk/credential-provider-cognito-identity'
 import { CognitoIdentityClient } from '@aws-sdk/client-cognito-identity'
@@ -27,6 +27,7 @@ function getClient() {
     client = new TimestreamQueryClient({
       region: REGION,
       credentials: fromCognitoIdentityPool({
+        // @ts-ignore: duplicate CognitoIdentityClient types across AWS SDK nested-clients
         client: new CognitoIdentityClient({ region: REGION }),
         identityPoolId: IDENTITY_POOL_ID,
         logins,
@@ -236,11 +237,11 @@ export function useTimestreamDashboard() {
   }
 
   return {
-    silvanopolis: readonly(silvanopolis),
-    miranorte: readonly(miranorte),
-    loading: readonly(loading),
-    error: readonly(error),
-    lastUpdated: readonly(lastUpdated),
+    silvanopolis,
+    miranorte,
+    loading,
+    error,
+    lastUpdated,
     refresh,
   }
 }
