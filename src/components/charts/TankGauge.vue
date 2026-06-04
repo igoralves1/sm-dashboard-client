@@ -1,206 +1,288 @@
 <template>
-  <div class="tank-gauge-wrapper" ref="wrapperRef">
-    <svg ref="svgRef" :width="size" :height="size + 40"></svg>
-    <div class="tank-percentage" :style="{ color: levelColor }">
-      {{ displayValue.toFixed(1) }}<span>%</span>
-    </div>
+  <div class="liquid-gauge-wrapper">
+    <svg :id="gaugeId" :width="size" :height="size"></svg>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch, computed } from 'vue'
+import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
 import * as d3 from 'd3'
 
 const props = defineProps<{
-  value: number   // 0-100 percentage
+  value: number   // 0–100 percentage
   size?: number
-  label?: string
 }>()
 
-const svgRef = ref<SVGSVGElement | null>(null)
-const wrapperRef = ref<HTMLDivElement | null>(null)
-const displayValue = ref(props.value)
-const size = computed(() => props.size ?? 220)
+const size = computed(() => props.size ?? 200)
+
+// Unique ID per instance to avoid clipPath collisions
+let idCounter = 0
+const gaugeId = `liquid-gauge-${++idCounter}-${Math.random().toString(36).slice(2, 7)}`
 
 // Color thresholds matching Grafana
-const levelColor = computed(() => {
-  if (props.value < 25) return '#e84040'
-  if (props.value < 50) return '#f58b06'
-  if (props.value < 75) return '#56a64b'
-  return '#37872d'
-})
+function circleColor(v: number) {
+  if (v < 25) return '#e84040'
+  if (v < 50) return '#f58b06'
+  return '#178BCA'
+}
+function waveColor(v: number) {
+  if (v < 25) return '#e84040'
+  if (v < 50) return '#f58b06'
+  return '#178BCA'
+}
+function waveTextColor(v: number) {
+  if (v < 25) return '#ffaaaa'
+  if (v < 50) return '#ffe0a0'
+  return '#A4DBf8'
+}
+function textColor(v: number) {
+  if (v < 25) return '#c02020'
+  if (v < 50) return '#c07000'
+  return '#045681'
+}
 
-const waterColor = computed(() => {
-  if (props.value < 25) return '#e84040'
-  if (props.value < 50) return '#f58b06'
-  if (props.value < 75) return '#4da6ff'
-  return '#4da6ff'
-})
+// ── Liquid fill gauge (ported from Curtis Bratton's gist, D3 v3 → v7) ────────
+let gaugeUpdater: { update: (v: number) => void } | null = null
 
-let waveOffset = 0
-let animFrame: number
-
-function drawTank(svgEl: SVGSVGElement, pct: number) {
-  const s = size.value
-  const cx = s / 2
-  const totalH = s * 0.72
-  const topY = s * 0.08
-  const botY = topY + totalH
-  const rx = s * 0.42     // horizontal radius of ellipse
-  const ry = s * 0.10     // vertical radius of ellipse (3D depth)
-  const fillH = totalH * (pct / 100)
-  const fillY = botY - fillH
-
-  const svg = d3.select(svgEl)
-  svg.selectAll('*').remove()
-
-  const defs = svg.append('defs')
-
-  // Clip path — cylinder body
-  const clipId = 'tank-clip'
-  defs.append('clipPath').attr('id', clipId)
-    .append('rect')
-    .attr('x', cx - rx)
-    .attr('y', topY)
-    .attr('width', rx * 2)
-    .attr('height', totalH)
-
-  // ── Background cylinder body ──
-  svg.append('rect')
-    .attr('x', cx - rx)
-    .attr('y', topY)
-    .attr('width', rx * 2)
-    .attr('height', totalH)
-    .attr('fill', '#2a2a2a')
-    .attr('rx', 2)
-
-  // ── Horizontal rings (mesh lines) ──
-  const ringCount = 7
-  for (let i = 1; i < ringCount; i++) {
-    const ry2 = topY + (totalH / ringCount) * i
-    svg.append('ellipse')
-      .attr('cx', cx).attr('cy', ry2)
-      .attr('rx', rx).attr('ry', ry * 0.5)
-      .attr('fill', 'none')
-      .attr('stroke', '#555').attr('stroke-width', 0.8)
-      .attr('opacity', 0.6)
+function loadGauge(value: number) {
+  const config = {
+    minValue: 0,
+    maxValue: 100,
+    circleThickness: 0.05,
+    circleFillGap: 0.05,
+    circleColor: circleColor(value),
+    waveHeight: 0.05,
+    waveCount: 1,
+    waveRiseTime: 1000,
+    waveAnimateTime: 18000,
+    waveRise: true,
+    waveHeightScaling: true,
+    waveAnimate: true,
+    waveColor: waveColor(value),
+    waveOffset: 0,
+    textVertPosition: 0.5,
+    textSize: 1,
+    valueCountUp: true,
+    displayPercent: true,
+    textColor: textColor(value),
+    waveTextColor: waveTextColor(value),
   }
 
-  // ── Water fill with wave ──
-  if (pct > 0) {
-    const waveAmp = fillH < 8 ? 1 : 3
-    const waveLen = rx * 1.2
-    const pts: [number, number][] = []
-    const steps = 60
-    for (let i = 0; i <= steps; i++) {
-      const x = (cx - rx) + (rx * 2 * i / steps)
-      const y = fillY + waveAmp * Math.sin((i / steps) * Math.PI * 2 * (rx / waveLen) + waveOffset)
-      pts.push([x, y])
+  const gauge = d3.select('#' + gaugeId)
+  // Clear previous render
+  gauge.selectAll('*').remove()
+
+  const radius = Math.min(parseInt(gauge.style('width')), parseInt(gauge.style('height'))) / 2
+  const locationX = parseInt(gauge.style('width')) / 2 - radius
+  const locationY = parseInt(gauge.style('height')) / 2 - radius
+  const fillPercent = Math.max(config.minValue, Math.min(config.maxValue, value)) / config.maxValue
+
+  const waveHeightScale = config.waveHeightScaling
+    ? d3.scaleLinear().range([0, config.waveHeight, 0]).domain([0, 50, 100])
+    : d3.scaleLinear().range([config.waveHeight, config.waveHeight]).domain([0, 100])
+
+  const textPixels = config.textSize * radius / 2
+  const textFinalValue = parseFloat(String(value)).toFixed(2)
+  const textStartValue = config.valueCountUp ? config.minValue : parseFloat(textFinalValue)
+  const percentText = config.displayPercent ? '%' : ''
+  const circleThickness = config.circleThickness * radius
+  const circleFillGap = config.circleFillGap * radius
+  const fillCircleMargin = circleThickness + circleFillGap
+  const fillCircleRadius = radius - fillCircleMargin
+  const waveHeight = fillCircleRadius * waveHeightScale(fillPercent * 100)
+  const waveLength = fillCircleRadius * 2 / config.waveCount
+  const waveClipCount = 1 + config.waveCount
+  const waveClipWidth = waveLength * waveClipCount
+
+  let textRounder = (v: number) => Math.round(v).toString()
+  if (parseFloat(textFinalValue) !== parseFloat(String(Math.round(parseFloat(textFinalValue))))) {
+    textRounder = (v: number) => parseFloat(String(v)).toFixed(1)
+  }
+  if (parseFloat(textFinalValue) !== parseFloat(textRounder(parseFloat(textFinalValue)))) {
+    textRounder = (v: number) => parseFloat(String(v)).toFixed(2)
+  }
+
+  const data: { x: number; y: number }[] = []
+  for (let i = 0; i <= 40 * waveClipCount; i++) {
+    data.push({ x: i / (40 * waveClipCount), y: i / 40 })
+  }
+
+  const gaugeCircleX = d3.scaleLinear().range([0, 2 * Math.PI]).domain([0, 1])
+  const gaugeCircleY = d3.scaleLinear().range([0, radius]).domain([0, radius])
+  const waveScaleX = d3.scaleLinear().range([0, waveClipWidth]).domain([0, 1])
+  const waveScaleY = d3.scaleLinear().range([0, waveHeight]).domain([0, 1])
+  const waveRiseScale = d3.scaleLinear()
+    .range([fillCircleMargin + fillCircleRadius * 2 + waveHeight, fillCircleMargin - waveHeight])
+    .domain([0, 1])
+  const waveAnimateScale = d3.scaleLinear()
+    .range([0, waveClipWidth - fillCircleRadius * 2])
+    .domain([0, 1])
+  const textRiseScaleY = d3.scaleLinear()
+    .range([fillCircleMargin + fillCircleRadius * 2, fillCircleMargin + textPixels * 0.7])
+    .domain([0, 1])
+
+  const gaugeGroup = gauge.append('g')
+    .attr('transform', `translate(${locationX},${locationY})`)
+
+  // Outer circle arc
+  const gaugeCircleArc = d3.arc()
+    .startAngle(gaugeCircleX(0))
+    .endAngle(gaugeCircleX(1))
+    .outerRadius(gaugeCircleY(radius))
+    .innerRadius(gaugeCircleY(radius - circleThickness))
+
+  gaugeGroup.append('path')
+    .attr('d', gaugeCircleArc as any)
+    .style('fill', config.circleColor)
+    .attr('transform', `translate(${radius},${radius})`)
+
+  // Text (outside wave)
+  const text1 = gaugeGroup.append('text')
+    .text(textRounder(textStartValue as number) + percentText)
+    .attr('class', 'liquidFillGaugeText')
+    .attr('text-anchor', 'middle')
+    .attr('font-size', textPixels + 'px')
+    .style('fill', config.textColor)
+    .attr('transform', `translate(${radius},${textRiseScaleY(config.textVertPosition)})`)
+
+  // Clip wave area
+  const clipArea = d3.area<{ x: number; y: number }>()
+    .x(d => waveScaleX(d.x))
+    .y0(d => waveScaleY(Math.sin(Math.PI * 2 * config.waveOffset * -1 + Math.PI * 2 * (1 - config.waveCount) + d.y * 2 * Math.PI)))
+    .y1(() => fillCircleRadius * 2 + waveHeight)
+
+  const waveGroup = gaugeGroup.append('defs')
+    .append('clipPath')
+    .attr('id', 'clipWave' + gaugeId)
+
+  const wave = waveGroup.append('path')
+    .datum(data)
+    .attr('d', clipArea as any)
+    .attr('T', 0)
+
+  // Fill circle with clip
+  const fillCircleGroup = gaugeGroup.append('g')
+    .attr('clip-path', `url(#clipWave${gaugeId})`)
+
+  fillCircleGroup.append('circle')
+    .attr('cx', radius).attr('cy', radius).attr('r', fillCircleRadius)
+    .style('fill', config.waveColor)
+
+  // Text (inside wave)
+  const text2 = fillCircleGroup.append('text')
+    .text(textRounder(textStartValue as number) + percentText)
+    .attr('class', 'liquidFillGaugeText')
+    .attr('text-anchor', 'middle')
+    .attr('font-size', textPixels + 'px')
+    .style('fill', config.waveTextColor)
+    .attr('transform', `translate(${radius},${textRiseScaleY(config.textVertPosition)})`)
+
+  // Count-up animation
+  if (config.valueCountUp) {
+    const textTween = function (this: SVGTextElement) {
+      const i = d3.interpolate(parseFloat(this.textContent ?? '0'), parseFloat(textFinalValue))
+      return (t: number) => { this.textContent = textRounder(i(t)) + percentText }
     }
-    pts.push([cx + rx, botY])
-    pts.push([cx - rx, botY])
-
-    const line = d3.line<[number, number]>().x(d => d[0]).y(d => d[1]).curve(d3.curveCatmullRom)
-    const pathD = line(pts) + 'Z'
-
-    svg.append('path')
-      .attr('d', pathD)
-      .attr('fill', waterColor.value)
-      .attr('opacity', 0.85)
-      .attr('clip-path', `url(#${clipId})`)
-
-    // Water surface ellipse
-    svg.append('ellipse')
-      .attr('cx', cx).attr('cy', fillY)
-      .attr('rx', rx).attr('ry', ry * 0.45)
-      .attr('fill', waterColor.value)
-      .attr('opacity', 0.95)
-      .attr('clip-path', `url(#${clipId})`)
+    text1.transition().duration(config.waveRiseTime).tween('text', textTween)
+    text2.transition().duration(config.waveRiseTime).tween('text', textTween)
   }
 
-  // ── Bottom ellipse (base) ──
-  svg.append('ellipse')
-    .attr('cx', cx).attr('cy', botY)
-    .attr('rx', rx).attr('ry', ry)
-    .attr('fill', '#1a1a1a').attr('stroke', '#444').attr('stroke-width', 1)
-
-  // ── Top ellipse ──
-  svg.append('ellipse')
-    .attr('cx', cx).attr('cy', topY)
-    .attr('rx', rx).attr('ry', ry)
-    .attr('fill', '#222').attr('stroke', '#555').attr('stroke-width', 1)
-
-  // ── Vertical bars (gold cage) ──
-  const barCount = 10
-  for (let i = 0; i < barCount; i++) {
-    const angle = (i / barCount) * Math.PI * 2
-    const bx = cx + rx * Math.cos(angle)
-    svg.append('line')
-      .attr('x1', bx).attr('y1', topY)
-      .attr('x2', bx).attr('y2', botY)
-      .attr('stroke', Math.abs(Math.cos(angle)) > 0.3 ? '#c8960c' : '#888')
-      .attr('stroke-width', Math.abs(Math.cos(angle)) > 0.3 ? 2 : 1)
-      .attr('opacity', Math.abs(Math.cos(angle)) > 0.15 ? 1 : 0.3)
+  // Wave rise
+  const waveGroupXPosition = fillCircleMargin + fillCircleRadius * 2 - waveClipWidth
+  if (config.waveRise) {
+    waveGroup
+      .attr('transform', `translate(${waveGroupXPosition},${waveRiseScale(0)})`)
+      .transition()
+      .duration(config.waveRiseTime)
+      .attr('transform', `translate(${waveGroupXPosition},${waveRiseScale(fillPercent)})`)
+      .on('start', () => { wave.attr('transform', 'translate(1,0)') })
+  } else {
+    waveGroup.attr('transform', `translate(${waveGroupXPosition},${waveRiseScale(fillPercent)})`)
   }
 
-  // ── Top ring (gold) ──
-  svg.append('ellipse')
-    .attr('cx', cx).attr('cy', topY)
-    .attr('rx', rx + 2).attr('ry', ry + 1)
-    .attr('fill', 'none').attr('stroke', '#c8960c').attr('stroke-width', 3)
+  function animateWave() {
+    wave.attr('transform', `translate(${waveAnimateScale(parseFloat(wave.attr('T')))},0)`)
+    wave.transition()
+      .duration(config.waveAnimateTime * (1 - parseFloat(wave.attr('T'))))
+      .ease(d3.easeLinear)
+      .attr('transform', `translate(${waveAnimateScale(1)},0)`)
+      .attr('T', 1)
+      .on('end', () => {
+        wave.attr('T', 0)
+        animateWave()
+      })
+  }
 
-  // ── Base ring ──
-  svg.append('ellipse')
-    .attr('cx', cx).attr('cy', botY + ry * 0.6)
-    .attr('rx', rx + 4).attr('ry', ry * 0.5)
-    .attr('fill', '#111').attr('stroke', '#333').attr('stroke-width', 2)
+  if (config.waveAnimate) animateWave()
+
+  gaugeUpdater = {
+    update(newValue: number) {
+      const newFinal = parseFloat(String(newValue)).toFixed(2)
+      let rounder = (v: number) => Math.round(v).toString()
+      if (parseFloat(newFinal) !== Math.round(parseFloat(newFinal)))
+        rounder = (v: number) => parseFloat(String(v)).toFixed(1)
+      if (parseFloat(newFinal) !== parseFloat(rounder(parseFloat(newFinal))))
+        rounder = (v: number) => parseFloat(String(v)).toFixed(2)
+
+      const tween = function (this: SVGTextElement) {
+        const i = d3.interpolate(parseFloat(this.textContent ?? '0'), parseFloat(newFinal))
+        return (t: number) => { this.textContent = rounder(i(t)) + percentText }
+      }
+      text1.transition().duration(config.waveRiseTime).tween('text', tween)
+      text2.transition().duration(config.waveRiseTime).tween('text', tween)
+
+      const newFillPct = Math.max(config.minValue, Math.min(config.maxValue, newValue)) / config.maxValue
+      const newWaveH = fillCircleRadius * waveHeightScale(newFillPct * 100)
+      const newWaveRiseScale = d3.scaleLinear()
+        .range([fillCircleMargin + fillCircleRadius * 2 + newWaveH, fillCircleMargin - newWaveH])
+        .domain([0, 1])
+      const newWaveScaleX = d3.scaleLinear().range([0, waveClipWidth]).domain([0, 1])
+      const newWaveScaleY = d3.scaleLinear().range([0, newWaveH]).domain([0, 1])
+      const newClipArea = d3.area<{ x: number; y: number }>()
+        .x(d => newWaveScaleX(d.x))
+        .y0(d => newWaveScaleY(Math.sin(Math.PI * 2 * config.waveOffset * -1 + Math.PI * 2 * (1 - config.waveCount) + d.y * 2 * Math.PI)))
+        .y1(() => fillCircleRadius * 2 + newWaveH)
+
+      const newWavePos = config.waveAnimate ? waveAnimateScale(1) : 0
+      wave.transition().duration(0).transition()
+        .duration(config.waveAnimate
+          ? config.waveAnimateTime * (1 - parseFloat(wave.attr('T')))
+          : config.waveRiseTime)
+        .ease(d3.easeLinear)
+        .attr('d', newClipArea as any)
+        .attr('transform', `translate(${newWavePos},0)`)
+        .attr('T', 1)
+        .on('end', () => {
+          if (config.waveAnimate) {
+            wave.attr('transform', `translate(${waveAnimateScale(0)},0)`)
+            animateWave()
+          }
+        })
+
+      waveGroup.transition()
+        .duration(config.waveRiseTime)
+        .attr('transform', `translate(${waveGroupXPosition},${newWaveRiseScale(newFillPct)})`)
+    }
+  }
 }
 
-function animate() {
-  if (!svgRef.value) return
-  waveOffset += 0.04
-  drawTank(svgRef.value, displayValue.value)
-  animFrame = requestAnimationFrame(animate)
-}
-
-function animateValue(target: number) {
-  const start = displayValue.value
-  const duration = 800
-  const startTime = performance.now()
-  function step(now: number) {
-    const t = Math.min((now - startTime) / duration, 1)
-    displayValue.value = start + (target - start) * d3.easeCubicInOut(t)
-    if (t < 1) requestAnimationFrame(step)
-  }
-  requestAnimationFrame(step)
-}
-
-onMounted(() => {
-  if (svgRef.value) {
-    drawTank(svgRef.value, props.value)
-    animate()
-  }
-})
+onMounted(() => loadGauge(props.value))
+onUnmounted(() => { d3.select('#' + gaugeId).selectAll('*').interrupt() })
 
 watch(() => props.value, (newVal) => {
-  animateValue(newVal)
+  if (gaugeUpdater) gaugeUpdater.update(newVal)
+  else loadGauge(newVal)
 })
 </script>
 
 <style scoped>
-.tank-gauge-wrapper {
+.liquid-gauge-wrapper {
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
 }
-.tank-percentage {
-  font-size: 2rem;
+:global(.liquidFillGaugeText) {
+  font-family: inherit;
   font-weight: 700;
-  margin-top: -8px;
-  letter-spacing: -0.5px;
-}
-.tank-percentage span {
-  font-size: 1.2rem;
 }
 </style>
