@@ -91,11 +91,11 @@ const levelThresholds = [
   { value: 100, color: '#73bf69', dash: '6,3' },
 ]
 
-// ── Auto-refresh every 5 min ──
+// ── Auto-refresh every 1 min ──
 let refreshTimer: ReturnType<typeof setInterval>
 onMounted(async () => {
   await refresh()
-  refreshTimer = setInterval(refresh, 5 * 60 * 1000)
+  refreshTimer = setInterval(refresh, 60 * 1000)
 })
 onUnmounted(() => clearInterval(refreshTimer))
 </script>
