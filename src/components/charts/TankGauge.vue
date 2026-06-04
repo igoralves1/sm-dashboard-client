@@ -19,21 +19,18 @@ const size = computed(() => props.size ?? 200)
 let idCounter = 0
 const gaugeId = `liquid-gauge-${++idCounter}-${Math.random().toString(36).slice(2, 7)}`
 
-// Color thresholds: < 50 red, 50–80 orange, > 80 green
+// Ring color thresholds: < 50 red, 50–80 orange, > 80 green
+// Water fill is always blue
 function circleColor(v: number) {
   if (v < 50) return '#e84040'
   if (v < 80) return '#f58b06'
   return '#37872d'
 }
-function waveColor(v: number) {
-  if (v < 50) return '#e84040'
-  if (v < 80) return '#f58b06'
-  return '#37872d'
+function waveColor(_v: number) {
+  return '#178BCA'  // always blue
 }
-function waveTextColor(v: number) {
-  if (v < 50) return '#ffaaaa'
-  if (v < 80) return '#ffe0a0'
-  return '#b7f0b1'
+function waveTextColor(_v: number) {
+  return '#A4DBf8'  // always light blue
 }
 function textColor(v: number) {
   if (v < 50) return '#c02020'
