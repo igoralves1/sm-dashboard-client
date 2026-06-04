@@ -22,12 +22,24 @@
       </div>
       <div ref="containerRef" class="chart-container"></div>
     </div>
+
+    <!-- Dynamic alerts section -->
+    <div v-if="computedAlerts.length" class="chart-notes">
+      <div v-for="(alert, i) in computedAlerts" :key="i" :class="['chart-alert', `chart-alert--${alert.level}`]">
+        <span :class="['alert-icon', alert.level === 'missing' ? 'alert-blink' : '']">
+          {{ alert.level === 'missing' ? '⚠' : '○' }}
+        </span>
+        <span class="alert-text">{{ alert.message }}</span>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
 import * as d3 from 'd3'
+
+interface AlertItem { level: 'missing' | 'zero'; message: string }
 
 const props = defineProps<{
   data: Record<string, any>[]
@@ -49,6 +61,42 @@ const colorOf = (name: string) => COLORS[name] ?? '#aaa'
 const ptpKeys = computed(() =>
   props.data.length ? Object.keys(props.data[0]).filter(k => k !== props.xField && k !== 'time') : []
 )
+
+// Real-time analysis: missing (null/undefined) vs zero per PTP per hour
+const computedAlerts = computed<AlertItem[]>(() => {
+  if (props.xField !== 'hour' || !props.data.length) return []
+  const alerts: AlertItem[] = []
+  const keys = ptpKeys.value
+
+  keys.forEach(ptp => {
+    const missingHours: number[] = []
+    const zeroHours: number[] = []
+
+    props.data.forEach(row => {
+      const v = row[ptp]
+      const h = +row[props.xField]
+      if (v === null || v === undefined) missingHours.push(h)
+      else if (+v === 0) zeroHours.push(h)
+    })
+
+    if (missingHours.length) {
+      const hrs = missingHours.sort((a, b) => a - b).join(', ')
+      alerts.push({
+        level: 'missing',
+        message: `${ptp} — dados ausentes (sem leitura) nas horas: ${hrs}h. Verificar conectividade do sensor.`
+      })
+    }
+    if (zeroHours.length) {
+      const hrs = zeroHours.sort((a, b) => a - b).join(', ')
+      alerts.push({
+        level: 'zero',
+        message: `${ptp} — leitura zero nas horas: ${hrs}h. Bomba desligada ou sensor em zero.`
+      })
+    }
+  })
+
+  return alerts
+})
 
 function draw() {
   if (!containerRef.value || !props.data.length) return
@@ -133,14 +181,46 @@ function draw() {
 
   // Axes
   const currentHour = new Date().getHours()
+
+  // Separate missing (null/undefined) from zero per hour
+  const missingHours = new Set<number>()
+  const zeroHours = new Set<number>()
+  if (props.xField === 'hour') {
+    sortedData.forEach(row => {
+      const h = +row[props.xField]
+      keys.forEach(k => {
+        const v = row[k]
+        if (v === null || v === undefined) missingHours.add(h)
+        else if (+v === 0) zeroHours.add(h)
+      })
+    })
+  }
+
   g.append('g').attr('transform', `translate(0,${H})`)
     .call(d3.axisBottom(x0))
     .call(gr => gr.select('.domain').attr('stroke', '#444'))
     .call(gr => gr.selectAll('.tick line').attr('stroke', '#444'))
     .call(gr => gr.selectAll<SVGTextElement, string>('text')
-      .attr('fill', d => props.xField === 'hour' && +d === currentHour ? '#fade2a' : '#888')
       .attr('font-size', '10px')
-      .attr('font-weight', d => props.xField === 'hour' && +d === currentHour ? '700' : 'normal')
+      .attr('font-weight', d => {
+        const h = +d
+        if (props.xField === 'hour' && h === currentHour) return '700'
+        if (missingHours.has(h) || zeroHours.has(h)) return '700'
+        return 'normal'
+      })
+      .attr('fill', d => {
+        const h = +d
+        if (props.xField === 'hour' && h === currentHour) return '#fade2a'
+        if (missingHours.has(h)) return '#e84040'   // red = missing
+        if (zeroHours.has(h)) return '#f58b06'       // orange = zero
+        return '#888'
+      })
+      .attr('class', d => {
+        const h = +d
+        if (h === currentHour) return null
+        if (missingHours.has(h)) return 'tick-missing'
+        return null
+      })
     )
 
   g.append('g')
@@ -201,6 +281,51 @@ watch(() => props.data, draw, { deep: true })
 .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 
 .legend-text { font-size: 0.72rem; color: #888; white-space: nowrap; }
+
+:global(.tick-missing) {
+  animation: tick-blink 1.1s ease-in-out infinite;
+}
+@keyframes tick-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.15; }
+}
+
+.chart-notes {
+  margin-top: 0.75rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid #252525;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.chart-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  border-radius: 5px;
+  padding: 0.45rem 0.7rem;
+}
+.chart-alert--missing {
+  background: rgba(232, 64, 64, 0.08);
+  border: 1px solid rgba(232, 64, 64, 0.25);
+}
+.chart-alert--zero {
+  background: rgba(245, 139, 6, 0.08);
+  border: 1px solid rgba(245, 139, 6, 0.25);
+}
+.alert-icon {
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+.chart-alert--missing .alert-icon { color: #e84040; }
+.chart-alert--zero    .alert-icon { color: #f58b06; }
+.alert-blink { animation: tick-blink 1.1s ease-in-out infinite; }
+.alert-text {
+  font-size: 0.76rem;
+  line-height: 1.45;
+}
+.chart-alert--missing .alert-text { color: #c08080; }
+.chart-alert--zero    .alert-text { color: #b8842a; }
 
 .chart-tooltip {
   position: absolute; pointer-events: none;
