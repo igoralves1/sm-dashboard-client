@@ -1,0 +1,1 @@
+import{N as t,aA as c,bQ as m,bS as o}from"./CustomEChart.vue_vue_type_script_setup_true_lang-i8X3T7KS.js";function D(a,e,n){e=t(e)&&{coordDimensions:e}||c({encodeDefine:a.getEncode()},e);var r=a.getSource(),s=m(r,e).dimensions,i=new o(s,a);return i.initData(r,n),i}export{D as c};
