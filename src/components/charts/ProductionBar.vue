@@ -23,11 +23,17 @@
       <div ref="containerRef" class="chart-container"></div>
     </div>
 
-    <!-- Dynamic alerts section -->
+    <!-- Anomaly diagnostics -->
     <div v-if="computedAlerts.length" class="chart-notes">
-      <div v-for="(alert, i) in computedAlerts" :key="i" :class="['chart-alert', `chart-alert--${alert.level}`]">
-        <span :class="['alert-icon', 'alert-blink']">⚠</span>
-        <span class="alert-text">{{ alert.message }}</span>
+      <div
+        v-for="(anomaly, i) in computedAlerts" :key="i"
+        :class="['chart-alert', `chart-alert--${anomaly.severity}`]"
+      >
+        <span :class="['alert-icon', anomaly.severity === 'critical' ? 'alert-blink' : '']">⚠</span>
+        <div class="alert-body">
+          <span class="alert-ptp">{{ anomaly.ptp }}</span>
+          <span class="alert-text">{{ anomaly.detail }}</span>
+        </div>
       </div>
     </div>
   </div>
@@ -36,8 +42,8 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
 import * as d3 from 'd3'
+import { detectAnomalies, type Anomaly } from '@/composables/useAnomalyDetection'
 
-interface AlertItem { level: 'missing' | 'zero'; message: string }
 
 const props = defineProps<{
   data: Record<string, any>[]
@@ -60,42 +66,10 @@ const ptpKeys = computed(() =>
   props.data.length ? Object.keys(props.data[0]).filter(k => k !== props.xField && k !== 'time') : []
 )
 
-// Real-time analysis: missing (null/undefined) vs zero per PTP per hour
-const computedAlerts = computed<AlertItem[]>(() => {
-  if (props.xField !== 'hour' || !props.data.length) return []
-  const alerts: AlertItem[] = []
-  const keys = ptpKeys.value
-
-  keys.forEach(ptp => {
-    const missingHours: number[] = []
-    const zeroHours: number[] = []
-
-    props.data.forEach(row => {
-      const v = row[ptp]
-      const h = +row[props.xField]
-      const isMissing = v === null || v === undefined || (typeof v === 'string' && v.trim() === '')
-      const isZeroOrInvalid = !isMissing && (isNaN(+v) || +v === 0)
-      if (isMissing) missingHours.push(h)
-      else if (isZeroOrInvalid) zeroHours.push(h)
-    })
-
-    if (missingHours.length) {
-      const hrs = missingHours.sort((a, b) => a - b).join(', ')
-      alerts.push({
-        level: 'missing',
-        message: `${ptp} — dados ausentes (sem leitura) nas horas: ${hrs}h. Verificar conectividade do sensor.`
-      })
-    }
-    if (zeroHours.length) {
-      const hrs = zeroHours.sort((a, b) => a - b).join(', ')
-      alerts.push({
-        level: 'zero',
-        message: `${ptp} — leitura zero nas horas: ${hrs}h. Bomba desligada ou sensor em zero.`
-      })
-    }
-  })
-
-  return alerts
+// Statistical anomaly detection — runs after every data update
+const computedAlerts = computed<Anomaly[]>(() => {
+  if (!props.data.length || !ptpKeys.value.length) return []
+  return detectAnomalies(props.data, props.xField, ptpKeys.value)
 })
 
 function draw() {
@@ -180,21 +154,15 @@ function draw() {
   // Axes
   const currentHour = new Date().getHours()
 
-  // Separate missing (null/undefined) from zero per hour
-  const missingHours = new Set<number>()
-  const zeroHours = new Set<number>()
-  if (props.xField === 'hour') {
-    sortedData.forEach(row => {
-      const h = +row[props.xField]
-      keys.forEach(k => {
-        const v = row[k]
-        const isMissing = v === null || v === undefined || (typeof v === 'string' && v.trim() === '')
-        const isZeroOrInvalid = !isMissing && (isNaN(+v) || +v === 0)
-        if (isMissing) missingHours.add(h)
-        else if (isZeroOrInvalid) zeroHours.add(h)
-      })
+  // Derive flagged hours from the anomaly engine for axis coloring
+  const criticalHours = new Set<number>()
+  const warningHours  = new Set<number>()
+  computedAlerts.value.forEach(a => {
+    a.hours.forEach(h => {
+      if (a.severity === 'critical') criticalHours.add(h)
+      else if (a.severity === 'warning') warningHours.add(h)
     })
-  }
+  })
 
   g.append('g').attr('transform', `translate(0,${H})`)
     .call(d3.axisBottom(x0))
@@ -205,20 +173,20 @@ function draw() {
       .attr('font-weight', d => {
         const h = +d
         if (props.xField === 'hour' && h === currentHour) return '700'
-        if (missingHours.has(h) || zeroHours.has(h)) return '700'
+        if (criticalHours.has(h) || warningHours.has(h)) return '700'
         return 'normal'
       })
       .attr('fill', d => {
         const h = +d
         if (props.xField === 'hour' && h === currentHour) return '#fade2a'
-        if (missingHours.has(h)) return '#e84040'   // red = missing
-        if (zeroHours.has(h)) return '#f58b06'       // orange = zero
+        if (criticalHours.has(h)) return '#e84040'
+        if (warningHours.has(h)) return '#f58b06'
         return '#888'
       })
       .attr('class', d => {
         const h = +d
         if (h === currentHour) return null
-        if (missingHours.has(h)) return 'tick-missing'
+        if (criticalHours.has(h)) return 'tick-missing'
         return null
       })
     )
@@ -305,27 +273,45 @@ watch(() => props.data, draw, { deep: true })
   border-radius: 5px;
   padding: 0.45rem 0.7rem;
 }
-.chart-alert--missing {
+.chart-alert--critical {
   background: rgba(232, 64, 64, 0.08);
-  border: 1px solid rgba(232, 64, 64, 0.25);
+  border: 1px solid rgba(232, 64, 64, 0.3);
 }
-.chart-alert--zero {
-  background: rgba(245, 139, 6, 0.08);
+.chart-alert--warning {
+  background: rgba(245, 139, 6, 0.07);
   border: 1px solid rgba(245, 139, 6, 0.25);
 }
+.chart-alert--info {
+  background: rgba(115, 191, 105, 0.06);
+  border: 1px solid rgba(115, 191, 105, 0.2);
+}
 .alert-icon {
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   flex-shrink: 0;
+  margin-top: 1px;
 }
-.chart-alert--missing .alert-icon { color: #e84040; }
-.chart-alert--zero    .alert-icon { color: #f58b06; }
+.chart-alert--critical .alert-icon { color: #e84040; }
+.chart-alert--warning  .alert-icon { color: #f58b06; }
+.chart-alert--info     .alert-icon { color: #73bf69; }
 .alert-blink { animation: tick-blink 1.1s ease-in-out infinite; }
-.alert-text {
-  font-size: 0.76rem;
-  line-height: 1.45;
+.alert-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
 }
-.chart-alert--missing .alert-text { color: #c08080; }
-.chart-alert--zero    .alert-text { color: #b8842a; }
+.alert-ptp {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+}
+.chart-alert--critical .alert-ptp { color: #e84040; }
+.chart-alert--warning  .alert-ptp { color: #f58b06; }
+.chart-alert--info     .alert-ptp { color: #73bf69; }
+.alert-text {
+  font-size: 0.74rem;
+  line-height: 1.5;
+  color: #aaa;
+}
 
 .chart-tooltip {
   position: absolute; pointer-events: none;
