@@ -65,18 +65,20 @@ Proceed? (or type corrections before I start)
 
 ## 2. AWS RESOURCES
 
-| Resource | ID |
+All sensitive values are stored in `.env` (gitignored) and GitHub Actions secrets.
+See `.env.example` for the required variable names.
+
+| Resource | Env Var |
 |---|---|
-| Account | `650254791912` (dev-sm) |
-| Region | `us-east-2` |
-| CLI Profile | `dev-sm` (SSO via `https://simemapdevices.awsapps.com/start`) |
-| Cognito User Pool | `<USER_POOL_ID>` |
-| Cognito App Client | `539e63bnkpnnbvjfsq3fan44mc` |
-| Cognito Identity Pool | `us-east-2:b6dd06c9-347f-4287-a77b-838592d05fb7` |
-| Timestream DB | `HidroForte` |
-| Timestream Table (realtime) | `<TABLE_RT>` |
-| Timestream Table (hourly) | `<TABLE_HOURLY>` |
-| Timestream Table (daily) | `<TABLE_DAILY>` |
+| Region | `VITE_AWS_REGION` |
+| Cognito User Pool | `VITE_USER_POOL_ID` |
+| Cognito App Client | `VITE_COGNITO_CLIENT_ID` |
+| Cognito Identity Pool | `VITE_IDENTITY_POOL_ID` |
+| Timestream DB | `VITE_TIMESTREAM_DB` |
+| Timestream Table (realtime) | `VITE_TIMESTREAM_TABLE_RT` |
+| Timestream Table (hourly) | `VITE_TIMESTREAM_TABLE_HOURLY` |
+| Timestream Table (daily) | `VITE_TIMESTREAM_TABLE_DAILY` |
+| Sensor IDs | `VITE_SENSOR_*` (see `.env.example`) |
 
 **AWS CLI commands:**
 ```bash
@@ -140,15 +142,18 @@ public/tank-preview.html           ← Standalone browser preview for SVG tank
 
 ## 4. SENSOR MAPPING (end_id values in Timestream)
 
-| Sensor | end_id | Location | Chart |
+Sensor `end_id` values are stored in `.env` as `VITE_SENSOR_*` variables.
+See `.env.example` for the full list of variable names.
+
+| Sensor | Env Var | Location | Chart |
 |---|---|---|---|
-| RAP_Silvanopolis | `smc01ow` | Silvanópolis — reservoir | Tank gauge, Level chart |
-| PTP_01 | `smca4vh` | Silvanópolis — pump 1 | Flow, Production |
-| PTP_02 | `smc9pg7` | Silvanópolis — pump 2 | Flow, Production |
-| PTP_03 | `smc25ku` | Silvanópolis — pump 3 | Flow, Production |
-| PTP_04 | `smc0qvb` | Silvanópolis — pump 4 | Flow, Production |
-| RAP_Miranorte | `smcait1` | Miranorte — reservoir | Tank gauge, Level chart |
-| PTP_07 | `smccsl0` | Miranorte — pump 7 | Flow, Production |
+| RAP_Silvanopolis | `VITE_SENSOR_RAP_SIL` | Silvanópolis — reservoir | Tank gauge, Level chart |
+| PTP_01 | `VITE_SENSOR_PTP_01` | Silvanópolis — pump 1 | Flow, Production |
+| PTP_02 | `VITE_SENSOR_PTP_02` | Silvanópolis — pump 2 | Flow, Production |
+| PTP_03 | `VITE_SENSOR_PTP_03` | Silvanópolis — pump 3 | Flow, Production |
+| PTP_04 | `VITE_SENSOR_PTP_04` | Silvanópolis — pump 4 | Flow, Production |
+| RAP_Miranorte | `VITE_SENSOR_RAP_MIR` | Miranorte — reservoir | Tank gauge, Level chart |
+| PTP_07 | `VITE_SENSOR_PTP_07` | Miranorte — pump 7 | Flow, Production |
 
 ---
 
@@ -156,13 +161,13 @@ public/tank-preview.html           ← Standalone browser preview for SVG tank
 
 Cutoff: `2026-05-02T18:35:00Z` → before=`pre`, after=`post`
 
-| end_id | Sensor | pre formula | post formula |
-|---|---|---|---|
-| `smca4vh` | PTP_01 | `(measure_value::double)*2/1000` | `measure_value::double/(12.0*1000)` |
-| `smc9pg7` | PTP_02 | `(measure_value::double)*2*12/(108*1000)` | `measure_value::double/(108.0*1000)` |
-| `smc25ku` | PTP_03 | `measure_value::double/1000` | `measure_value::double/(2*12.0*1000)` |
-| `smc0qvb` | PTP_04 | `measure_value::double/1000` | `measure_value::double/(2*12.0*1000)` |
-| `smccsl0` | PTP_07 | `(measure_value::double)*2/1000` | `measure_value::double/(12.0*1000)` |
+| Sensor | pre formula | post formula |
+|---|---|---|
+| PTP_01 | `(measure_value::double)*2/1000` | `measure_value::double/(12.0*1000)` |
+| PTP_02 | `(measure_value::double)*2*12/(108*1000)` | `measure_value::double/(108.0*1000)` |
+| PTP_03 | `measure_value::double/1000` | `measure_value::double/(2*12.0*1000)` |
+| PTP_04 | `measure_value::double/1000` | `measure_value::double/(2*12.0*1000)` |
+| PTP_07 | `(measure_value::double)*2/1000` | `measure_value::double/(12.0*1000)` |
 
 Level calibration cutoff (Silvanópolis only): `2026-05-05T12:15:00Z`
 
@@ -209,7 +214,7 @@ Token expires after 30 minutes:
 ```
 
 **Cognito logins key for Identity Pool:**
-`cognito-idp.us-east-2.amazonaws.com/<USER_POOL_ID>`
+`cognito-idp.${VITE_AWS_REGION}.amazonaws.com/${VITE_USER_POOL_ID}`
 
 ---
 

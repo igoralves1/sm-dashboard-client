@@ -59,14 +59,13 @@ SM Dashboard Client is a single-page application that provides real-time visibil
 ```
 Browser
   │
-  ├─ Cognito User Pool (<USER_POOL_ID>)
+  ├─ Cognito User Pool
   │    └─ Authenticates user, issues 30-min JWT tokens
   │
-  ├─ Cognito Identity Pool (us-east-2:b6dd06c9-...)
+  ├─ Cognito Identity Pool
   │    └─ Exchanges JWT for temporary AWS credentials
   │
-  └─ Timestream Query (HidroForte database, us-east-2)
-       └─ Direct browser → AWS query (no backend needed)
+  └─ Timestream Query (direct browser → AWS, no backend needed)
 ```
 
 ---
@@ -119,7 +118,7 @@ Open [http://localhost:5173/sm-dashboard-client/](http://localhost:5173/sm-dashb
 
 ### AWS Profile Setup
 
-This project uses the `dev-sm` AWS profile (account `650254791912`, region `us-east-2`).
+This project uses the `dev-sm` AWS profile. Configure your credentials in `.env` (see `.env.example`).
 
 ```bash
 # Configure SSO (one-time setup)
@@ -206,29 +205,19 @@ GitHub Pages serves static files only. A `404.html` redirect trick is used to su
 
 ## Data Sources (AWS Timestream)
 
-| Panel | Database | Table | Measure |
-|---|---|---|---|
-| Tank gauge (Silvanópolis) | HidroForte | <TABLE_RT> | `water_level` |
-| Level chart (Silvanópolis) | HidroForte | <TABLE_RT> | `water_level` |
-| Tank gauge (Miranorte) | HidroForte | <TABLE_RT> | `water_level` |
-| Level chart (Miranorte) | HidroForte | <TABLE_RT> | `water_level` |
-| Flow PTPs | HidroForte | <TABLE_RT> | `flux` |
-| Production 24h | HidroForte | <TABLE_HOURLY> | `L_acc` |
-| Production daily | HidroForte | <TABLE_DAILY> | `L_acc` |
+| Panel | Env Var | Measure |
+|---|---|---|
+| Tank gauge + Level chart | `VITE_TIMESTREAM_TABLE_RT` | `water_level` |
+| Flow PTPs | `VITE_TIMESTREAM_TABLE_RT` | `flux` |
+| Production 24h | `VITE_TIMESTREAM_TABLE_HOURLY` | `L_acc` |
+| Production daily | `VITE_TIMESTREAM_TABLE_DAILY` | `L_acc` |
 
 ---
 
 ## Sensor Mapping
 
-| Sensor Name | `end_id` | Location |
-|---|---|---|
-| RAP_Silvanopolis | `smc01ow` | Silvanópolis — main reservoir |
-| PTP_01 | `smca4vh` | Silvanópolis — pump 1 |
-| PTP_02 | `smc9pg7` | Silvanópolis — pump 2 |
-| PTP_03 | `smc25ku` | Silvanópolis — pump 3 |
-| PTP_04 | `smc0qvb` | Silvanópolis — pump 4 |
-| RAP_Miranorte | `smcait1` | Miranorte — main reservoir |
-| PTP_07 | `smccsl0` | Miranorte — pump 7 |
+Sensor `end_id` values are configured via environment variables.
+See `.env.example` for the full list of `VITE_SENSOR_*` variable names.
 
 ---
 
