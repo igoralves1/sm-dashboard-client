@@ -4,6 +4,7 @@ import { fromCognitoIdentityPool } from '@aws-sdk/credential-provider-cognito-id
 import { CognitoIdentityClient } from '@aws-sdk/client-cognito-identity'
 import { useAuthStore } from '@/stores/auth'
 import { appendSnapshot } from './useDashboardLogger'
+import { checkRateLimit } from './useRateLimiter'
 
 // ── AWS Config (values injected via environment variables) ───────────────────
 const REGION           = import.meta.env.VITE_AWS_REGION        as string
@@ -40,6 +41,11 @@ function getClient() {
 
 // ── Query helper ─────────────────────────────────────────────────────────────
 async function query(sql: string): Promise<Record<string, string>[]> {
+  const rl = checkRateLimit()
+  if (!rl.allowed) {
+    const mins = Math.ceil(rl.resetInSecs / 60)
+    throw new Error(`RATE_LIMIT_EXCEEDED:${mins}`)
+  }
   const cmd = new QueryCommand({ QueryString: sql })
   const res = await getClient().send(cmd)
   const cols = res.ColumnInfo?.map(c => c.Name ?? '') ?? []
@@ -203,7 +209,9 @@ export function useTimestreamDashboard() {
     level: 0, levelSeries: [], flowSeries: [], production24h: [], productionDaily: []
   })
   const loading = ref(false)
-  const error = ref<string | null>(null)
+  const error         = ref<string | null>(null)
+  const rateLimited   = ref(false)
+  const rateLimitMins = ref(0)
   const lastUpdated = ref('')
 
   async function refresh() {
@@ -240,8 +248,14 @@ export function useTimestreamDashboard() {
       lastUpdated.value = new Date().toLocaleTimeString()
       appendSnapshot(silvanopolis.value, miranorte.value)
     } catch (e: any) {
-      error.value = e.message ?? 'Failed to load data'
-      console.error('Timestream error:', e)
+      const msg = e.message ?? ''
+      if (msg.startsWith('RATE_LIMIT_EXCEEDED:')) {
+        rateLimited.value   = true
+        rateLimitMins.value = parseInt(msg.split(':')[1]) || 60
+      } else {
+        error.value = msg || 'Failed to load data'
+        console.error('Timestream error:', e)
+      }
     } finally {
       loading.value = false
     }
@@ -252,6 +266,8 @@ export function useTimestreamDashboard() {
     miranorte,
     loading,
     error,
+    rateLimited,
+    rateLimitMins,
     lastUpdated,
     refresh,
   }

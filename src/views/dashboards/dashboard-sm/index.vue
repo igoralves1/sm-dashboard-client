@@ -17,6 +17,14 @@
       </div>
     </div>
 
+    <!-- Rate limit alert -->
+    <div v-if="rateLimited" class="rate-limit-alert">
+      <span class="rate-limit-icon">⚠</span>
+      <span class="rate-limit-text">
+        Limite de queries alcançado — aguarde {{ rateLimitMins }} min ou contacte o administrador.
+      </span>
+    </div>
+
     <!-- ═══ SILVANÓPOLIS ═══ -->
     <div class="section-label">▾ Silvanópolis</div>
     <div class="row g-3 mb-4">
@@ -116,7 +124,7 @@ const siteMarkers = [
   { lat: -11.15430944152578, lng: -48.172973779141344, label: 'RAP01 Silvanópolis', color: '#4da6ff' },
 ]
 
-const { silvanopolis, miranorte, loading, error, lastUpdated, refresh } = useTimestreamDashboard()
+const { silvanopolis, miranorte, loading, error, rateLimited, rateLimitMins, lastUpdated, refresh } = useTimestreamDashboard()
 
 // ── Threshold lines (matching Grafana) ──
 const levelThresholds = [
@@ -194,5 +202,32 @@ onUnmounted(() => {
   transition: background 0.15s;
 }
 .export-btn:hover { background: #252c3f; }
+
+.rate-limit-alert {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(232, 64, 64, 0.10);
+  border: 1px solid rgba(232, 64, 64, 0.4);
+  border-radius: 7px;
+  padding: 0.7rem 1.1rem;
+  margin-bottom: 1.2rem;
+}
+.rate-limit-icon {
+  font-size: 1.2rem;
+  color: #e84040;
+  animation: rl-blink 1s ease-in-out infinite;
+  flex-shrink: 0;
+}
+.rate-limit-text {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #e84040;
+  letter-spacing: 0.2px;
+}
+@keyframes rl-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.1; }
+}
 
 </style>
