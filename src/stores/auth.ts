@@ -158,6 +158,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 }, {
   persist: {
+    storage: sessionStorage,
     pick: ['accessToken', 'idToken', 'refreshToken', 'tokenExpiry', 'user'],
   },
 })
