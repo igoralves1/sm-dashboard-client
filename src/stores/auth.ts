@@ -7,9 +7,9 @@ import {
   CognitoUserSession,
 } from 'amazon-cognito-identity-js'
 
-// ── Cognito config ────────────────────────────────────────────────────────────
-const USER_POOL_ID = '<USER_POOL_ID>'
-const CLIENT_ID    = '539e63bnkpnnbvjfsq3fan44mc'
+// ── Cognito config (values injected via environment variables) ───────────────
+const USER_POOL_ID = import.meta.env.VITE_USER_POOL_ID      as string
+const CLIENT_ID    = import.meta.env.VITE_COGNITO_CLIENT_ID as string
 const TOKEN_EXPIRY_MINUTES = 30
 
 const userPool = new CognitoUserPool({

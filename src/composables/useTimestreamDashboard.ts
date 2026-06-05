@@ -5,11 +5,11 @@ import { CognitoIdentityClient } from '@aws-sdk/client-cognito-identity'
 import { useAuthStore } from '@/stores/auth'
 import { appendSnapshot } from './useDashboardLogger'
 
-// ── AWS Config ──────────────────────────────────────────────────────────────
-const REGION = 'us-east-2'
-const IDENTITY_POOL_ID = 'us-east-2:b6dd06c9-347f-4287-a77b-838592d05fb7'
-const USER_POOL_ID = '<USER_POOL_ID>'
-const DB = 'HidroForte'
+// ── AWS Config (values injected via environment variables) ───────────────────
+const REGION           = import.meta.env.VITE_AWS_REGION        as string
+const IDENTITY_POOL_ID = import.meta.env.VITE_IDENTITY_POOL_ID  as string
+const USER_POOL_ID     = import.meta.env.VITE_USER_POOL_ID      as string
+const DB               = import.meta.env.VITE_TIMESTREAM_DB     as string
 
 let client: TimestreamQueryClient | null = null
 let lastIdToken = ''

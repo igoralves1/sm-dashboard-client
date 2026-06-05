@@ -27,6 +27,12 @@ jobs:
 
       - name: Build
         run: npm run build
+        env:
+          VITE_AWS_REGION:        ${{ secrets.VITE_AWS_REGION }}
+          VITE_IDENTITY_POOL_ID:  ${{ secrets.VITE_IDENTITY_POOL_ID }}
+          VITE_USER_POOL_ID:      ${{ secrets.VITE_USER_POOL_ID }}
+          VITE_COGNITO_CLIENT_ID: ${{ secrets.VITE_COGNITO_CLIENT_ID }}
+          VITE_TIMESTREAM_DB:     ${{ secrets.VITE_TIMESTREAM_DB }}
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
