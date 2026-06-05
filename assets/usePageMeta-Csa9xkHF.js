@@ -1,1 +1,0 @@
-import{ah as t,ai as i,q as n,aj as o,ak as e}from"./index-ByfeDidV.js";const r=(a,s,c)=>{t({title:a?`${a} | ${e}`:e,meta:[{name:"viewport",content:"width=device-width, initial-scale=1.0"},{name:"author",content:n},{name:"description",content:o}],link:[{rel:"shortcut icon",href:i}]})};export{r as u};
