@@ -32,7 +32,12 @@
         <span :class="['alert-icon', anomaly.severity === 'critical' ? 'alert-blink' : '']">⚠</span>
         <div class="alert-body">
           <span class="alert-ptp">{{ anomaly.ptp }}</span>
-          <span class="alert-text">{{ anomaly.detail }}</span>
+          <span class="alert-text">
+            {{ anomaly.detail }}
+            <span :class="['alert-prob', `alert-prob--${anomaly.severity}`]">
+              Probabilidade: {{ anomaly.probability }}%
+            </span>
+          </span>
         </div>
       </div>
     </div>
@@ -312,6 +317,18 @@ watch(() => props.data, draw, { deep: true })
   line-height: 1.5;
   color: #aaa;
 }
+.alert-prob {
+  display: inline-block;
+  margin-left: 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 3px;
+  vertical-align: middle;
+}
+.alert-prob--critical { background: rgba(232,64,64,0.18); color: #e84040; }
+.alert-prob--warning  { background: rgba(245,139,6,0.18);  color: #f58b06; }
+.alert-prob--info     { background: rgba(115,191,105,0.15); color: #73bf69; }
 
 .chart-tooltip {
   position: absolute; pointer-events: none;

@@ -2,14 +2,13 @@
  * Two-stage anomaly detection for pump flow series.
  *
  * Stage 1 — Pump-off detection:
- *   Values ≤ 5% of series max are treated as "pump off / near-zero".
- *   Always flagged as critical regardless of the rest of the series.
+ *   Values ≤ 5% of series max are "pump off / near-zero". Always critical.
+ *   Probability = 1 − (avg_value / threshold), capped at 99%.
  *
  * Stage 2 — IQR outlier on running values only:
  *   IQR computed only on points where pump is running (> threshold).
- *   A second guard: only flag if the deviation is also > 30% from the
- *   running median, preventing false alarms on extremely stable series
- *   where IQR is tiny (e.g. 0.04 m³/h).
+ *   Guard: deviation must also be > 30% from running median.
+ *   Probability = 50% + (avg_excess / IQR) × 25%, capped at 99%.
  */
 
 export type AnomalySeverity = 'critical' | 'warning' | 'info'
@@ -20,6 +19,7 @@ export interface Anomaly {
   hours: number[]
   type: AnomalyType
   severity: AnomalySeverity
+  probability: number   // 0–99 integer
   detail: string
 }
 
@@ -32,8 +32,10 @@ function quantile(sorted: number[], q: number): number {
 
 function fmt(n: number) { return n.toFixed(2) }
 
-const PUMP_OFF_RATIO  = 0.05   // ≤ 5% of series max  → pump off
-const MIN_REL_DEV     = 0.30   // outlier must also be > 30% from running median
+function cap(p: number) { return Math.min(99, Math.max(1, Math.round(p))) }
+
+const PUMP_OFF_RATIO = 0.05
+const MIN_REL_DEV    = 0.30
 
 export function detectAnomalies(
   data: Record<string, any>[],
@@ -56,17 +58,19 @@ export function detectAnomalies(
 
     if (series.length < 4) return
 
-    const maxVal = Math.max(...series.map(p => p.value))
+    const maxVal      = Math.max(...series.map(p => p.value))
     const offThreshold = maxVal * PUMP_OFF_RATIO
 
     // ── Stage 1: pump off ────────────────────────────────────────────────
-    const offPoints  = series.filter(p => p.value <= offThreshold)
-    const runPoints  = series.filter(p => p.value  > offThreshold)
+    const offPoints = series.filter(p => p.value <= offThreshold)
+    const runPoints = series.filter(p => p.value  > offThreshold)
 
     if (offPoints.length) {
-      const hrs = offPoints.map(p => p.hour)
+      const hrs    = offPoints.map(p => p.hour)
+      const avgOff = offPoints.reduce((s, p) => s + p.value, 0) / offPoints.length
+      const prob   = cap((1 - avgOff / offThreshold) * 99)
       results.push({
-        ptp, hours: hrs, type: 'pump_off', severity: 'critical',
+        ptp, hours: hrs, type: 'pump_off', severity: 'critical', probability: prob,
         detail: `Bomba desligada ou fluxo próximo de zero (≤ ${fmt(offThreshold)} m³/h) nas horas: ${hrs.join(', ')}h.`
       })
     }
@@ -83,25 +87,30 @@ export function detectAnomalies(
     const lo        = q1 - 1.5 * iqr
     const hi        = q3 + 1.5 * iqr
 
-    const iqrLowHrs  = runPoints
-      .filter(p => p.value < lo && Math.abs(p.value - med) / med > MIN_REL_DEV)
-      .map(p => p.hour)
+    const iqrLowPts = runPoints.filter(
+      p => p.value < lo && Math.abs(p.value - med) / med > MIN_REL_DEV
+    )
+    const iqrHighPts = runPoints.filter(
+      p => p.value > hi && Math.abs(p.value - med) / med > MIN_REL_DEV
+    )
 
-    const iqrHighHrs = runPoints
-      .filter(p => p.value > hi && Math.abs(p.value - med) / med > MIN_REL_DEV)
-      .map(p => p.hour)
-
-    if (iqrLowHrs.length) {
+    if (iqrLowPts.length) {
+      const avgExcess = iqrLowPts.reduce((s, p) => s + (lo - p.value), 0) / iqrLowPts.length
+      const prob = cap(50 + (avgExcess / (iqr || 1)) * 25)
+      const hrs  = iqrLowPts.map(p => p.hour)
       results.push({
-        ptp, hours: iqrLowHrs, type: 'outlier_low', severity: 'warning',
-        detail: `Queda anômala durante operação (< ${fmt(lo)} m³/h) nas horas: ${iqrLowHrs.join(', ')}h  ·  mediana=${fmt(med)}  Q1=${fmt(q1)}  Q3=${fmt(q3)}`
+        ptp, hours: hrs, type: 'outlier_low', severity: 'warning', probability: prob,
+        detail: `Queda anômala durante operação (< ${fmt(lo)} m³/h) nas horas: ${hrs.join(', ')}h  ·  mediana=${fmt(med)}  Q1=${fmt(q1)}  Q3=${fmt(q3)}`
       })
     }
 
-    if (iqrHighHrs.length) {
+    if (iqrHighPts.length) {
+      const avgExcess = iqrHighPts.reduce((s, p) => s + (p.value - hi), 0) / iqrHighPts.length
+      const prob = cap(50 + (avgExcess / (iqr || 1)) * 25)
+      const hrs  = iqrHighPts.map(p => p.hour)
       results.push({
-        ptp, hours: iqrHighHrs, type: 'outlier_high', severity: 'info',
-        detail: `Pico anômalo durante operação (> ${fmt(hi)} m³/h) nas horas: ${iqrHighHrs.join(', ')}h  ·  mediana=${fmt(med)}  Q1=${fmt(q1)}  Q3=${fmt(q3)}`
+        ptp, hours: hrs, type: 'outlier_high', severity: 'info', probability: prob,
+        detail: `Pico anômalo durante operação (> ${fmt(hi)} m³/h) nas horas: ${hrs.join(', ')}h  ·  mediana=${fmt(med)}  Q1=${fmt(q1)}  Q3=${fmt(q3)}`
       })
     }
   })
