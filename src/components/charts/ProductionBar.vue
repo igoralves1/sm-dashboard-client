@@ -35,7 +35,7 @@
           <span class="alert-text">
             {{ anomaly.detail }}
             <span :class="['alert-prob', `alert-prob--${anomaly.severity}`]">
-              Probabilidade: {{ anomaly.probability }}%
+              Prob. em operação normal: {{ fmtP(anomaly.pValuePct / 100) }}
             </span>
           </span>
         </div>
@@ -47,7 +47,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
 import * as d3 from 'd3'
-import { detectAnomalies, type Anomaly } from '@/composables/useAnomalyDetection'
+import { detectAnomalies, fmtP, type Anomaly } from '@/composables/useAnomalyDetection'
 
 
 const props = defineProps<{
