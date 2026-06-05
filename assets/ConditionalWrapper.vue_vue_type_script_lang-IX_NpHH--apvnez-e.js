@@ -1,1 +1,0 @@
-import{d as t,ag as p}from"./index-D4MJK_Na.js";const f=t({name:"ConditionalWrapper",inheritAttrs:!1,props:{tag:{type:String,default:"div"},skip:{type:Boolean,required:!0}},slots:Object,setup(a,{slots:e,attrs:n}){return()=>{var r,i;return a.skip?(r=e.default)==null?void 0:r.call(e,{}):p(a.tag,{...n},[(i=e.default)==null?void 0:i.call(e,{})])}}});export{f as _};
