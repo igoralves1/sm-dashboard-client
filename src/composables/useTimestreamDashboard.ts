@@ -112,7 +112,7 @@ async function fetchLevel(endId: string, expr: string): Promise<DataPoint[]> {
   const rows = await query(`
     SELECT ${expr} AS water_level, time
     FROM "${DB}"."<TABLE_RT>"
-    WHERE time >= ago(24h)
+    WHERE time >= ago(1h)
     AND end_id = '${endId}'
     ORDER BY time ASC
   `)
@@ -134,7 +134,7 @@ async function fetchFlow(endId: string, ptpName: string): Promise<FlowSeries> {
   const rows = await query(`
     SELECT ${formula} AS value, time
     FROM "${DB}"."<TABLE_RT>"
-    WHERE time >= ago(24h)
+    WHERE time >= ago(1h)
     AND end_id = '${endId}'
     ORDER BY time ASC
   `)
