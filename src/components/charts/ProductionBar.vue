@@ -24,7 +24,7 @@
     </div>
 
     <!-- Anomaly diagnostics -->
-    <div v-if="computedAlerts.length" class="chart-notes">
+    <div v-if="computedAlerts.length" class="chart-notes" ref="notesRef">
       <div
         v-for="(anomaly, i) in computedAlerts" :key="i"
         :class="['chart-alert', `chart-alert--${anomaly.severity}`]"
@@ -41,11 +41,64 @@
         </div>
       </div>
     </div>
+
+    <!-- Statistical model explanation (collapsible) -->
+    <div v-if="computedAlerts.length" class="model-section">
+      <button class="model-toggle" @click="showModel = !showModel">
+        {{ showModel ? '▾' : '▸' }} Modelo estatístico utilizado
+      </button>
+      <div v-if="showModel" ref="mathRef" class="model-body">
+        <p class="model-intro">
+          Os diagnósticos acima são gerados por dois estágios complementares.
+          Para cada PTP, os parâmetros são calculados <em>independentemente</em>
+          usando apenas os valores daquela série.
+        </p>
+
+        <p class="model-subtitle">1 — Detecção de bomba desligada</p>
+        <p class="model-text">
+          Um valor \(x\) é classificado como <em>bomba desligada</em> se:
+        </p>
+        \[ x \;\leq\; \tau, \qquad \tau = 0{,}05 \cdot \max(x_i) \]
+
+        <p class="model-subtitle">2 — Limites IQR (valores em operação)</p>
+        <p class="model-text">
+          Os quartis e a cerca de Tukey definem os limites de controle:
+        </p>
+        \[
+          L^{-} = Q_1 - 1{,}5 \cdot \text{IQR}, \qquad
+          L^{+} = Q_3 + 1{,}5 \cdot \text{IQR}, \qquad
+          \text{IQR} = Q_3 - Q_1
+        \]
+        <p class="model-text">
+          Guarda adicional: o desvio relativo à mediana deve superar 30%
+          para evitar falsos positivos em séries muito estáveis:
+        </p>
+        \[ \frac{|x - \tilde{x}|}{\tilde{x}} \;>\; 0{,}30 \]
+
+        <p class="model-subtitle">3 — P-valor (gráfico de controle)</p>
+        <p class="model-text">
+          Para cada ponto anômalo calcula-se o z-score em relação à
+          distribuição normal dos valores em operação \((\mu,\,\sigma)\):
+        </p>
+        \[ z = \frac{x - \mu}{\sigma} \]
+        <p class="model-text">
+          O p-valor bicaudal é obtido via função de distribuição acumulada
+          normal \(\Phi\):
+        </p>
+        \[ p = 2\,\bigl(1 - \Phi(|z|)\bigr), \qquad \Phi(z) = \frac{1}{2}\!\left[1 + \operatorname{erf}\!\left(\frac{z}{\sqrt{2}}\right)\right] \]
+        <p class="model-text">
+          Um p-valor baixo (ex.: \(p = 0{,}3\%\)) indica que há apenas
+          \(0{,}3\%\) de probabilidade de aquele valor ocorrer em condições
+          normais de operação — não identifica a causa, apenas sinaliza que
+          o valor <strong>não é esperado</strong>.
+        </p>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
+import { ref, onMounted, onUnmounted, watch, computed, nextTick } from 'vue'
 import * as d3 from 'd3'
 import { detectAnomalies, fmtP, type Anomaly } from '@/composables/useAnomalyDetection'
 
@@ -59,7 +112,19 @@ const props = defineProps<{
 
 const containerRef = ref<HTMLDivElement | null>(null)
 const tooltipRef   = ref<HTMLDivElement | null>(null)
+const notesRef     = ref<HTMLDivElement | null>(null)
+const mathRef      = ref<HTMLDivElement | null>(null)
+const showModel    = ref(false)
 let resizeObserver: ResizeObserver
+
+// Typeset MathJax whenever the model section opens
+watch(showModel, async (open) => {
+  if (!open) return
+  await nextTick()
+  if (mathRef.value && (window as any).MathJax?.typesetPromise) {
+    ;(window as any).MathJax.typesetPromise([mathRef.value])
+  }
+})
 
 const COLORS: Record<string, string> = {
   PTP_01: '#73bf69', PTP_02: '#8ab8ff', PTP_03: '#f2cc0c',
@@ -254,6 +319,50 @@ watch(() => props.data, draw, { deep: true })
 .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 
 .legend-text { font-size: 0.72rem; color: #888; white-space: nowrap; }
+
+.model-section {
+  margin-top: 0.6rem;
+  border-top: 1px solid #252525;
+  padding-top: 0.5rem;
+}
+.model-toggle {
+  background: none;
+  border: none;
+  color: #666;
+  font-size: 0.75rem;
+  cursor: pointer;
+  padding: 0;
+  letter-spacing: 0.3px;
+  transition: color 0.15s;
+}
+.model-toggle:hover { color: #aaa; }
+.model-body {
+  margin-top: 0.75rem;
+  padding: 0.9rem 1rem;
+  background: #13151a;
+  border: 1px solid #252525;
+  border-radius: 6px;
+  color: #888;
+}
+.model-intro {
+  font-size: 0.75rem;
+  line-height: 1.6;
+  margin-bottom: 0.8rem;
+  color: #777;
+}
+.model-subtitle {
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: #aaa;
+  margin: 0.9rem 0 0.3rem;
+  letter-spacing: 0.3px;
+}
+.model-text {
+  font-size: 0.74rem;
+  line-height: 1.6;
+  color: #777;
+  margin: 0.2rem 0;
+}
 
 :global(.tick-missing) {
   animation: tick-blink 1.1s ease-in-out infinite;
