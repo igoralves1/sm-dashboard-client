@@ -69,9 +69,9 @@ import UserProfile from '@/layouts/components/topbar/components/UserProfile.vue'
 import { useLayout } from '@/stores/layout.ts'
 import { Icon } from '@iconify/vue'
 
-import logo from '@/assets/images/pranafinal.svg'
-import logoSm from '@/assets/images/pranafinal.svg'
-import logoDark from '@/assets/images/pranafinal.svg'
+import logo from '@/assets/images/pranalogototal.svg'
+import logoSm from '@/assets/images/pranalogototal.svg'
+import logoDark from '@/assets/images/pranalogototal.svg'
 
 const { layout, setSideNavSize, toggleMobileMenu } = useLayout()
 

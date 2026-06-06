@@ -4,9 +4,9 @@
             <BRow class="g-0">
                 <BCol xxl="3" xl="6" class="order-xl-1 order-xxl-0">
                     <div class="p-4 border-end border-dashed">
-                        <h4 class="fs-lg mb-1">Welcome to SIMEMAP+ Admin Theme.</h4>
+                        <h4 class="fs-lg mb-1">Plataforma AIIoT — Cidades Inteligentes</h4>
                         <span class="text-muted">
-                            You have <span class="text-primary fw-semibold">42</span> messages and 6 notifications.
+                            Você tem <span class="text-primary fw-semibold">42</span> alertas e 6 notificações de sensores.
                         </span>
 
                         <BListGroup flush class="mt-3">
@@ -25,7 +25,7 @@
 
                         <div class="text-center mt-2">
                             <BButton variant="secondary" class="rounded-pill" href="#!">
-                                View Messages
+                                Ver Alertas
                             </BButton>
                         </div>
                     </div>
@@ -35,9 +35,9 @@
                 <BCol xxl="6" class="order-xl-3 order-xxl-1">
                     <div class="px-4 py-3 border-end border-dashed">
                         <div class="d-flex justify-content-between mb-3">
-                            <h4 class="card-title">Revenue</h4>
+                            <h4 class="card-title">Consumo de Energia (kWh)</h4>
                             <RouterLink to="#" class="link-reset text-decoration-underline fw-semibold link-offset-3">
-                                View Reports
+                                Ver Relatórios
                                 <Icon icon="tabler:arrow-right" />
                             </RouterLink>
                         </div>
@@ -46,10 +46,10 @@
                             <BCol>
                                 <div class="bg-light bg-opacity-50 p-2">
                                     <h5 class="m-0">
-                                        <span class="text-muted me-1">Total Revenue:</span>
+                                        <span class="text-muted me-1">Consumo Total:</span>
 
-                                        <CountUp class="d-inline-flex" :end-val="40"
-                                            :options="{ prefix: '$', suffix: 'M', enableScrollSpy: true, scrollSpyOnce: true }" />
+                                        <CountUp class="d-inline-flex" :end-val="1847"
+                                            :options="{ suffix: ' MWh', enableScrollSpy: true, scrollSpyOnce: true }" />
 
                                     </h5>
                                 </div>
@@ -57,10 +57,10 @@
                             <BCol>
                                 <div class="bg-light bg-opacity-50 p-2">
                                     <h5 class="m-0">
-                                        <span class="text-muted me-1">Total Orders:</span>
+                                        <span class="text-muted me-1">Sensores Ativos:</span>
 
-                                        <CountUp class="d-inline-flex" :end-val="50.90"
-                                            :options="{ suffix: 'K', decimalPlaces: 2 }" />
+                                        <CountUp class="d-inline-flex" :end-val="2847"
+                                            :options="{ separator: '.' }" />
 
                                     </h5>
                                 </div>
@@ -70,9 +70,9 @@
                         <div class="position-relative" dir="ltr">
                             <div class="py-2 px-3 rounded-3 bg-light-subtle border text-primary z-1 position-absolute"
                                 style="top: 4.5%; left: 12%;">
-                                <p class="mb-2 text-uppercase fs-xxs fw-semibold">Growth Rate</p>
+                                <p class="mb-2 text-uppercase fs-xxs fw-semibold">Eficiência</p>
                                 <h4 class="mb-0 fw-bold text-primary">
-                                    89.24%
+                                    94.7%
                                     <Icon icon="tabler:trending-up" />
                                 </h4>
                             </div>
@@ -86,8 +86,8 @@
 
                 <BCol xxl="3" xl="6" class="order-xl-2 order-xxl-2">
                     <div class="p-3">
-                        <h4 class="card-title mb-1">Project Progress</h4>
-                        <p class="text-muted fs-xs">You have 21 projects with not completed task.</p>
+                        <h4 class="card-title mb-1">Status das Estações</h4>
+                        <p class="text-muted fs-xs">21 estações monitoradas em tempo real.</p>
 
                         <b-row class="mt-4">
                             <BCol>

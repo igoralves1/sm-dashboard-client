@@ -146,7 +146,7 @@
         </p>
 
         <div class="sm-auth__footer">
-          © {{ currentYear }} SIMEMAP. All rights reserved.
+          © {{ currentYear }} prana. Todos os direitos reservados.
         </div>
       </div>
     </div>
