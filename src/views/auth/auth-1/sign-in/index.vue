@@ -29,7 +29,7 @@
         <!-- Logo -->
         <div class="sm-auth__logo">
           <RouterLink to="/">
-            <img :src="pranLogo" alt="prana" style="height:300px" />
+            <img :src="pranLogo" alt="prana" style="height:200px" />
           </RouterLink>
         </div>
 
