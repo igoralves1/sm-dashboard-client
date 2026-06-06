@@ -135,7 +135,7 @@ const levelThresholds = [
 ]
 
 // ── Auto-refresh every 1 min with countdown ──
-const REFRESH_SECS = 3600
+const REFRESH_SECS = 60
 const secondsLeft = ref(REFRESH_SECS)
 
 let refreshTimer: ReturnType<typeof setInterval>
