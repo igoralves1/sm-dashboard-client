@@ -72,7 +72,55 @@
         --#{$prefix}sidenav-item-hover-color:       #ffffff;
         --#{$prefix}sidenav-item-hover-bg:          rgba(255,255,255,0.1);
         --#{$prefix}sidenav-item-active-color:      #ffffff;
-        --#{$prefix}sidenav-item-active-bg:         rgba(0,0,0,0.18);
+        --#{$prefix}sidenav-item-active-bg:         rgba(214,170,1,0.28);
+
+        // Active item: gold left border accent
+        .sidenav-item.active > .sidenav-link,
+        .sidenav-item .sidenav-link.active {
+            border-left: 3px solid #d6aa01;
+            padding-left: calc(var(--ins-sidenav-item-padding-x) + 7px);
+            background: rgba(214,170,1,0.22) !important;
+            color: #ffffff !important;
+        }
+
+        // Section titles
+        .menu-title {
+            color: rgba(255,255,255,0.35) !important;
+            letter-spacing: 1.2px;
+        }
+
+        // User profile area
+        .sidenav-user-info .sidenav-user-name { color: #fff !important; }
+        .sidenav-user-info .sidenav-user-designation { color: rgba(255,255,255,0.5) !important; }
+    }
+
+    // Prana — orange-gold gradient buttons (matching login CTA)
+    html[data-menu-color="prana"],
+    html[data-topbar-color="prana"] {
+        .btn-primary {
+            background: linear-gradient(135deg, #e24a19 0%, #d6aa01 100%) !important;
+            border-color: transparent !important;
+            color: #fff !important;
+            box-shadow: 0 2px 8px rgba(226,74,25,0.3) !important;
+        }
+        .btn-primary:hover:not(:disabled) {
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(226,74,25,0.4) !important;
+        }
+
+        // Links & active nav use prana green
+        a:not(.btn):not(.sidenav-link):not(.logo) {
+            color: #017b56;
+        }
+        a:not(.btn):not(.sidenav-link):not(.logo):hover {
+            color: #e24a19;
+        }
+
+        // Topbar logo area
+        .topbar-brand img {
+            height: 36px !important;
+        }
     }
 
     // Dark Mode
