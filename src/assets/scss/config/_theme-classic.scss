@@ -68,9 +68,9 @@
     html[data-menu-color="prana"] {
         --#{$prefix}sidenav-bg:                       #{linear-gradient(180deg, #017b56 0%, #2a7a1a 55%, #4a8c10 100%)};
         --#{$prefix}sidenav-border-color:             transparent;
-        --#{$prefix}sidenav-item-color:             rgba(255,255,255,0.68);
+        --#{$prefix}sidenav-item-color:             #ffffff;
         --#{$prefix}sidenav-item-hover-color:       #ffffff;
-        --#{$prefix}sidenav-item-hover-bg:          rgba(255,255,255,0.1);
+        --#{$prefix}sidenav-item-hover-bg:          rgba(255,255,255,0.12);
         --#{$prefix}sidenav-item-active-color:      #ffffff;
         --#{$prefix}sidenav-item-active-bg:         rgba(214,170,1,0.28);
 
@@ -108,18 +108,28 @@
             transform: translateY(-1px);
             box-shadow: 0 4px 12px rgba(226,74,25,0.4) !important;
         }
+    }
 
-        // Links & active nav use prana green
-        a:not(.btn):not(.sidenav-link):not(.logo) {
-            color: #017b56;
-        }
-        a:not(.btn):not(.sidenav-link):not(.logo):hover {
-            color: #e24a19;
+    // Prana sidebar — force all nav links to full white, fix dimmed items
+    html[data-menu-color="prana"] {
+        .sidenav-menu .sidenav-link,
+        .sidenav-menu .sidenav-link:hover,
+        .sidenav-menu .side-nav-link,
+        .sidenav-menu .side-nav-link:hover {
+            color: #ffffff !important;
         }
 
-        // Topbar logo area
-        .topbar-brand img {
-            height: 36px !important;
+        // Reduce disabled opacity so text stays legible
+        .sidenav-menu .sidenav-link.disabled,
+        .sidenav-menu .side-nav-link.disabled {
+            opacity: 0.55 !important;
+            color: #ffffff !important;
+        }
+
+        // Section titles
+        .menu-title {
+            color: rgba(255,255,255,0.45) !important;
+            letter-spacing: 1.2px;
         }
     }
 
