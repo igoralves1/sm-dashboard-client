@@ -15,13 +15,13 @@
           <line x1="0" y1="380" x2="500" y2="380"/>
           <line x1="0" y1="520" x2="500" y2="520"/>
           <!-- nodes -->
-          <circle cx="60" cy="80" r="4" fill="rgba(0,158,224,0.4)" stroke="none"/>
-          <circle cx="200" cy="220" r="4" fill="rgba(0,158,224,0.4)" stroke="none"/>
-          <circle cx="350" cy="80" r="4" fill="rgba(0,158,224,0.4)" stroke="none"/>
-          <circle cx="480" cy="380" r="4" fill="rgba(0,158,224,0.4)" stroke="none"/>
-          <circle cx="60" cy="520" r="4" fill="rgba(0,158,224,0.4)" stroke="none"/>
-          <circle cx="350" cy="380" r="6" fill="rgba(0,158,224,0.25)" stroke="rgba(0,158,224,0.5)" stroke-width="1.5"/>
-          <circle cx="200" cy="520" r="6" fill="rgba(0,158,224,0.25)" stroke="rgba(0,158,224,0.5)" stroke-width="1.5"/>
+          <circle cx="60" cy="80" r="4" fill="rgba(226,74,25,0.4)" stroke="none"/>
+          <circle cx="200" cy="220" r="4" fill="rgba(226,74,25,0.4)" stroke="none"/>
+          <circle cx="350" cy="80" r="4" fill="rgba(226,74,25,0.4)" stroke="none"/>
+          <circle cx="480" cy="380" r="4" fill="rgba(226,74,25,0.4)" stroke="none"/>
+          <circle cx="60" cy="520" r="4" fill="rgba(226,74,25,0.4)" stroke="none"/>
+          <circle cx="350" cy="380" r="6" fill="rgba(226,74,25,0.25)" stroke="rgba(226,74,25,0.5)" stroke-width="1.5"/>
+          <circle cx="200" cy="520" r="6" fill="rgba(226,74,25,0.25)" stroke="rgba(226,74,25,0.5)" stroke-width="1.5"/>
         </g>
       </svg>
 
@@ -158,7 +158,7 @@ import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { Icon } from '@iconify/vue'
 import { currentYear } from '@/helpers'
-import pranLogo from '@/assets/images/pranafinal.svg'
+import pranLogo from '@/assets/images/pranafinal_300px.svg'
 import { usePageMeta } from '@/composables/usePageMeta.ts'
 import { useAuthStore } from '@/stores/auth.ts'
 
@@ -203,7 +203,7 @@ async function handleLogin() {
 .sm-auth__left {
   position: relative;
   width: 55%;
-  background: linear-gradient(145deg, #0a1d6e 0%, #102a83 45%, #0d4f8a 100%);
+  background: linear-gradient(145deg, #017b56 0%, #2a7a1a 45%, #4a8c10 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -271,8 +271,8 @@ async function handleLogin() {
   width: 44px;
   height: 44px;
   border-radius: 10px;
-  background: rgba(0,158,224,0.25);
-  color: #009ee0;
+  background: rgba(226,74,25,0.25);
+  color: #e24a19;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -281,13 +281,13 @@ async function handleLogin() {
 }
 
 .sm-feature__icon--water {
-  background: rgba(26,179,148,0.25);
-  color: #1ab394;
+  background: rgba(1,123,86,0.25);
+  color: #017b56;
 }
 
 .sm-feature__icon--tele {
-  background: rgba(248,172,89,0.2);
-  color: #f8ac59;
+  background: rgba(214,170,1,0.2);
+  color: #d6aa01;
 }
 
 .sm-feature__title {
@@ -316,16 +316,16 @@ async function handleLogin() {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #0acf97;
-  box-shadow: 0 0 0 0 rgba(10,207,151,0.6);
+  background: #74af25;
+  box-shadow: 0 0 0 0 rgba(116,175,37,0.6);
   animation: pulse-dot 2s infinite;
   flex-shrink: 0;
 }
 
 @keyframes pulse-dot {
-  0%   { box-shadow: 0 0 0 0 rgba(10,207,151,0.6); }
-  70%  { box-shadow: 0 0 0 8px rgba(10,207,151,0); }
-  100% { box-shadow: 0 0 0 0 rgba(10,207,151,0); }
+  0%   { box-shadow: 0 0 0 0 rgba(116,175,37,0.6); }
+  70%  { box-shadow: 0 0 0 8px rgba(116,175,37,0); }
+  100% { box-shadow: 0 0 0 0 rgba(116,175,37,0); }
 }
 
 /* ─── Right panel ─────────────────────────────────── */
@@ -350,7 +350,7 @@ async function handleLogin() {
 .sm-auth__form-header h2 {
   font-size: 1.75rem;
   font-weight: 700;
-  color: #102a83;
+  color: #017b56;
   margin-bottom: 6px;
 }
 
@@ -395,8 +395,8 @@ async function handleLogin() {
 }
 
 .sm-input:focus {
-  border-color: #009ee0 !important;
-  box-shadow: 0 0 0 3px rgba(0,158,224,0.12) !important;
+  border-color: #e24a19 !important;
+  box-shadow: 0 0 0 3px rgba(226,74,25,0.12) !important;
 }
 
 .sm-input--pass {
@@ -423,7 +423,7 @@ async function handleLogin() {
 
 .sm-link-forgot {
   font-size: 0.78rem;
-  color: #009ee0;
+  color: #e24a19;
   text-decoration: none;
   font-weight: 500;
 }
@@ -435,14 +435,14 @@ async function handleLogin() {
   color: #6c757d;
 }
 .sm-checkbox :deep(.form-check-input:checked) {
-  background-color: #102a83;
-  border-color: #102a83;
+  background-color: #017b56;
+  border-color: #017b56;
 }
 
 /* Primary button */
 .sm-btn-primary {
   height: 48px;
-  background: linear-gradient(135deg, #102a83 0%, #009ee0 100%) !important;
+  background: linear-gradient(135deg, #e24a19 0%, #d6aa01 100%) !important;
   border: none !important;
   border-radius: 10px !important;
   font-weight: 600 !important;
@@ -481,7 +481,7 @@ async function handleLogin() {
 }
 
 .sm-auth__register a {
-  color: #102a83;
+  color: #017b56;
   font-weight: 600;
   text-decoration: none;
 }
