@@ -4,9 +4,9 @@
             <BRow class="g-0">
                 <BCol xxl="3" xl="6" class="order-xl-1 order-xxl-0">
                     <div class="p-4 border-end border-dashed">
-                        <h4 class="fs-lg mb-1">Plataforma AIIoT — Cidades Inteligentes</h4>
+                        <h4 class="fs-lg mb-1">Gestão de Condomínios — Cidades Inteligentes</h4>
                         <span class="text-muted">
-                            Você tem <span class="text-primary fw-semibold">42</span> alertas e 6 notificações de sensores.
+                            Você tem <span class="text-primary fw-semibold">42</span> alertas e 6 notificações de sensores IoT no seu condomínio.
                         </span>
 
                         <BListGroup flush class="mt-3">

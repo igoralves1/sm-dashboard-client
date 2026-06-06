@@ -17,7 +17,7 @@
           <BCol cols="12">
             <div class="p-3 text-center bg-light bg-opacity-50">
               <h4 class="mb-0 fs-lg fw-semibold">
-                Bem-vindo à plataforma <span class="text-primary">prana AIIoT</span>
+                Bem-vindo à <span class="text-primary">prana AIIoT</span> — Gestão de Condomínios em Cidades Inteligentes
               </h4>
             </div>
           </BCol>

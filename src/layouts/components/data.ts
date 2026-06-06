@@ -11,31 +11,31 @@ type UserDropdownItemType = {
 
 export const userDropdownItems: UserDropdownItemType[] = [
   {
-    label: 'Welcome back!',
+    label: 'Bem-vindo de volta!',
     isHeader: true,
   },
   {
-    label: 'Profile',
+    label: 'Meu Perfil',
     icon: 'tabler:user-circle',
     url: '#',
   },
   {
-    label: 'Notifications',
+    label: 'Notificações de Sensores',
     icon: 'tabler:bell-ringing',
     url: '#',
   },
   {
-    label: 'Balance: $985.25',
-    icon: 'tabler:credit-card',
+    label: 'Meu Condomínio',
+    icon: 'tabler:building',
     url: '#',
   },
   {
-    label: 'Account Settings',
+    label: 'Configurações da Conta',
     icon: 'tabler:settings-2',
     url: '#',
   },
   {
-    label: 'Support Center',
+    label: 'Central de Suporte',
     icon: 'tabler:headphones',
     url: '#',
   },
@@ -43,7 +43,7 @@ export const userDropdownItems: UserDropdownItemType[] = [
     isDivider: true,
   },
   {
-    label: 'Lock Screen',
+    label: 'Bloquear Tela',
     icon: 'tabler:lock',
     url: '/auth-1/lock-screen',
   },
