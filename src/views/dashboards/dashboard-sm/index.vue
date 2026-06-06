@@ -1,19 +1,28 @@
 <template>
   <div class="dashboard-sm">
-    <div class="page-header mb-4">
-      <div class="d-flex justify-content-between align-items-center">
-        <h3 class="page-title">HF Dashboard</h3>
-        <button class="export-btn" @click="exportLog()" :title="`Export ${getSnapshotCount()} snapshots`">
-          ↓ Export JSON
-        </button>
+
+    <!-- ═══ TOP HEADER BAR ═══ -->
+    <div class="top-bar">
+      <div class="top-bar__left">
+        <img src="@/assets/images/pranalogototal.svg" alt="prana" class="top-bar__logo" />
+        <div class="top-bar__divider"></div>
+        <div class="top-bar__meta">
+          <span class="top-bar__meta-label">Monitoramento IoT em Tempo Real</span>
+          <span class="top-bar__meta-status">
+            <span v-if="loading" class="status-dot loading"></span>
+            <span v-else-if="error" class="status-dot error"></span>
+            <span v-else class="status-dot ok"></span>
+            <span v-if="loading" class="status-text">Carregando...</span>
+            <span v-else-if="error" class="status-text text-danger">{{ error }}</span>
+            <span v-else class="status-text">Atualizado às {{ lastUpdated }} · {{ getSnapshotCount() }} snapshots</span>
+          </span>
+        </div>
       </div>
-      <div class="d-flex align-items-center gap-3 mt-1">
-        <small class="text-muted">
-          <span v-if="loading">⏳ Loading...</span>
-          <span v-else-if="error" class="text-danger">⚠ {{ error }}</span>
-          <span v-else>Last updated: {{ lastUpdated }} · {{ getSnapshotCount() }} snapshots logged</span>
-        </small>
-        <RefreshCountdown :duration-seconds="300" :seconds-left="secondsLeft" :size="48" />
+      <div class="top-bar__right">
+        <RefreshCountdown :duration-seconds="300" :seconds-left="secondsLeft" :size="44" />
+        <button class="export-btn" @click="exportLog()" :title="`Export ${getSnapshotCount()} snapshots`">
+          <span class="export-icon">↓</span> Export JSON
+        </button>
       </div>
     </div>
 
@@ -26,11 +35,16 @@
     </div>
 
     <!-- ═══ SILVANÓPOLIS ═══ -->
-    <div class="section-label">▾ Silvanópolis</div>
+    <div class="section-header">
+      <span class="section-header__icon">◈</span>
+      <span class="section-header__title">Silvanópolis</span>
+      <div class="section-header__line"></div>
+    </div>
+
     <div class="row g-3 mb-4">
       <!-- Tank -->
       <div class="col-lg-3 col-md-4">
-        <div class="chart-card py-3">
+        <div class="chart-card chart-card--center py-3">
           <TankGauge
             :value="silvanopolis.level"
             :size="200"
@@ -50,9 +64,12 @@
       </div>
       <!-- Map -->
       <div class="col-lg-3 col-md-4">
-        <div class="chart-card" style="height:100%;min-height:260px">
-          <div class="chart-title">Site Location</div>
-          <SiteMap :markers="siteMarkers" style="height:calc(100% - 24px)" />
+        <div class="chart-card chart-card--map" style="min-height:260px">
+          <div class="chart-title">
+            <span class="chart-title__dot" style="background:#4da6ff"></span>
+            Localização do Site
+          </div>
+          <SiteMap :markers="siteMarkers" style="height:calc(100% - 30px);border-radius:6px;overflow:hidden" />
         </div>
       </div>
       <!-- Flow PTPs -->
@@ -83,11 +100,16 @@
     </div>
 
     <!-- ═══ MIRANORTE ═══ -->
-    <div class="section-label">▾ Miranorte</div>
-    <div class="row g-3">
+    <div class="section-header">
+      <span class="section-header__icon">◈</span>
+      <span class="section-header__title">Miranorte</span>
+      <div class="section-header__line"></div>
+    </div>
+
+    <div class="row g-3 mb-4">
       <!-- Tank -->
       <div class="col-lg-3 col-md-4">
-        <div class="chart-card py-3">
+        <div class="chart-card chart-card--center py-3">
           <TankGauge
             :value="miranorte.level"
             :size="200"
@@ -106,6 +128,12 @@
         </div>
       </div>
     </div>
+
+    <!-- Footer -->
+    <div class="dashboard-footer">
+      <span>prana · AIIoT · Monitoramento em Tempo Real</span>
+    </div>
+
   </div>
 </template>
 
@@ -160,74 +188,217 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+/* ── Base ── */
 .dashboard-sm {
-  padding: 1.5rem;
-  background: #111217;
+  padding: 0;
+  background: #0e1015;
   min-height: 100vh;
   color: #d0d0d0;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
 }
-.page-header { border-bottom: 1px solid #2a2a2a; padding-bottom: 0.75rem; }
-.page-title { color: #e0e0e0; font-size: 1.4rem; margin: 0; }
-.section-label {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #888;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-bottom: 0.5rem;
-  padding: 0.25rem 0;
-  border-bottom: 1px solid #222;
-}
-.chart-card {
-  background: #181b20;
-  border: 1px solid #2a2a2a;
-  border-radius: 8px;
-  padding: 1rem;
-  height: 100%;
-}
-.chart-title {
-  font-size: 0.82rem;
-  color: #aaa;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
-}
-.export-btn {
-  background: #1e2330;
-  border: 1px solid #3a3f55;
-  color: #8ab4f8;
-  padding: 0.3rem 0.8rem;
-  border-radius: 5px;
-  font-size: 0.8rem;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-.export-btn:hover { background: #252c3f; }
 
+/* ── Top Bar ── */
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1.75rem;
+  background: #13161c;
+  border-bottom: 1px solid #1f2330;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.35);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.top-bar__left {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+}
+.top-bar__logo {
+  height: 36px;
+  width: auto;
+  filter: drop-shadow(0 0 6px rgba(214,170,1,0.25));
+}
+.top-bar__divider {
+  width: 1px;
+  height: 32px;
+  background: linear-gradient(to bottom, transparent, #2e3240, transparent);
+}
+.top-bar__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.top-bar__meta-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: #d6aa01;
+  opacity: 0.85;
+}
+.top-bar__meta-status {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.status-dot.ok      { background: #37872d; box-shadow: 0 0 5px #37872d; }
+.status-dot.error   { background: #e84040; box-shadow: 0 0 5px #e84040; }
+.status-dot.loading { background: #d6aa01; animation: rl-blink 1s ease-in-out infinite; }
+.status-text {
+  font-size: 0.75rem;
+  color: #7a8099;
+}
+.top-bar__right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* ── Export button ── */
+.export-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: transparent;
+  border: 1px solid #2e3550;
+  color: #8ab4f8;
+  padding: 0.35rem 0.9rem;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.18s;
+  letter-spacing: 0.3px;
+}
+.export-btn:hover {
+  background: #1a2040;
+  border-color: #4a5580;
+  color: #aecbfa;
+}
+.export-icon { font-size: 0.9rem; }
+
+/* ── Content area ── */
+.dashboard-content {
+  padding: 1.5rem 1.75rem;
+}
+
+/* ── Section header ── */
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin: 1.75rem 1.75rem 0.9rem;
+}
+.section-header__icon {
+  font-size: 0.9rem;
+  color: #d6aa01;
+  line-height: 1;
+}
+.section-header__title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.8px;
+  color: #c8ccd8;
+  white-space: nowrap;
+}
+.section-header__line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, #2a2e3e, transparent);
+}
+
+/* ── Row wrapper ── */
+.row {
+  padding: 0 1.75rem;
+}
+
+/* ── Chart cards ── */
+.chart-card {
+  background: #13161c;
+  border: 1px solid #1e2230;
+  border-radius: 10px;
+  padding: 1.1rem;
+  height: 100%;
+  transition: border-color 0.2s;
+}
+.chart-card:hover {
+  border-color: #2a3050;
+}
+.chart-card--center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.chart-card--map {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Chart title ── */
+.chart-title {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  color: #9aa0b8;
+  margin-bottom: 0.6rem;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
+.chart-title__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ── Rate limit alert ── */
 .rate-limit-alert {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  background: rgba(232, 64, 64, 0.10);
-  border: 1px solid rgba(232, 64, 64, 0.4);
-  border-radius: 7px;
-  padding: 0.7rem 1.1rem;
-  margin-bottom: 1.2rem;
+  background: rgba(232, 64, 64, 0.08);
+  border: 1px solid rgba(232, 64, 64, 0.35);
+  border-radius: 8px;
+  padding: 0.7rem 1.75rem;
+  margin: 0.75rem 1.75rem;
 }
 .rate-limit-icon {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   color: #e84040;
   animation: rl-blink 1s ease-in-out infinite;
   flex-shrink: 0;
 }
 .rate-limit-text {
-  font-size: 0.85rem;
+  font-size: 0.83rem;
   font-weight: 600;
   color: #e84040;
   letter-spacing: 0.2px;
 }
-@keyframes rl-blink {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0.1; }
+
+/* ── Footer ── */
+.dashboard-footer {
+  margin: 2rem 1.75rem 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #1a1d26;
+  font-size: 0.7rem;
+  color: #3a3f55;
+  text-align: center;
+  letter-spacing: 1px;
+  text-transform: uppercase;
 }
 
+@keyframes rl-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.15; }
+}
 </style>
