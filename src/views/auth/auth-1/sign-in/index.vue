@@ -281,8 +281,8 @@ async function handleLogin() {
 }
 
 .sm-feature__icon--water {
-  background: rgba(1,123,86,0.25);
-  color: #017b56;
+  background: rgba(144,210,236,0.25);
+  color: #90d2ec;
 }
 
 .sm-feature__icon--tele {
