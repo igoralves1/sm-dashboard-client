@@ -72,7 +72,7 @@ export const allRoutes = [
         path: '/dashboard-sm',
         name: 'dashboard-sm',
         meta: {
-            title: 'HidroForte SM',
+            title: 'HF SM',
         },
         component: () => import('@/views/dashboards/dashboard-sm/index.vue'),
     },

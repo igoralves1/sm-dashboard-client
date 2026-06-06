@@ -64,7 +64,7 @@ export const menuItems: MenuItemType[] = [
         badge: { variant: 'success', text: '2' },
         children: [
             { key: 'dashboard-v2', label: 'Dashboard v.2', url: '/dashboard2' },
-            { key: 'dashboard-sm', label: 'HidroForte SM', url: '/dashboard-sm' },
+            { key: 'dashboard-sm', label: 'HF SM', url: '/dashboard-sm' },
         ],
     },
     { key: 'landing', label: 'Landing Page', icon: 'tabler:stack-front', url: '/landing' },

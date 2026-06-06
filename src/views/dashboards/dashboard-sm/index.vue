@@ -2,7 +2,7 @@
   <div class="dashboard-sm">
     <div class="page-header mb-4">
       <div class="d-flex justify-content-between align-items-center">
-        <h3 class="page-title">HidroForte Dashboard</h3>
+        <h3 class="page-title">HF Dashboard</h3>
         <button class="export-btn" @click="exportLog()" :title="`Export ${getSnapshotCount()} snapshots`">
           ↓ Export JSON
         </button>
