@@ -13,7 +13,7 @@
           <span v-else-if="error" class="text-danger">⚠ {{ error }}</span>
           <span v-else>Last updated: {{ lastUpdated }} · {{ getSnapshotCount() }} snapshots logged</span>
         </small>
-        <RefreshCountdown :duration-seconds="60" :seconds-left="secondsLeft" :size="48" />
+        <RefreshCountdown :duration-seconds="300" :seconds-left="secondsLeft" :size="48" />
       </div>
     </div>
 
@@ -135,7 +135,7 @@ const levelThresholds = [
 ]
 
 // ── Auto-refresh every 1 min with countdown ──
-const REFRESH_SECS = 60
+const REFRESH_SECS = 300
 const secondsLeft = ref(REFRESH_SECS)
 
 let refreshTimer: ReturnType<typeof setInterval>
