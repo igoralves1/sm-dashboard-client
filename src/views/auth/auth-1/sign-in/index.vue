@@ -34,8 +34,8 @@
         </div>
 
         <div class="sm-auth__tagline">
-          <h1>Monitoramento Inteligente — AIIoT</h1>
-          <p>Inteligência artificial aplicada ao monitoramento em tempo real de energia, água e telemetria — conectando sensores de campo à tomada de decisão em cidades inteligentes.</p>
+          <h1>Monitoramento Inteligente através do AIIoT</h1>
+          <p>Transforme dados de energia, água e telemetria em decisões precisas — IA e IoT unidos para construir cidades mais eficientes e sustentáveis.</p>
         </div>
 
         <!-- Feature pills -->
