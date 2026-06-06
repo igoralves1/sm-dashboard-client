@@ -34,8 +34,8 @@
         </div>
 
         <div class="sm-auth__tagline">
-          <h1>Smart IoT Monitoring</h1>
-          <p>Real-time visibility into energy, water, and telemetry assets — from edge sensors to cloud dashboards.</p>
+          <h1>Monitoramento Inteligente — AIIoT</h1>
+          <p>Inteligência artificial aplicada ao monitoramento em tempo real de energia, água e telemetria — conectando sensores de campo à tomada de decisão em cidades inteligentes.</p>
         </div>
 
         <!-- Feature pills -->
