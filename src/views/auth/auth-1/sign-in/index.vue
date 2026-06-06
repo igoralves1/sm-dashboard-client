@@ -316,16 +316,16 @@ async function handleLogin() {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #74af25;
-  box-shadow: 0 0 0 0 rgba(116,175,37,0.6);
+  background: #d6aa01;
+  box-shadow: 0 0 0 0 rgba(214,170,1,0.6);
   animation: pulse-dot 2s infinite;
   flex-shrink: 0;
 }
 
 @keyframes pulse-dot {
-  0%   { box-shadow: 0 0 0 0 rgba(116,175,37,0.6); }
-  70%  { box-shadow: 0 0 0 8px rgba(116,175,37,0); }
-  100% { box-shadow: 0 0 0 0 rgba(116,175,37,0); }
+  0%   { box-shadow: 0 0 0 0 rgba(214,170,1,0.6); }
+  70%  { box-shadow: 0 0 0 8px rgba(214,170,1,0); }
+  100% { box-shadow: 0 0 0 0 rgba(214,170,1,0); }
 }
 
 /* ─── Right panel ─────────────────────────────────── */
