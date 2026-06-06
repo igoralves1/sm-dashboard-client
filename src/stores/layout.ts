@@ -149,6 +149,6 @@ export const useLayout = defineStore(
     }
   },
   {
-    persist: true,
+    persist: { key: 'layout-v2' },
   },
 )
