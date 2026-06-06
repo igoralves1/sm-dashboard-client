@@ -1,5 +1,5 @@
 <template>
-    <UICard title="Quarterly Reports" body-class="p-0" is-collapsable is-reloadable is-closeable>
+    <UICard title="Relatórios Trimestrais" body-class="p-0" is-collapsable is-reloadable is-closeable>
         <div class="table-responsive">
             <table  class="table table-hover table-custom table-nowrap table-centered mb-0">
                 <thead class="bg-light bg-opacity-25 thead-sm">

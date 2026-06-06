@@ -1,9 +1,9 @@
 <template>
     <BCard no-body>
         <BCardHeader class="d-flex justify-content-between align-items-center">
-            <h5 class="card-title mb-0">Latest Project Updates</h5>
+            <h5 class="card-title mb-0">Últimas Atualizações IoT</h5>
             <BBadge variant="warning" class="fs-xxs p-1">
-                8 Notifications
+                8 Notificações
             </BBadge>
         </BCardHeader>
 

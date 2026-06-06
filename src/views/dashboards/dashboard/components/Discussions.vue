@@ -2,13 +2,13 @@
     <BCard no-body>
         <BCardHeader class="d-flex justify-content-between align-items-center">
             <h5 class="card-title mb-0">
-                Discussions
+                Discussões
                 <BBadge variant="primary" class="bg-primary-subtle text-primary ms-2">
                     Pro+
                 </BBadge>
             </h5>
             <RouterLink to="#" class="badge text-bg-light fs-xs fw-semibold p-1">
-                Mark all as read
+                Marcar como lidas
             </RouterLink>
         </BCardHeader>
 
@@ -18,10 +18,10 @@
                     <img :src="mailImg" height="36" alt="message img" />
                 </div>
                 <div class="flex-grow-1">
-                    <h4 class="fs-sm mb-1">New messages</h4>
+                    <h4 class="fs-sm mb-1">Novas mensagens dos condomínios</h4>
                     <p class="fs-xs mb-0 text-body-secondary">
-                        You have <span class="text-body fw-semibold">22</span> new messages and
-                        <span class="text-body fw-semibold"> 16</span> waiting in draft folder.
+                        Você tem <span class="text-body fw-semibold">22</span> novas mensagens e
+                        <span class="text-body fw-semibold"> 16</span> aguardando resposta.
                     </p>
                 </div>
             </div>
@@ -58,7 +58,7 @@
 
             <div class="text-center mt-3">
                 <RouterLink to="/chat" class="link-reset text-decoration-underline d-flex align-items-center justify-content-center gap-1 fw-semibold link-offset-3">
-                    Go to Chat Room
+                    Ir para o Chat
                     <Icon icon="tabler:send-2" />
                 </RouterLink>
             </div>

@@ -1,5 +1,5 @@
 <template>
-    <UICard title="Project Performance" body-class="p-0" is-collapsable is-reloadable is-closeable>
+    <UICard title="Desempenho das Estações" body-class="p-0" is-collapsable is-reloadable is-closeable>
         <BCardBody>
             <div>
                 <div v-for="(stat, index) in projectStats" :key="index">
