@@ -68,7 +68,7 @@
     html[data-menu-color="prana"] {
         --#{$prefix}sidenav-bg:                       #{linear-gradient(180deg, #017b56 0%, #2a7a1a 55%, #4a8c10 100%)};
         --#{$prefix}sidenav-border-color:             transparent;
-        --#{$prefix}sidenav-item-color:             #ffffff;
+        --#{$prefix}sidenav-item-color:             rgba(255,255,255,0.68);
         --#{$prefix}sidenav-item-hover-color:       #ffffff;
         --#{$prefix}sidenav-item-hover-bg:          rgba(255,255,255,0.12);
         --#{$prefix}sidenav-item-active-color:      #ffffff;
@@ -112,18 +112,19 @@
 
     // Prana sidebar — force all nav links to full white, fix dimmed items
     html[data-menu-color="prana"] {
-        .sidenav-menu .sidenav-link,
+        .sidenav-menu .sidenav-link {
+            color: rgba(255,255,255,0.68) !important;
+        }
         .sidenav-menu .sidenav-link:hover,
-        .sidenav-menu .side-nav-link,
         .sidenav-menu .side-nav-link:hover {
             color: #ffffff !important;
         }
 
-        // Reduce disabled opacity so text stays legible
+        // Disabled items: same weak white, slightly more transparent
         .sidenav-menu .sidenav-link.disabled,
         .sidenav-menu .side-nav-link.disabled {
             opacity: 0.55 !important;
-            color: #ffffff !important;
+            color: rgba(255,255,255,0.68) !important;
         }
 
         // Section titles
