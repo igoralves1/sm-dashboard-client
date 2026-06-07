@@ -223,7 +223,10 @@ See `.env.example` for the full list of `VITE_SENSOR_*` variable names.
 
 ## License
 
-Private — SIMEMAP © 2026. All rights reserved.
+This is an open source project licensed under the **Apache 2.0 License**, developed by **Dr. Igor Lemos Alves**.
+Free to be used by anyone.
+
+The `alle` branch is a customization requested by **Prana** to adapt the project to its specific needs.
 
 
 ---
