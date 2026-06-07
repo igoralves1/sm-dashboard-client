@@ -11,13 +11,11 @@
                         <Icon :icon="item.icon" />
                     </span>
                 </div>
-                <h3 class="mb-0">
-                    
-                        <CountUp :end-val="item.value"
-                            :options="{ prefix: item.prefix || '', suffix: item.suffix || '', enableScrollSpy: true, scrollSpyOnce: true }" />
-                    
+                <h3 class="mb-0 text-nowrap stat-value">
+                    <CountUp :end-val="item.value"
+                        :options="{ prefix: item.prefix || '', suffix: item.suffix || '', enableScrollSpy: true, scrollSpyOnce: true }" />
                 </h3>
-                <span class="fw-medium ms-2 fs-xs ms-auto" :class="[
+                <span class="fw-medium ms-2 fs-xs ms-auto text-nowrap" :class="[
                     item.badgeVariant === 'light'
                         ? 'text-bg-light'
                         : `badge-soft-${item.badgeVariant}`,
@@ -50,4 +48,12 @@ defineProps<{
 }>()
 </script>
 
-<style scoped></style>
+<style scoped>
+.stat-value {
+  font-size: clamp(1.1rem, 2vw, 1.5rem);
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+</style>

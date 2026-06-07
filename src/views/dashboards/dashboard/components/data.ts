@@ -39,6 +39,7 @@ export const statCards: StatCard[] = [
     title: 'Consumo de Água',
     value: 847,
     suffix: 'm³',
+
     badgeText: '-3.2%',
     badgeVariant: 'light',
     icon: 'tabler:droplet',
@@ -50,7 +51,7 @@ export const statCards: StatCard[] = [
     id: 4,
     title: 'Energia Monitorada',
     value: 1847,
-    suffix: ' kWh',
+    suffix: 'kWh',
     badgeText: '+2.1%',
     badgeVariant: 'secondary',
     icon: 'tabler:bolt',
