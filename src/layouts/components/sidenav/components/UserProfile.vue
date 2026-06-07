@@ -4,7 +4,7 @@
       <div>
         <RouterLink to="" class="link-reset">
           <img :src="user2" alt="user-image" class="rounded-circle mb-2 avatar-md" />
-          <span class="sidenav-user-name fw-bold">Igor A.</span>
+          <span class="sidenav-user-name fw-bold">User-Test</span>
           <span class="fs-12 fw-semibold" data-lang="user-role">Gestor de Condomínios</span>
         </RouterLink>
       </div>

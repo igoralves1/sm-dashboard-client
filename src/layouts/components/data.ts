@@ -63,7 +63,7 @@ export const menuItems: MenuItemType[] = [
         icon: 'tabler:layout-dashboard',
         badge: { variant: 'success', text: '1' },
         children: [
-            { key: 'dashboard-sm', label: 'Monitoramento IoT', url: '/dashboard-sm' },
+            { key: 'dashboard-sm', label: 'HF - Água', url: '/dashboard-sm' },
         ],
     },
     { key: 'landing', label: 'Landing Page', icon: 'tabler:stack-front', url: '/landing' },

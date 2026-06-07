@@ -19,6 +19,9 @@
         </div>
       </div>
       <div class="top-bar__right">
+        <button class="export-btn" @click="router.push('/dashboard')" title="Voltar ao início">
+          ← Início
+        </button>
         <RefreshCountdown :duration-seconds="300" :seconds-left="secondsLeft" :size="44" />
         <button class="export-btn" @click="exportLog()" :title="`Export ${getSnapshotCount()} snapshots`">
           <span class="export-icon">↓</span> Export JSON
@@ -139,6 +142,7 @@
 
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import TankGauge from '@/components/charts/TankGauge.vue'
 import LevelTimeSeries from '@/components/charts/LevelTimeSeries.vue'
 import FlowTimeSeries from '@/components/charts/FlowTimeSeries.vue'
@@ -147,6 +151,8 @@ import RefreshCountdown from '@/components/charts/RefreshCountdown.vue'
 import { useTimestreamDashboard } from '@/composables/useTimestreamDashboard'
 import { exportLog, getSnapshotCount } from '@/composables/useDashboardLogger'
 import SiteMap from '@/components/charts/SiteMap.vue'
+
+const router = useRouter()
 
 const siteMarkers = [
   { lat: -11.15430944152578, lng: -48.172973779141344, label: 'RAP01 Silvanópolis', color: '#4da6ff' },

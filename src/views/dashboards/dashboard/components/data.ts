@@ -49,7 +49,7 @@ export const statCards: StatCard[] = [
   },
   {
     id: 4,
-    title: 'Energia Monitorada',
+    title: 'Energia',
     value: 1847,
     suffix: 'kWh',
     badgeText: '+2.1%',

@@ -1,7 +1,7 @@
 # SM Dashboard Client
 
 <p align="center">
-  <img src="src/assets/images/favicon.ico" width="48" alt="SIMEMAP" />
+  <img src="https://igoralves1.github.io/sm-dashboard-client/pranalogototal.svg" width="200" alt="prana" />
 </p>
 
 <p align="center">
@@ -224,3 +224,18 @@ See `.env.example` for the full list of `VITE_SENSOR_*` variable names.
 ## License
 
 Private — SIMEMAP © 2026. All rights reserved.
+
+
+---
+
+## References
+
+- [biovisualize.com](https://www.biovisualize.com/) — D3.js visualization patterns and examples
+- [Observable](https://observablehq.com/?utm_source=d3js-org&utm_medium=promo&utm_campaign=try-observable) — Interactive D3.js notebooks and chart examples
+- [Observable — Trending](https://observablehq.com/trending) — Most popular notebooks right now
+- [Observable — Recent](https://observablehq.com/recent) — Latest published notebooks
+- [Observable — Top (recent)](https://observablehq.com/top?type=recent) — Top notebooks filtered by recent activity
+- [Observable — Top](https://observablehq.com/top) — All-time top notebooks
+- [Observable — Resource Center](https://observablehq.com/resource-center) — Tutorials, guides, and learning resources
+- [Qualium Systems — Showcase](https://www.qualium-systems.com/showcase/) — Vue.js and frontend showcase examples
+- [Piktochart — Big Data Visualization](https://piktochart.com/blog/big-data-visualization/) — Best practices and examples for visualizing large datasets

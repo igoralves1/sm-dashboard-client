@@ -10,7 +10,7 @@
       <template #button-content>
         <img :src="user2" width="32" class="rounded-circle me-lg-2 d-flex" alt="user-image" />
         <div class="d-lg-flex align-items-center gap-1 d-none">
-          <h5 class="my-0">Igor A.</h5>
+          <h5 class="my-0">User-Test</h5>
           <Icon icon="tabler:chevron-down" class="align-middle" />
         </div>
       </template>
