@@ -1,12 +1,12 @@
-# SM Dashboard Client
+# IoT Monitoring System
 
 <p align="center">
   <img src="https://igoralves1.github.io/sm-dashboard-client/pranalogototal.svg" width="200" alt="prana" />
 </p>
 
 <p align="center">
-  <strong>Real-time IoT monitoring dashboard for water infrastructure</strong><br/>
-  Built with Vue 3 · D3.js · AWS Timestream · AWS Cognito
+  <strong>To be used in Water, Energy and any other smart city context.</strong><br/>
+  Real-time AIIoT dashboards powered by Vue 3 · D3.js · AWS Timestream · AWS Cognito
 </p>
 
 <p align="center">
@@ -15,27 +15,49 @@
   <img src="https://img.shields.io/badge/AWS-Timestream-FF9900?logo=amazonaws&logoColor=white" />
   <img src="https://img.shields.io/badge/Auth-Cognito-FF9900?logo=amazonaws&logoColor=white" />
   <img src="https://img.shields.io/badge/Deploy-GitHub%20Pages-181717?logo=github&logoColor=white" />
+  <img src="https://img.shields.io/badge/License-Apache%202.0-blue" />
 </p>
 
 ---
 
 ## Overview
 
-SM Dashboard Client is a single-page application that provides real-time visibility into water level monitoring infrastructure for the **HidroForte** project. It connects directly to AWS Timestream from the browser using Cognito-authenticated credentials — no backend server required.
+**IoT Monitoring System** is an open-source, browser-native single-page application for real-time monitoring of IoT infrastructure across smart city domains — water distribution networks, energy grids, environmental sensors, and beyond.
+
+It was designed to turn raw sensor data into actionable intelligence: live tank levels, pump flow rates, energy consumption trends, and anomaly alerts — all visualized through interactive D3.js charts without the need for a dedicated backend server.
+
+Data flows directly from **AWS Timestream** to the browser using short-lived credentials issued by **AWS Cognito**, keeping the architecture serverless and cost-efficient.
 
 **Live demo:** [https://igoralves1.github.io/sm-dashboard-client/](https://igoralves1.github.io/sm-dashboard-client/)
 
 ---
 
+## Use Cases
+
+This system is domain-agnostic. The same architecture and visualization layer can be applied to:
+
+| Domain | Examples |
+|---|---|
+| 🌊 **Water** | Reservoir levels, pump flow rates, distribution pressure |
+| ⚡ **Energy** | Consumption tracking, demand forecasting, grid efficiency |
+| 🌡️ **Environment** | Air quality, temperature, humidity, rainfall |
+| 🏙️ **Smart Cities** | Multi-sensor city dashboards, alert management |
+| 🏗️ **Industrial IoT** | Equipment telemetry, predictive maintenance |
+
+---
+
 ## Features
 
-- 🌊 **Animated liquid fill gauge** — D3.js water tank with wave animation and color-coded levels
-- 📈 **Real-time time series** — 24h water level charts with threshold lines and interactive tooltips
-- 📊 **Production bar charts** — hourly and daily pump production (m³/h and m³)
-- 🗺️ **Site map** — OpenStreetMap widget showing sensor locations
-- 🔐 **AWS Cognito authentication** — 30-minute session tokens, forced password change on first login
-- 🔄 **Auto-refresh** — 1-minute countdown timer with live data polling
-- 📤 **JSON export** — snapshot logger with export button
+- **Animated liquid fill gauges** — D3.js water tanks with wave animation and color-coded threshold levels
+- **Real-time time series** — 24-hour level and flow charts with threshold lines and interactive crosshair tooltips
+- **Stacked area charts** — D3.js energy consumption trends with monthly projections and statistics
+- **Donut charts** — Station status overview with interactive hover and SVG legends
+- **Production bar charts** — Hourly and daily pump production grouped by sensor
+- **Site map** — OpenStreetMap widget showing sensor locations with custom markers
+- **AWS Cognito authentication** — 30-minute session tokens, silent refresh, forced password change on first login
+- **Auto-refresh** — Configurable countdown timer with live data polling (default 5 min)
+- **JSON snapshot export** — Timestamped logger with one-click export button
+- **Fully responsive** — ResizeObserver-driven charts that adapt to any viewport
 
 ---
 
@@ -63,10 +85,15 @@ Browser
   │    └─ Authenticates user, issues 30-min JWT tokens
   │
   ├─ Cognito Identity Pool
-  │    └─ Exchanges JWT for temporary AWS credentials
+  │    └─ Exchanges JWT for temporary AWS credentials (STS)
   │
   └─ Timestream Query (direct browser → AWS, no backend needed)
+       ├─ Real-time table  (latest sensor readings)
+       ├─ Hourly table     (hourly aggregates)
+       └─ Daily table      (daily aggregates)
 ```
+
+No backend server. No API gateway. Sensor data goes directly from AWS to the browser.
 
 ---
 
@@ -91,9 +118,10 @@ src/
 ├── views/
 │   ├── auth/                # Login & set-new-password pages
 │   └── dashboards/
-│       └── dashboard-sm/    # HidroForte SM main dashboard
+│       ├── dashboard/       # Main overview dashboard (stat cards, charts)
+│       └── dashboard-sm/    # HidroForte SM IoT dashboard
 └── router/
-    └── routes.ts            # Route definitions
+    └── index.ts             # Route definitions with silent token refresh
 ```
 
 ---
@@ -116,9 +144,28 @@ npm run dev
 
 Open [http://localhost:5173/sm-dashboard-client/](http://localhost:5173/sm-dashboard-client/)
 
-### AWS Profile Setup
+### Environment Variables
 
-This project uses the `dev-sm` AWS profile. Configure your credentials in `.env` (see `.env.example`).
+Copy `.env.example` to `.env` and fill in your AWS resource identifiers:
+
+```bash
+cp .env.example .env
+```
+
+Key variables:
+
+```
+VITE_AWS_REGION=
+VITE_USER_POOL_ID=
+VITE_COGNITO_CLIENT_ID=
+VITE_IDENTITY_POOL_ID=
+VITE_TIMESTREAM_DB=
+VITE_TIMESTREAM_TABLE_RT=
+VITE_TIMESTREAM_TABLE_HOURLY=
+VITE_TIMESTREAM_TABLE_DAILY=
+```
+
+### AWS Profile Setup
 
 ```bash
 # Configure SSO (one-time setup)
@@ -128,63 +175,37 @@ aws configure sso --profile dev-sm
 aws sso login --profile dev-sm
 ```
 
-The profile auto-loads when you `cd` into this directory (via [direnv](https://direnv.net/) + `.envrc`).
+The profile auto-loads when you `cd` into this directory via [direnv](https://direnv.net/).
 
 ---
 
 ## CI/CD Pipeline
 
-The project uses **GitHub Actions** for automated build and deployment to GitHub Pages.
-
-### Workflow file: `.github/workflows/deploy.yml`
+Automated build and deployment to GitHub Pages via **GitHub Actions** on every push to the `alle` branch.
 
 ```
-Push to main
+Push to alle
      │
      ▼
 ┌─────────────────┐
-│   CI — Build    │  Runs on: ubuntu-latest
+│   CI — Build    │  ubuntu-latest / Node.js 20
 │                 │
-│ 1. Checkout     │  git checkout
-│ 2. Setup Node   │  Node.js 20
-│ 3. Install deps │  npm ci
-│ 4. Type check   │  vue-tsc --build
-│ 5. Vite build   │  npm run build-only
+│ 1. Checkout     │
+│ 2. npm ci       │  Clean install
+│ 3. Vite build   │  Output → /dist
 └────────┬────────┘
-         │ Build artifacts in /dist
+         │
          ▼
 ┌─────────────────┐
 │  CD — Deploy    │
 │                 │
-│ 6. Upload dist  │  actions/upload-pages-artifact
-│ 7. Deploy       │  actions/deploy-pages → gh-pages branch
+│ 4. Upload dist  │  actions/upload-pages-artifact
+│ 5. Deploy       │  actions/deploy-pages
 └─────────────────┘
          │
          ▼
   https://igoralves1.github.io/sm-dashboard-client/
 ```
-
-### CI Steps (Continuous Integration)
-
-| Step | What it does |
-|---|---|
-| **Checkout** | Pulls the latest code from the `main` branch |
-| **Node.js setup** | Installs Node.js 20 with npm cache enabled |
-| **npm ci** | Clean install of all dependencies from `package-lock.json` |
-| **Type check** | Runs `vue-tsc --build` to catch TypeScript errors before building |
-| **Vite build** | Compiles and bundles the app for production into `/dist` |
-
-### CD Steps (Continuous Deployment)
-
-| Step | What it does |
-|---|---|
-| **Upload artifact** | Packages the `/dist` folder as a GitHub Pages artifact |
-| **Deploy to Pages** | Publishes the artifact to the `gh-pages` branch |
-| **Live** | App is served at `https://igoralves1.github.io/sm-dashboard-client/` |
-
-### SPA Routing Fix
-
-GitHub Pages serves static files only. A `404.html` redirect trick is used to support Vue Router's history mode — any unmatched URL redirects back to `index.html` with the path encoded as a query parameter, then a script in `index.html` restores the original URL.
 
 ---
 
@@ -194,8 +215,8 @@ GitHub Pages serves static files only. A `404.html` redirect trick is used to su
 1. User visits /login
 2. Enters email + password
 3. Cognito User Pool authenticates
-   ├─ First login → redirect to /new-password (forced password change)
-   └─ Success → JWT tokens stored (access + id + refresh)
+   ├─ First login → /new-password (forced password change)
+   └─ Success    → JWT tokens stored in Pinia (access + id + refresh)
 4. Access token valid for 30 minutes
 5. On expiry → silent refresh via refresh token
 6. On full expiry → redirect to /login
@@ -205,12 +226,12 @@ GitHub Pages serves static files only. A `404.html` redirect trick is used to su
 
 ## Data Sources (AWS Timestream)
 
-| Panel | Env Var | Measure |
+| Panel | Table | Measure |
 |---|---|---|
-| Tank gauge + Level chart | `VITE_TIMESTREAM_TABLE_RT` | `water_level` |
-| Flow PTPs | `VITE_TIMESTREAM_TABLE_RT` | `flux` |
-| Production 24h | `VITE_TIMESTREAM_TABLE_HOURLY` | `L_acc` |
-| Production daily | `VITE_TIMESTREAM_TABLE_DAILY` | `L_acc` |
+| Tank gauge + Level chart | `RT` (real-time) | `water_level` |
+| Flow PTPs | `RT` (real-time) | `flux` |
+| Production 24h | `HOURLY` | `L_acc` |
+| Production daily | `DAILY` | `L_acc` |
 
 ---
 
@@ -227,7 +248,6 @@ This is an open source project licensed under the **Apache 2.0 License**, develo
 Free to be used by anyone.
 
 The `alle` branch is a customization requested by **Prana** to adapt the project to its specific needs.
-
 
 ---
 
