@@ -1,7 +1,7 @@
 # SM Dashboard Client
 
 <p align="center">
-  <img src="https://igoralves1.github.io/sm-dashboard-client/pranalogototal.svg" width="200" alt="prana" />
+  <img src="https://raw.githubusercontent.com/igoralves1/sm-dashboard-client/alle/public/pranalogototal.svg" width="200" alt="prana" />
 </p>
 
 <p align="center">
