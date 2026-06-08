@@ -46,9 +46,14 @@ function sanitizeUser(user: string): string {
   return user.replace(/[^a-zA-Z0-9._-]/g, '_').toLowerCase()
 }
 
+function isAuthenticated(): boolean {
+  return !!useAuthStore().idToken
+}
+
 export function useS3Activity() {
 
   async function uploadSession(session: PageSession): Promise<void> {
+    if (!isAuthenticated()) return   // no Cognito session → skip silently
     try {
       const client = makeClient()
       const key = `sessions/${sanitizeUser(session.user)}/${session.id}.json`
@@ -64,6 +69,7 @@ export function useS3Activity() {
   }
 
   async function loadAllSessions(): Promise<PageSession[]> {
+    if (!isAuthenticated()) return []   // no Cognito session → return empty
     try {
       const client = makeClient()
       const sessions: PageSession[] = []
