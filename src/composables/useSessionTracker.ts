@@ -192,6 +192,12 @@ export function useSessionTracker() {
     all.unshift(current)
     persist(all.slice(0, MAX_SESSIONS))
 
+    // Push to S3 for cross-browser shared storage
+    const saved = { ...current }
+    import('./useS3Activity').then(({ useS3Activity }) => {
+      useS3Activity().uploadSession(saved)
+    })
+
     current = null
   }
 

@@ -8,8 +8,14 @@
           <h4 class="mb-0 fw-semibold">Atividade de Usuários</h4>
           <p class="text-muted fs-xs mb-0">Sessões, páginas visitadas, cliques e localização em tempo real.</p>
         </BCol>
-        <BCol xs="auto" class="d-flex gap-2">
-          <button class="act-btn act-btn--ghost" @click="refresh">
+        <BCol xs="auto" class="d-flex gap-2 align-items-center">
+          <span v-if="loading" class="text-muted fs-xs d-flex align-items-center gap-1">
+            <Icon icon="tabler:loader-2" width="14" class="spin" /> Carregando S3…
+          </span>
+          <span v-if="s3Error && !loading" class="text-danger fs-xs d-flex align-items-center gap-1">
+            <Icon icon="tabler:alert-circle" width="14" /> Erro S3
+          </span>
+          <button class="act-btn act-btn--ghost" :disabled="loading" @click="refresh">
             <Icon icon="tabler:refresh" width="15" /> Atualizar
           </button>
           <button class="act-btn act-btn--danger" @click="clearAll">
@@ -318,22 +324,61 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { BCard, BCol, BContainer, BRow } from 'bootstrap-vue-next'
 import { Icon } from '@iconify/vue'
 import MainLayout from '@/layouts/MainLayout.vue'
 import { useSessionTracker, type PageSession } from '@/composables/useSessionTracker'
+import { useS3Activity } from '@/composables/useS3Activity'
 
 const { getSessions, clear } = useSessionTracker()
+const { loadAllSessions }    = useS3Activity()
 
 const sessions     = ref<PageSession[]>(getSessions())
 const expandedId   = ref<string | null>(null)
 const selectedUser = ref('Todos')
+const loading      = ref(false)
+const s3Error      = ref(false)
+
+// Load from S3 on mount — merges with localStorage data
+onMounted(async () => {
+  loading.value = true
+  s3Error.value = false
+  try {
+    const s3Sessions = await loadAllSessions()
+    if (s3Sessions.length) {
+      // Merge: S3 is source of truth; keep any local sessions not yet pushed
+      const s3Ids = new Set(s3Sessions.map(s => s.id))
+      const localOnly = getSessions().filter(s => !s3Ids.has(s.id))
+      sessions.value = [...s3Sessions, ...localOnly]
+        .sort((a, b) => b.enteredAt.localeCompare(a.enteredAt))
+    }
+  } catch {
+    s3Error.value = true
+  } finally {
+    loading.value = false
+  }
+})
 
 // Reset expanded when switching users
 watch(selectedUser, () => { expandedId.value = null })
 
-function refresh() { sessions.value = getSessions() }
+async function refresh() {
+  loading.value = true
+  s3Error.value = false
+  try {
+    const s3Sessions = await loadAllSessions()
+    const s3Ids = new Set(s3Sessions.map(s => s.id))
+    const localOnly = getSessions().filter(s => !s3Ids.has(s.id))
+    sessions.value = [...s3Sessions, ...localOnly]
+      .sort((a, b) => b.enteredAt.localeCompare(a.enteredAt))
+  } catch {
+    s3Error.value = true
+    sessions.value = getSessions()
+  } finally {
+    loading.value = false
+  }
+}
 
 function clearAll() {
   if (confirm('Apagar todos os dados de atividade?')) { clear(); sessions.value = [] }
@@ -445,6 +490,9 @@ function fmtFull(iso: string) {
 </script>
 
 <style scoped>
+@keyframes spin { to { transform: rotate(360deg) } }
+.spin { animation: spin 1s linear infinite; display: inline-block; }
+
 /* ── Stat cards ─────────────────────────────────────────────────────────── */
 .stat-card {
   display: flex; align-items: center; gap: 14px;

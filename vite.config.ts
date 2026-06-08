@@ -27,6 +27,7 @@ export default defineConfig({
     optimizeDeps: {
         include: [
             '@aws-sdk/client-timestream-query',
+            '@aws-sdk/client-s3',
             '@aws-sdk/credential-provider-cognito-identity',
             '@aws-sdk/client-cognito-identity',
             'amazon-cognito-identity-js',
