@@ -274,19 +274,53 @@
                   </div>
                 </div>
                 <div class="session-header-right">
+                  <span v-if="s.device" class="device-chip" :class="`device-chip--${s.device.type}`">
+                    <Icon :icon="s.device.type === 'mobile' ? 'tabler:device-mobile' : s.device.type === 'tablet' ? 'tabler:device-tablet' : 'tabler:device-laptop'" width="12" />
+                    {{ s.device.browser }}
+                  </span>
                   <div class="session-time">{{ fmtTime(s.enteredAt) }}</div>
                   <div class="session-dur"><Icon icon="tabler:clock" width="11" />{{ s.duration ?? '—' }}s</div>
                   <Icon :icon="expandedId === s.id ? 'tabler:chevron-up' : 'tabler:chevron-down'" width="16" class="session-chevron" />
                 </div>
               </div>
               <div v-if="expandedId === s.id" class="session-body">
+                <!-- Device -->
+                <div class="detail-section">
+                  <div class="detail-title"><Icon icon="tabler:device-laptop" width="13" /> Dispositivo & Navegador</div>
+                  <div v-if="s.device" class="detail-geo">
+                    <div class="geo-row">
+                      <span class="geo-label">Tipo</span>
+                      <span class="geo-val d-flex align-items-center gap-1">
+                        <Icon :icon="s.device.type === 'mobile' ? 'tabler:device-mobile' : s.device.type === 'tablet' ? 'tabler:device-tablet' : 'tabler:device-laptop'" width="13" />
+                        {{ s.device.type === 'mobile' ? 'Celular' : s.device.type === 'tablet' ? 'Tablet' : 'Desktop' }}
+                      </span>
+                    </div>
+                    <div class="geo-row"><span class="geo-label">Navegador</span><span class="geo-val">{{ s.device.browser }}</span></div>
+                    <div class="geo-row"><span class="geo-label">Sistema</span><span class="geo-val">{{ s.device.os }}</span></div>
+                    <div v-if="s.gps" class="geo-row">
+                      <span class="geo-label">GPS</span>
+                      <span class="geo-val">
+                        <a :href="`https://maps.google.com/?q=${s.gps.lat},${s.gps.lng}`" target="_blank" class="gps-link">
+                          {{ s.gps.lat.toFixed(5) }}, {{ s.gps.lng.toFixed(5) }}
+                          <Icon icon="tabler:map-2" width="12" />
+                        </a>
+                        <span class="geo-accuracy">±{{ s.gps.accuracy }}m</span>
+                      </span>
+                    </div>
+                    <div v-else-if="s.device.type !== 'desktop'" class="geo-row">
+                      <span class="geo-label">GPS</span><span class="geo-val geo-val--muted">Não autorizado ou indisponível</span>
+                    </div>
+                  </div>
+                  <div v-else class="detail-empty">Dispositivo não identificado</div>
+                </div>
+                <!-- Location / IP -->
                 <div class="detail-section">
                   <div class="detail-title"><Icon icon="tabler:map-pin" width="13" /> Localização & IP</div>
                   <div v-if="s.geo" class="detail-geo">
                     <div class="geo-row"><span class="geo-label">IP</span><code class="geo-val">{{ s.geo.ip }}</code></div>
                     <div class="geo-row"><span class="geo-label">Cidade</span><span class="geo-val">{{ s.geo.city }}, {{ s.geo.region }}</span></div>
                     <div class="geo-row"><span class="geo-label">País</span><span class="geo-val">{{ s.geo.country }}</span></div>
-                    <div class="geo-row"><span class="geo-label">Coordenadas</span><span class="geo-val">{{ s.geo.lat.toFixed(4) }}, {{ s.geo.lng.toFixed(4) }}</span></div>
+                    <div class="geo-row"><span class="geo-label">Coordenadas (IP)</span><span class="geo-val">{{ s.geo.lat.toFixed(4) }}, {{ s.geo.lng.toFixed(4) }}</span></div>
                   </div>
                   <div v-else class="detail-empty">Localização não disponível</div>
                 </div>
@@ -662,6 +696,18 @@ function fmtFull(iso: string) {
 .session-time { font-size: 0.72rem; color: var(--bs-secondary-color); }
 .session-dur  { display: flex; align-items: center; gap: 3px; font-size: 0.72rem; color: var(--bs-secondary-color); }
 .session-chevron { color: var(--bs-secondary-color); }
+.device-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 0.68rem; font-weight: 600; border-radius: 20px;
+  padding: 2px 8px; white-space: nowrap;
+}
+.device-chip--mobile  { background: #e8f4ff; color: #0d6efd; }
+.device-chip--tablet  { background: #f0e8ff; color: #6f42c1; }
+.device-chip--desktop { background: #e8f8f0; color: #198754; }
+.gps-link { color: #0d6efd; text-decoration: none; display: inline-flex; align-items: center; gap: 3px; }
+.gps-link:hover { text-decoration: underline; }
+.geo-accuracy { margin-left: 6px; font-size: 0.7rem; color: var(--bs-secondary-color); }
+.geo-val--muted { color: var(--bs-secondary-color); font-style: italic; }
 .session-body { border-top: 1px solid var(--bs-border-color, #e5e7eb); padding: 14px 16px; display: flex; flex-direction: column; gap: 16px; }
 
 /* ── Shared detail bits ─────────────────────────────────────────────────── */

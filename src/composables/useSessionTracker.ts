@@ -12,6 +12,19 @@ const MAX_SESSIONS = 200
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
+export interface DeviceInfo {
+  type:    'mobile' | 'tablet' | 'desktop'
+  browser: string
+  os:      string
+  ua:      string
+}
+
+export interface GpsCoords {
+  lat:      number
+  lng:      number
+  accuracy: number   // metres
+}
+
 export interface GeoInfo {
   ip:      string
   city:    string
@@ -47,8 +60,52 @@ export interface PageSession {
   exitedAt?:   string
   duration?:   number        // seconds
   geo?:        GeoInfo
+  device?:     DeviceInfo
+  gps?:        GpsCoords
   mouseTrails: MouseSample[]
   clicks:      ClickEvent[]
+}
+
+// ── Device detection ─────────────────────────────────────────────────────────
+
+function detectDevice(): DeviceInfo {
+  const ua = navigator.userAgent
+  const isMobile  = /Mobi|Android|iPhone|iPod/i.test(ua)
+  const isTablet  = /iPad|Tablet|(Android(?!.*Mobi))/i.test(ua)
+  const type: DeviceInfo['type'] = isMobile ? 'mobile' : isTablet ? 'tablet' : 'desktop'
+
+  let browser = 'Unknown'
+  if (/Edg\//i.test(ua))          browser = 'Edge'
+  else if (/OPR\//i.test(ua))     browser = 'Opera'
+  else if (/Chrome\//i.test(ua))  browser = 'Chrome'
+  else if (/Safari\//i.test(ua))  browser = 'Safari'
+  else if (/Firefox\//i.test(ua)) browser = 'Firefox'
+
+  let os = 'Unknown'
+  if (/Windows/i.test(ua))        os = 'Windows'
+  else if (/iPhone|iPad|iPod/i.test(ua)) os = 'iOS'
+  else if (/Android/i.test(ua))   os = 'Android'
+  else if (/Mac OS X/i.test(ua))  os = 'macOS'
+  else if (/Linux/i.test(ua))     os = 'Linux'
+
+  return { type, browser, os, ua: ua.slice(0, 200) }
+}
+
+// ── GPS (mobile only, non-blocking) ──────────────────────────────────────────
+
+function fetchGps(): Promise<GpsCoords | undefined> {
+  if (!navigator.geolocation) return Promise.resolve(undefined)
+  return new Promise(resolve => {
+    navigator.geolocation.getCurrentPosition(
+      pos => resolve({
+        lat:      pos.coords.latitude,
+        lng:      pos.coords.longitude,
+        accuracy: Math.round(pos.coords.accuracy),
+      }),
+      () => resolve(undefined),
+      { timeout: 8000, maximumAge: 60000 }
+    )
+  })
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -141,8 +198,16 @@ export function useSessionTracker() {
       clicks:      [],
     }
 
-    // Attach geo asynchronously — attaches when resolved
+    // Detect device immediately (synchronous)
+    current.device = detectDevice()
+
+    // Attach IP geo asynchronously
     fetchGeo().then(geo => { if (current && geo) current.geo = geo })
+
+    // Request GPS on mobile/tablet
+    if (current.device.type !== 'desktop') {
+      fetchGps().then(gps => { if (current && gps) current.gps = gps })
+    }
 
     // Start listeners
     abortController = new AbortController()
