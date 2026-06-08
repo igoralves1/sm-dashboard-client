@@ -65,6 +65,11 @@
               Integrado ao conceito de Smart City 4.0, este sistema conecta infraestrutura física
               a uma camada digital de inteligência — sensores, telemetria e análise em tempo real —
               para tornar a gestão pública mais eficiente, transparente e responsiva.
+              Todos os processos são supervisionados de forma contínua e permanente por algoritmos
+              de inteligência artificial que monitoram padrões operacionais, identificam desvios
+              e anomalias automaticamente, e emitem alertas imediatos para os gestores ou técnicos
+              designados — garantindo que cada ocorrência seja tratada pela pessoa certa,
+              no momento certo, antes de se transformar em um problema crítico para a população.
             </div>
           </div>
           <div class="context-banner__card">
