@@ -7,6 +7,7 @@ import {
   CognitoUserSession,
 } from 'amazon-cognito-identity-js'
 import { useActivityTracker } from '@/composables/useActivityTracker'
+import { useSessionTracker } from '@/composables/useSessionTracker'
 
 // ── Cognito config (values injected via environment variables) ───────────────
 const USER_POOL_ID = import.meta.env.VITE_USER_POOL_ID      as string
@@ -83,6 +84,8 @@ export const useAuthStore = defineStore('auth', () => {
           setSession(session)
           loading.value = false
           useActivityTracker().trackLogin(email)
+          // Backfill the in-progress /login session with the real email
+          useSessionTracker().updateUser(email)
           resolve('ok')
         },
         onFailure(err) {

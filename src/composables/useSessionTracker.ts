@@ -266,6 +266,16 @@ export function useSessionTracker() {
     current = null
   }
 
+  // Call immediately after login to backfill the in-progress /login session
+  function updateUser(email: string) {
+    if (!current) return
+    current.user = email
+    // Also patch the most recent anonymous entry already saved to localStorage
+    const all = load()
+    const anonIdx = all.findIndex(s => s.user === 'anonymous' && !s.exitedAt)
+    if (anonIdx !== -1) { all[anonIdx].user = email; persist(all) }
+  }
+
   function getSessions(): PageSession[] {
     return load()
   }
@@ -278,5 +288,5 @@ export function useSessionTracker() {
     persist([])
   }
 
-  return { startPage, endPage, getSessions, exportJson, clear }
+  return { startPage, endPage, updateUser, getSessions, exportJson, clear }
 }
