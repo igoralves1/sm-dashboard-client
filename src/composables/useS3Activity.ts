@@ -1,7 +1,9 @@
 /**
- * S3-backed activity storage for cross-user/cross-browser session data.
+ * S3-backed storage for cross-user/cross-browser data.
  * Bucket: <S3_BUCKET> (us-east-2)
- * Layout: sessions/{userId}/{sessionId}.json
+ * Layout:
+ *   sessions/{userId}/{sessionId}.json
+ *   alerts/{alertId}.json
  *
  * Uses Cognito Identity Pool credentials (same as Timestream).
  */
@@ -16,6 +18,7 @@ import { fromCognitoIdentityPool } from '@aws-sdk/credential-provider-cognito-id
 import { CognitoIdentityClient } from '@aws-sdk/client-cognito-identity'
 import { useAuthStore } from '@/stores/auth'
 import type { PageSession } from './useSessionTracker'
+import type { StoredAlert } from './useAlertStore'
 
 const BUCKET  = '<S3_BUCKET>'
 const REGION  = import.meta.env.VITE_AWS_REGION        as string
@@ -104,5 +107,52 @@ export function useS3Activity() {
     }
   }
 
-  return { uploadSession, loadAllSessions }
+  // ── Alerts ────────────────────────────────────────────────────────────────
+
+  async function uploadAlert(alert: StoredAlert): Promise<void> {
+    if (!isAuthenticated()) return
+    try {
+      const client = makeClient()
+      await client.send(new PutObjectCommand({
+        Bucket:      BUCKET,
+        Key:         `alerts/${alert.id}.json`,
+        Body:        JSON.stringify(alert),
+        ContentType: 'application/json',
+      }))
+    } catch (e) {
+      console.warn('[S3Activity] alert upload failed:', e)
+    }
+  }
+
+  async function loadAllAlerts(): Promise<StoredAlert[]> {
+    if (!isAuthenticated()) return []
+    try {
+      const client  = makeClient()
+      const alerts: StoredAlert[] = []
+      let continuationToken: string | undefined
+      do {
+        const listResp = await client.send(new ListObjectsV2Command({
+          Bucket:            BUCKET,
+          Prefix:            'alerts/',
+          ContinuationToken: continuationToken,
+        }))
+        const keys = (listResp.Contents ?? []).map(o => o.Key!).filter(Boolean)
+        await Promise.all(keys.map(async (key) => {
+          try {
+            const obj  = await client.send(new GetObjectCommand({ Bucket: BUCKET, Key: key }))
+            const text = await obj.Body!.transformToString()
+            alerts.push(JSON.parse(text) as StoredAlert)
+          } catch { /* skip corrupted */ }
+        }))
+        continuationToken = listResp.NextContinuationToken
+      } while (continuationToken)
+      alerts.sort((a, b) => b.timestamp.localeCompare(a.timestamp))
+      return alerts
+    } catch (e) {
+      console.warn('[S3Activity] alerts load failed:', e)
+      return []
+    }
+  }
+
+  return { uploadSession, loadAllSessions, uploadAlert, loadAllAlerts }
 }

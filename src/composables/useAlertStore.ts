@@ -68,6 +68,17 @@ export function useAlertStore() {
 
     _alerts.value = [...fresh, ..._alerts.value].slice(0, MAX_ALERTS)
     save(_alerts.value)
+
+    // Push new alerts to S3 (fire-and-forget, requires Cognito session)
+    import('./useS3Activity').then(({ useS3Activity }) => {
+      const { uploadAlert } = useS3Activity()
+      fresh.forEach(a => uploadAlert(a))
+    })
+  }
+
+  function replaceAll(incoming: StoredAlert[]) {
+    _alerts.value = incoming.slice(0, MAX_ALERTS)
+    save(_alerts.value)
   }
 
   function clear() {
@@ -79,5 +90,5 @@ export function useAlertStore() {
     return JSON.stringify(_alerts.value, null, 2)
   }
 
-  return { alerts, alerts24h, ingestAnomalies, clear, exportJson }
+  return { alerts, alerts24h, ingestAnomalies, replaceAll, clear, exportJson }
 }
