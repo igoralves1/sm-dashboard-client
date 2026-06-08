@@ -223,7 +223,7 @@
     "iot_updates": "Latest IoT Updates",
     "notifications_count": "{n} Notifications",
     "quarterly_reports": "Quarterly Reports",
-    "energy_chart_title": "Energy consumption in R$ per month",
+    "energy_chart_title": "Energy consumption in US$ per month",
     "energy_until": "until day",
     "kwh_legend": "kWh",
     "sensors_legend": "Sensors",
