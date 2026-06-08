@@ -262,3 +262,6 @@ The `alle` branch is a customization requested by **Prana** to adapt the project
 - [Observable — Resource Center](https://observablehq.com/resource-center) — Tutorials, guides, and learning resources
 - [Qualium Systems — Showcase](https://www.qualium-systems.com/showcase/) — Vue.js and frontend showcase examples
 - [Piktochart — Big Data Visualization](https://piktochart.com/blog/big-data-visualization/) — Best practices and examples for visualizing large datasets
+
+---
+Last updated: 2026-06-08
