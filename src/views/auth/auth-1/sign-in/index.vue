@@ -181,7 +181,7 @@ async function handleLogin() {
   loading.value = true
   const result = await auth.login(email.value, password.value)
   if (result === 'ok') {
-    const redirect = (route.query.redirect as string) || '/dashboard-sm'
+    const redirect = (route.query.redirect as string) || '/dashboard'
     router.push(redirect)
   } else if (result === 'new_password_required') {
     router.push({ name: 'new-password', query: { email: email.value } })

@@ -30,7 +30,7 @@ router.beforeEach(async (to, _from, next) => {
   }
 
   if (auth.isAuthenticated && isPublic) {
-    return next({ path: '/dashboard-sm' })
+    return next({ path: '/dashboard' })
   }
 
   next()
