@@ -219,9 +219,11 @@ import ProductionBar from '@/components/charts/ProductionBar.vue'
 import RefreshCountdown from '@/components/charts/RefreshCountdown.vue'
 import { useTimestreamDashboard } from '@/composables/useTimestreamDashboard'
 import { exportLog, getSnapshotCount } from '@/composables/useDashboardLogger'
+import { useAlertStore } from '@/composables/useAlertStore'
 import SiteMap from '@/components/charts/SiteMap.vue'
 
 const router = useRouter()
+const { initFromS3 } = useAlertStore()
 
 const siteMarkers = [
   { lat: -11.15430944152578, lng: -48.172973779141344, label: 'RAP01 Silvanópolis', color: '#4da6ff' },
@@ -252,6 +254,8 @@ async function doRefresh() {
 }
 
 onMounted(async () => {
+  // Seed alert store from S3 before sensor data arrives
+  initFromS3()
   await doRefresh()
   refreshTimer = setInterval(doRefresh, REFRESH_SECS * 1000)
   tickTimer = setInterval(() => {

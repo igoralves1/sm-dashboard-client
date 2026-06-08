@@ -103,7 +103,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted } from 'vue'
 import { BCard, BCol, BRow } from 'bootstrap-vue-next'
 import CountUp from 'vue-countup-v3'
 import { Icon } from '@iconify/vue'
@@ -111,34 +111,12 @@ import StackedAreaChart from './StackedAreaChart.vue'
 import DonutChart from './DonutChart.vue'
 import { useAlertStore } from '@/composables/useAlertStore'
 import type { StoredAlert } from '@/composables/useAlertStore'
-import { useS3Activity } from '@/composables/useS3Activity'
 import pranaLogoRaw from '/pranalogototal.svg?raw'
 
-const { alerts, alerts24h } = useAlertStore()
-const { loadAllAlerts, uploadAlert } = useS3Activity()
-const s3Loaded = ref(false)
+const { alerts, alerts24h, initFromS3 } = useAlertStore()
 
-// On mount: load from S3 and push any local-only alerts up
-onMounted(async () => {
-  try {
-    const s3Alerts  = await loadAllAlerts()
-    const s3Ids     = new Set(s3Alerts.map(a => a.id))
-    const localOnly = alerts.value.filter(a => !s3Ids.has(a.id))
-
-    // Push local-only to S3
-    localOnly.forEach(a => uploadAlert(a))
-
-    // Merge: S3 is source of truth
-    if (s3Alerts.length) {
-      const merged = [...s3Alerts, ...localOnly]
-        .filter((a, i, arr) => arr.findIndex(x => x.id === a.id) === i)
-        .sort((a, b) => b.timestamp.localeCompare(a.timestamp))
-      // Inject into the store's reactive ref directly
-      useAlertStore().replaceAll(merged)
-    }
-  } catch { /* silent — local data still shown */ }
-  finally { s3Loaded.value = true }
-})
+// Load alerts from S3 on mount — replaces local data with S3 source of truth
+onMounted(() => { initFromS3() })
 
 const recentAlerts = computed(() => alerts.value.slice(0, 8))
 const count24h     = computed(() => alerts24h.value.length)
