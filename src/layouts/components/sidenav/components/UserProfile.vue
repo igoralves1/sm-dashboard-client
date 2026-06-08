@@ -22,19 +22,19 @@
 
         <template v-for="(item, idx) in userDropdownItems" :key="idx">
           <BDropdownHeader v-if="item.isHeader" class="noti-title">
-            <h6 class="text-overflow m-0">{{ tDropdown(item.label) }}</h6>
+            <h6 class="text-overflow m-0">{{ item.label }}</h6>
           </BDropdownHeader>
 
           <BDropdownDivider v-else-if="item.isDivider" />
 
           <button
-            v-else-if="item.label === 'Log Out'"
+            v-else-if="item.url === '#' && item.class?.includes('danger')"
             class="dropdown-item d-flex align-items-center"
             :class="item.class"
             @click="handleLogout"
           >
             <Icon v-if="item.icon" :icon="item.icon" class="me-2 fs-17 align-middle" />
-            <span class="align-middle">{{ t('nav.logout') }}</span>
+            <span class="align-middle">{{ item.label }}</span>
           </button>
 
           <RouterLink
@@ -44,7 +44,7 @@
             :class="item.class"
           >
             <Icon v-if="item.icon" :icon="item.icon" class="me-2 fs-17 align-middle" />
-            <span class="align-middle">{{ tDropdown(item.label) }}</span>
+            <span class="align-middle">{{ item.label }}</span>
           </RouterLink>
         </template>
       </BDropdown>
@@ -55,8 +55,9 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
 import { useRouter } from 'vue-router'
+import { computed } from 'vue'
 import user2 from '@/assets/images/users/user-2.jpg'
-import { userDropdownItems } from '@/layouts/components/data'
+import { getUserDropdownItems } from '@/layouts/components/data'
 import { useAuthStore } from '@/stores/auth.ts'
 import { useI18n } from 'vue-i18n'
 
@@ -64,20 +65,7 @@ const auth = useAuthStore()
 const router = useRouter()
 const { t } = useI18n()
 
-const DROPDOWN_MAP: Record<string, string> = {
-  'Bem-vindo de volta!': 'nav.welcome_back',
-  'Meu Perfil': 'nav.my_profile',
-  'Notificações de Sensores': 'nav.sensor_notifications',
-  'Meu Condomínio': 'nav.my_building',
-  'Configurações da Conta': 'nav.account_settings',
-  'Central de Suporte': 'nav.support',
-  'Bloquear Tela': 'nav.lock_screen',
-  'Log Out': 'nav.logout',
-}
-function tDropdown(label: string | undefined) {
-  if (!label) return ''
-  return DROPDOWN_MAP[label] ? t(DROPDOWN_MAP[label]) : label
-}
+const userDropdownItems = computed(() => getUserDropdownItems(t))
 
 function handleLogout() {
   auth.logout()

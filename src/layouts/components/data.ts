@@ -9,51 +9,21 @@ type UserDropdownItemType = {
   class?: string
 }
 
-export const userDropdownItems: UserDropdownItemType[] = [
-  {
-    label: 'Bem-vindo de volta!',
-    isHeader: true,
-  },
-  {
-    label: 'Meu Perfil',
-    icon: 'tabler:user-circle',
-    url: '#',
-  },
-  {
-    label: 'Notificações de Sensores',
-    icon: 'tabler:bell-ringing',
-    url: '#',
-  },
-  {
-    label: 'Meu Condomínio',
-    icon: 'tabler:building',
-    url: '#',
-  },
-  {
-    label: 'Configurações da Conta',
-    icon: 'tabler:settings-2',
-    url: '#',
-  },
-  {
-    label: 'Central de Suporte',
-    icon: 'tabler:headphones',
-    url: '#',
-  },
-  {
-    isDivider: true,
-  },
-  {
-    label: 'Bloquear Tela',
-    icon: 'tabler:lock',
-    url: '/auth-1/lock-screen',
-  },
-  {
-    label: 'Log Out',
-    icon: 'tabler:logout-2',
-    url: '#',
-    class: 'text-danger fw-semibold',
-  },
-]
+export function getUserDropdownItems(t: (k: string) => string): UserDropdownItemType[] {
+  return [
+    { label: t('nav.welcome_back'), isHeader: true },
+    { label: t('nav.my_profile'),            icon: 'tabler:user-circle', url: '#' },
+    { label: t('nav.sensor_notifications'),  icon: 'tabler:bell-ringing', url: '#' },
+    { label: t('nav.my_building'),           icon: 'tabler:building', url: '#' },
+    { label: t('nav.account_settings'),      icon: 'tabler:settings-2', url: '#' },
+    { label: t('nav.support'),               icon: 'tabler:headphones', url: '#' },
+    { isDivider: true },
+    { label: t('nav.lock_screen'),           icon: 'tabler:lock', url: '/auth-1/lock-screen' },
+    { label: t('nav.logout'),                icon: 'tabler:logout-2', url: '#', class: 'text-danger fw-semibold' },
+  ]
+}
+/** @deprecated use getUserDropdownItems(t) */
+export const userDropdownItems: UserDropdownItemType[] = []
 
 export const menuItems: MenuItemType[] = [
     { key: 'menu', label: 'Menu', isTitle: true },
