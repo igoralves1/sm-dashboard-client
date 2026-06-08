@@ -3,8 +3,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
 import * as d3 from 'd3'
+import { useI18n } from 'vue-i18n'
+
+const { t, locale } = useI18n()
 
 const container = ref<HTMLDivElement | null>(null)
 let resizeObserver: ResizeObserver | null = null
@@ -28,7 +31,7 @@ const LEG_ROW_H = 26   // px per legend row
 const LEG_GAP   = 4
 const LEG_COLS  = 2
 
-function draw(el: HTMLDivElement) {
+function draw(el: HTMLDivElement, avgLabel?: string) {
   el.innerHTML = ''
   const totalW = el.getBoundingClientRect().width
   if (totalW === 0) return
@@ -73,7 +76,7 @@ function draw(el: HTMLDivElement) {
     .attr('text-anchor', 'middle').attr('dy', '1.1em')
     .attr('fill', 'var(--bs-secondary-color)')
     .style('font-size', `${radius * 0.12}px`)
-    .text('média geral')
+    .text(avgLabel ?? t('dashboard.avg_general'))
 
   // Slices
   const slices = donutG.append('g').selectAll('path')
@@ -109,7 +112,7 @@ function draw(el: HTMLDivElement) {
     .on('mouseleave', function() {
       d3.select(this).transition().duration(140).attr('d', arc as any)
       cvVal.text(`${avg}%`)
-      cvLbl.text('média geral')
+      cvLbl.text(t('dashboard.avg_general'))
       tip.style('display','none')
     })
 
@@ -220,6 +223,9 @@ onMounted(() => {
   resizeObserver.observe(container.value)
 })
 onUnmounted(() => resizeObserver?.disconnect())
+
+// Redraw when locale switches so D3-rendered text updates
+watch(locale, () => { if (container.value) draw(container.value) })
 </script>
 
 <style scoped>
