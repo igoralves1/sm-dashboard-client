@@ -42,11 +42,48 @@ const props = defineProps<PropsType>()
 const { t } = useI18n()
 
 const NAV_MAP: Record<string, string> = {
+  // Portuguese labels
   'Usuários': 'nav.users', 'Contatos': 'nav.contacts',
   'Funções': 'nav.roles', 'Permissões': 'nav.permissions',
   'Atividade': 'nav.activity', 'Alertas': 'nav.alerts',
   'Dashboard': 'nav.dashboard', 'Monitoramento': 'nav.monitoring',
   'Dashboards': 'nav.dashboard',
+  // English labels
+  'Users': 'nav.users', 'Contacts': 'nav.contacts',
+  'Roles': 'nav.roles', 'Permissions': 'nav.permissions',
+  'Activity': 'nav.activity', 'Alerts': 'nav.alerts',
+  'Monitoring': 'nav.monitoring',
+  // App items
+  'Landing Page': 'nav.landing_page',
+  'Ecommerce': 'nav.ecommerce',
+  'Email': 'nav.email',
+  'Projects': 'nav.projects',
+  'File Manager': 'nav.file_manager',
+  'Chat': 'nav.chat',
+  'Calendar': 'nav.calendar',
+  'Invoice': 'nav.invoice',
+  'Other Apps': 'nav.other_apps',
+  // Custom pages
+  'Pages': 'nav.pages',
+  'Miscellaneous': 'nav.miscellaneous',
+  'Authentication': 'nav.authentication',
+  'Error Pages': 'nav.error_pages',
+  // Layouts
+  'Layout Options': 'nav.layout_options',
+  'Sidebars': 'nav.sidebars',
+  'Topbars': 'nav.topbars',
+  // Components
+  'Base UI': 'nav.base_ui',
+  'Widgets': 'nav.widgets',
+  'Metrics': 'nav.metrics',
+  'Graphs': 'nav.graphs',
+  'Forms': 'nav.forms',
+  'Tables': 'nav.tables',
+  'Icons': 'nav.icons',
+  'Maps': 'nav.maps',
+  // Menu items
+  'Menu Levels': 'nav.menu_levels',
+  'Disabled Menu': 'nav.disabled_menu',
 }
 function tLabel(label: string | undefined) {
   if (!label) return ''
