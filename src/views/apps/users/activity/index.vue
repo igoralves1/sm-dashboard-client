@@ -68,6 +68,77 @@
         </BCol>
       </BRow>
 
+      <!-- ═══ COGNITO USERS PANEL ═══ -->
+      <BCard no-body class="mb-3">
+        <div class="cog-header" @click="cognitoOpen = !cognitoOpen">
+          <div class="d-flex align-items-center gap-2">
+            <Icon icon="tabler:shield-lock" width="16" class="text-primary" />
+            <span class="fw-semibold fs-sm">Usuários Cognito</span>
+            <span v-if="cognitoUsers.length" class="cog-badge">{{ cognitoUsers.length }}</span>
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            <span v-if="cognitoLoading" class="text-muted fs-xs d-flex align-items-center gap-1">
+              <Icon icon="tabler:loader-2" width="13" class="spin" /> Carregando…
+            </span>
+            <span v-if="cognitoError" class="text-danger fs-xs">{{ cognitoError }}</span>
+            <Icon :icon="cognitoOpen ? 'tabler:chevron-up' : 'tabler:chevron-down'" width="16" class="text-muted" />
+          </div>
+        </div>
+        <div v-if="cognitoOpen" class="cog-body">
+          <div v-if="!cognitoUsers.length && !cognitoLoading" class="cog-empty">Nenhum usuário encontrado.</div>
+          <table v-else class="cog-table">
+            <thead>
+              <tr>
+                <th>Email</th>
+                <th>Status</th>
+                <th>Ativo</th>
+                <th>Senha definida</th>
+                <th>Criado em</th>
+                <th>Última modificação</th>
+                <th>Sessões</th>
+                <th>Último acesso</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="u in cognitoUsers" :key="u.username">
+                <td>
+                  <div class="d-flex align-items-center gap-2">
+                    <div class="cog-avatar">{{ u.email[0]?.toUpperCase() }}</div>
+                    <span class="cog-email">{{ u.email }}</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="cog-status" :class="`cog-status--${u.status.toLowerCase()}`">
+                    <Icon :icon="u.status === 'CONFIRMED' ? 'tabler:circle-check' : 'tabler:clock-exclamation'" width="12" />
+                    {{ u.status === 'CONFIRMED' ? 'Confirmado' : u.status === 'FORCE_CHANGE_PASSWORD' ? 'Aguardando senha' : u.status }}
+                  </span>
+                </td>
+                <td>
+                  <span class="cog-bool" :class="u.enabled ? 'cog-bool--yes' : 'cog-bool--no'">
+                    <Icon :icon="u.enabled ? 'tabler:check' : 'tabler:x'" width="12" />
+                    {{ u.enabled ? 'Sim' : 'Não' }}
+                  </span>
+                </td>
+                <td>
+                  <span class="cog-bool" :class="u.passwordSet ? 'cog-bool--yes' : 'cog-bool--no'">
+                    <Icon :icon="u.passwordSet ? 'tabler:lock-check' : 'tabler:lock-open'" width="12" />
+                    {{ u.passwordSet ? 'Sim' : 'Pendente' }}
+                  </span>
+                </td>
+                <td class="cog-date">{{ fmtFull(u.createdAt) }}</td>
+                <td class="cog-date">{{ fmtFull(u.updatedAt) }}</td>
+                <td>
+                  <span class="cog-sessions">{{ sessionsByUser(u.email).length }}</span>
+                </td>
+                <td class="cog-date">
+                  {{ sessionsByUser(u.email)[0]?.enteredAt ? fmtTime(sessionsByUser(u.email)[0].enteredAt) : '—' }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </BCard>
+
       <!-- User selector tabs -->
       <BCard no-body class="mb-3">
         <div class="user-tabs">
@@ -380,9 +451,30 @@ import { Icon } from '@iconify/vue'
 import MainLayout from '@/layouts/MainLayout.vue'
 import { useSessionTracker, type PageSession } from '@/composables/useSessionTracker'
 import { useS3Activity } from '@/composables/useS3Activity'
+import { useCognitoUsers, type CognitoUser } from '@/composables/useCognitoUsers'
 
 const { getSessions, clear } = useSessionTracker()
 const { loadAllSessions, uploadSession } = useS3Activity()
+const { listUsers } = useCognitoUsers()
+
+// ── Cognito panel ────────────────────────────────────────────────────────────
+const cognitoOpen    = ref(false)
+const cognitoUsers   = ref<CognitoUser[]>([])
+const cognitoLoading = ref(false)
+const cognitoError   = ref('')
+
+watch(cognitoOpen, async (open) => {
+  if (!open || cognitoUsers.value.length) return   // already loaded
+  cognitoLoading.value = true
+  cognitoError.value   = ''
+  try {
+    cognitoUsers.value = await listUsers()
+  } catch (e: any) {
+    cognitoError.value = e?.message ?? 'Erro ao carregar usuários'
+  } finally {
+    cognitoLoading.value = false
+  }
+})
 
 const sessions     = ref<PageSession[]>(getSessions())
 const expandedId   = ref<string | null>(null)
@@ -556,6 +648,59 @@ function fmtFull(iso: string) {
 @keyframes spin  { to { transform: rotate(360deg) } }
 @keyframes pulse { 0%,100% { transform: scale(1); opacity:.8 } 50% { transform: scale(1.6); opacity:0 } }
 .spin  { animation: spin 1s linear infinite; display: inline-block; }
+
+/* ── Cognito panel ──────────────────────────────────────────────────────── */
+.cog-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px; cursor: pointer; user-select: none;
+  border-radius: var(--bs-card-border-radius, 8px);
+}
+.cog-header:hover { background: var(--bs-tertiary-bg, #f8f9fa); }
+.cog-badge {
+  background: #0d6efd; color: #fff;
+  font-size: 0.68rem; font-weight: 700;
+  padding: 1px 7px; border-radius: 20px;
+}
+.cog-body { padding: 0 16px 16px; overflow-x: auto; }
+.cog-empty { color: var(--bs-secondary-color); font-size: 0.85rem; padding: 8px 0; }
+.cog-table {
+  width: 100%; border-collapse: collapse; font-size: 0.8rem;
+  white-space: nowrap;
+}
+.cog-table th {
+  padding: 7px 12px; text-align: left; font-weight: 600; font-size: 0.72rem;
+  text-transform: uppercase; letter-spacing: .04em;
+  color: var(--bs-secondary-color);
+  border-bottom: 1px solid var(--bs-border-color, #dee2e6);
+}
+.cog-table td { padding: 9px 12px; border-bottom: 1px solid var(--bs-border-color, #dee2e6); vertical-align: middle; }
+.cog-table tbody tr:last-child td { border-bottom: none; }
+.cog-table tbody tr:hover td { background: var(--bs-tertiary-bg, #f8f9fa); }
+
+.cog-avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: #e8f0fe; color: #1a56db;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem; font-weight: 700; flex-shrink: 0;
+}
+.cog-email { font-weight: 500; }
+.cog-date  { color: var(--bs-secondary-color); font-size: 0.75rem; }
+.cog-sessions { font-weight: 700; color: #0d6efd; }
+
+.cog-status {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 0.72rem; font-weight: 600; padding: 2px 8px; border-radius: 20px;
+}
+.cog-status--confirmed          { background: #d1fae5; color: #065f46; }
+.cog-status--force_change_password { background: #fef3c7; color: #92400e; }
+.cog-status--unconfirmed        { background: #fee2e2; color: #991b1b; }
+
+.cog-bool {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-size: 0.72rem; font-weight: 600; padding: 2px 7px; border-radius: 20px;
+}
+.cog-bool--yes { background: #d1fae5; color: #065f46; }
+.cog-bool--no  { background: #fee2e2; color: #991b1b; }
 
 .stat-icon--teal { background: #e0faf6 !important; color: #26b8a5 !important; }
 .online-pulse {
