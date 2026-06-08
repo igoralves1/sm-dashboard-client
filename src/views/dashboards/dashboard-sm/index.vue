@@ -39,12 +39,14 @@
 
     <!-- ═══ CONTEXT BANNER ═══ -->
     <div class="context-banner">
-      <div class="context-banner__grid">
+      <button class="context-banner__toggle" @click="bannerOpen = !bannerOpen">
+        <span class="context-banner__dot"></span>
+        Sistema Ativo · Estado do Tocantins &nbsp;·&nbsp; Monitoramento Hídrico em Tempo Real
+        <span class="context-banner__chevron" :class="{ 'context-banner__chevron--open': bannerOpen }">▾</span>
+      </button>
+      <div class="context-banner__grid" v-show="bannerOpen">
 
         <div class="context-banner__lead">
-          <div class="context-banner__eyebrow">
-            <span class="context-banner__dot"></span>Sistema Ativo · Estado do Tocantins
-          </div>
           <h2 class="context-banner__title">
             Monitoramento Hídrico em Tempo Real
           </h2>
@@ -235,6 +237,8 @@ const levelThresholds = [
   { value: 100, color: '#73bf69', dash: '6,3' },
 ]
 
+const bannerOpen = ref(false)   // collapsed by default
+
 // ── Auto-refresh every 1 min with countdown ──
 const REFRESH_SECS = 300
 const secondsLeft = ref(REFRESH_SECS)
@@ -262,6 +266,20 @@ onUnmounted(() => {
 
 <style scoped>
 /* ── Context Banner ── */
+.context-banner__toggle {
+  width: 100%; display: flex; align-items: center; gap: 10px;
+  background: none; border: none; cursor: pointer; padding: 0 0 4px;
+  font-size: 12px; font-weight: 600; letter-spacing: .07em;
+  text-transform: uppercase; color: #26b8a5;
+  text-align: left;
+}
+.context-banner__toggle:hover { color: #4dd0be; }
+.context-banner__chevron {
+  margin-left: auto; font-size: 16px; transition: transform .25s;
+  display: inline-block;
+}
+.context-banner__chevron--open { transform: rotate(180deg); }
+
 .context-banner {
   margin: 0 16px 8px;
   padding: 28px 32px;
@@ -274,6 +292,7 @@ onUnmounted(() => {
   grid-template-columns: 1fr 2fr;
   gap: 32px;
   align-items: start;
+  margin-top: 20px;
 }
 @media (max-width: 900px) {
   .context-banner__grid { grid-template-columns: 1fr; }
