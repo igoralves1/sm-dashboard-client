@@ -37,6 +37,68 @@
       </span>
     </div>
 
+    <!-- ═══ CONTEXT BANNER ═══ -->
+    <div class="context-banner">
+      <div class="context-banner__grid">
+
+        <div class="context-banner__lead">
+          <div class="context-banner__eyebrow">
+            <span class="context-banner__dot"></span>Sistema Ativo · Estado do Tocantins
+          </div>
+          <h2 class="context-banner__title">
+            Monitoramento Hídrico em Tempo Real
+          </h2>
+          <p class="context-banner__desc">
+            Plataforma de supervisão contínua dos sistemas de abastecimento de água dos municípios de
+            <strong>Silvanópolis</strong> e <strong>Miranorte</strong>, no Estado do Tocantins.
+            Dados coletados por sensores IoT instalados nos reservatórios e nas estações de bombeamento
+            são transmitidos e processados em tempo real, permitindo uma visão precisa e atualizada
+            do estado operacional de toda a infraestrutura hídrica municipal.
+          </p>
+        </div>
+
+        <div class="context-banner__cards">
+          <div class="context-banner__card">
+            <div class="context-banner__card-icon">🏙️</div>
+            <div class="context-banner__card-title">Cidade Inteligente 4.0</div>
+            <div class="context-banner__card-text">
+              Integrado ao conceito de Smart City 4.0, este sistema conecta infraestrutura física
+              a uma camada digital de inteligência — sensores, telemetria e análise em tempo real —
+              para tornar a gestão pública mais eficiente, transparente e responsiva.
+            </div>
+          </div>
+          <div class="context-banner__card">
+            <div class="context-banner__card-icon">📊</div>
+            <div class="context-banner__card-title">Decisão Baseada em Dados</div>
+            <div class="context-banner__card-text">
+              Gestores municipais e equipes técnicas acompanham níveis de reservatório, vazão
+              das bombas e produção diária sem depender de vistorias presenciais — reduzindo
+              custos operacionais e tempo de resposta a falhas ou quedas de pressão.
+            </div>
+          </div>
+          <div class="context-banner__card">
+            <div class="context-banner__card-icon">⚡</div>
+            <div class="context-banner__card-title">Resposta Imediata a Incidentes</div>
+            <div class="context-banner__card-text">
+              Anomalias nos padrões de consumo ou falhas em bombas são detectadas automaticamente.
+              A equipe é alertada em tempo real, podendo agir antes que o desabastecimento
+              afete a população — garantindo continuidade no serviço essencial de água tratada.
+            </div>
+          </div>
+          <div class="context-banner__card">
+            <div class="context-banner__card-icon">🌱</div>
+            <div class="context-banner__card-title">Sustentabilidade e Eficiência</div>
+            <div class="context-banner__card-text">
+              O controle preciso do bombeamento reduz o consumo de energia elétrica e o desperdício
+              hídrico. Com dados históricos e projeções de tendência, a gestão pode planejar
+              manutenções preventivas e investimentos com base em evidências concretas.
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
     <!-- ═══ SILVANÓPOLIS ═══ -->
     <div class="section-header">
       <span class="section-header__icon">◈</span>
@@ -194,6 +256,77 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+/* ── Context Banner ── */
+.context-banner {
+  margin: 0 16px 8px;
+  padding: 28px 32px;
+  background: linear-gradient(135deg, #111620 0%, #0e1520 100%);
+  border: 1px solid #1e2a3a;
+  border-radius: 12px;
+}
+.context-banner__grid {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 32px;
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .context-banner__grid { grid-template-columns: 1fr; }
+}
+.context-banner__eyebrow {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 11px; font-weight: 600; letter-spacing: .08em;
+  text-transform: uppercase; color: #26b8a5; margin-bottom: 12px;
+}
+.context-banner__dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: #26b8a5;
+  box-shadow: 0 0 6px #26b8a5;
+  animation: dotPulse 2s ease-in-out infinite;
+  flex-shrink: 0;
+}
+@keyframes dotPulse {
+  0%,100% { opacity: 1; } 50% { opacity: .4; }
+}
+.context-banner__title {
+  font-size: 22px; font-weight: 700; color: #e8eaf0;
+  margin: 0 0 14px; line-height: 1.25;
+}
+.context-banner__desc {
+  font-size: 13.5px; line-height: 1.7; color: #8a93a8; margin: 0;
+}
+.context-banner__desc strong { color: #c8d0e0; }
+
+.context-banner__cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+@media (max-width: 600px) {
+  .context-banner__cards { grid-template-columns: 1fr; }
+}
+.context-banner__card {
+  background: #141922;
+  border: 1px solid #1e2a3a;
+  border-radius: 10px;
+  padding: 16px 18px;
+  transition: border-color .2s, transform .2s;
+}
+.context-banner__card:hover {
+  border-color: #2a3f5f;
+  transform: translateY(-2px);
+}
+.context-banner__card-icon {
+  font-size: 22px; margin-bottom: 8px; line-height: 1;
+}
+.context-banner__card-title {
+  font-size: 12.5px; font-weight: 700; color: #c8d4e8;
+  margin-bottom: 6px; letter-spacing: .02em;
+}
+.context-banner__card-text {
+  font-size: 12px; line-height: 1.65; color: #6a7590;
+}
+
 /* ── Base ── */
 .dashboard-sm {
   padding: 0;
