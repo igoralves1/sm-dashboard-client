@@ -6,15 +6,15 @@
       <div class="chart-legend">
         <span class="legend-item">
           <span class="legend-dot" style="background:#e84040"></span>
-          <span class="legend-text">Crítico &lt; 50%</span>
+          <span class="legend-text">{{ t('monitoring.level_critical') }}</span>
         </span>
         <span class="legend-item">
           <span class="legend-dot" style="background:#f58b06"></span>
-          <span class="legend-text">Alerta 50–80%</span>
+          <span class="legend-text">{{ t('monitoring.level_alert') }}</span>
         </span>
         <span class="legend-item">
           <span class="legend-dot" style="background:#73bf69"></span>
-          <span class="legend-text">Normal &gt; 80%</span>
+          <span class="legend-text">{{ t('monitoring.level_normal') }}</span>
         </span>
       </div>
     </div>
@@ -26,7 +26,7 @@
         <div class="tt-time"></div>
         <div class="tt-row">
           <span class="tt-dot"></span>
-          <span class="tt-label">Nível</span>
+          <span class="tt-label">{{ t('monitoring.level_label') }}</span>
           <span class="tt-value"></span>
         </div>
       </div>
@@ -36,6 +36,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import * as d3 from 'd3'
 
 interface DataPoint { time: Date; value: number }
@@ -48,6 +49,7 @@ const props = defineProps<{
   title?: string
 }>()
 
+const { t, locale } = useI18n()
 const containerRef = ref<HTMLDivElement | null>(null)
 const tooltipRef   = ref<HTMLDivElement | null>(null)
 let resizeObserver: ResizeObserver
@@ -131,7 +133,7 @@ function draw() {
     .attr('text-anchor', 'middle')
     .attr('fill', '#666')
     .attr('font-size', '10px')
-    .text('Hora do dia')
+    .text(t('monitoring.hour_of_day'))
 
   // ── Tooltip overlay ──────────────────────────────────────────────────────
   const bisect = d3.bisector((d: DataPoint) => d.time).left
@@ -199,6 +201,7 @@ onMounted(() => {
 })
 onUnmounted(() => resizeObserver?.disconnect())
 watch(() => props.data, draw, { deep: true })
+watch(locale, draw)
 </script>
 
 <style scoped>

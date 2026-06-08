@@ -7,14 +7,14 @@
         <img src="@/assets/images/pranalogototal.svg" alt="prana" class="top-bar__logo" />
         <div class="top-bar__divider"></div>
         <div class="top-bar__meta">
-          <span class="top-bar__meta-label">Monitoramento IoT em Tempo Real</span>
+          <span class="top-bar__meta-label">{{ t('monitoring.iot_realtime') }}</span>
           <span class="top-bar__meta-status">
             <span v-if="loading" class="status-dot loading"></span>
             <span v-else-if="error" class="status-dot error"></span>
             <span v-else class="status-dot ok"></span>
-            <span v-if="loading" class="status-text">Carregando...</span>
+            <span v-if="loading" class="status-text">{{ t('monitoring.loading') }}</span>
             <span v-else-if="error" class="status-text text-danger">{{ error }}</span>
-            <span v-else class="status-text">Atualizado às {{ lastUpdated }} · {{ getSnapshotCount() }} snapshots</span>
+            <span v-else class="status-text">{{ t('monitoring.updated_at') }} {{ lastUpdated }} · {{ getSnapshotCount() }} {{ t('monitoring.snapshots') }}</span>
           </span>
         </div>
       </div>
@@ -33,7 +33,7 @@
     <div v-if="rateLimited" class="rate-limit-alert">
       <span class="rate-limit-icon">⚠</span>
       <span class="rate-limit-text">
-        Limite de queries alcançado — aguarde {{ rateLimitMins }} min ou contacte o administrador.
+        {{ t('monitoring.rate_limit', { mins: rateLimitMins }) }}
       </span>
     </div>
 
@@ -91,7 +91,7 @@
           <TankGauge
             :value="silvanopolis.level"
             :size="200"
-            title="Porcentagem de Preenchimento do Nível de Água · RAP01 · Silvanópolis"
+            :title="t('monitoring.tank_title_sil')"
           />
         </div>
       </div>
@@ -101,7 +101,7 @@
           <LevelTimeSeries
             :data="silvanopolis.levelSeries"
             :thresholds="levelThresholds"
-            title="Porcentagem de Preenchimento do Nível de Água · RAP01 · Silvanópolis"
+            :title="t('monitoring.level_title_sil')"
           />
         </div>
       </div>
@@ -110,7 +110,7 @@
         <div class="chart-card chart-card--map" style="min-height:260px">
           <div class="chart-title">
             <span class="chart-title__dot" style="background:#4da6ff"></span>
-            Localização do Site
+            {{ t('monitoring.site_location') }}
           </div>
           <SiteMap :markers="siteMarkers" style="height:calc(100% - 30px);border-radius:6px;overflow:hidden" />
         </div>
@@ -127,7 +127,7 @@
           <ProductionBar
             :data="silvanopolis.production24h"
             x-field="hour"
-            title="Produção em m³/h nas últimas 24h · PTPs · Silvanópolis"
+            :title="t('monitoring.production_24h_sil')"
           />
         </div>
       </div>
@@ -136,7 +136,7 @@
           <ProductionBar
             :data="silvanopolis.productionDaily"
             x-field="day"
-            title="Produção dos últimos 5 dias em m³ · PTPs · Silvanópolis"
+            :title="t('monitoring.production_daily_sil')"
           />
         </div>
       </div>
@@ -156,7 +156,7 @@
           <TankGauge
             :value="miranorte.level"
             :size="200"
-            title="Porcentagem de Preenchimento do Nível de Água · RAP01 · Miranorte"
+            :title="t('monitoring.tank_title_mir')"
           />
         </div>
       </div>
@@ -166,7 +166,7 @@
           <LevelTimeSeries
             :data="miranorte.levelSeries"
             :thresholds="levelThresholds"
-            title="Porcentagem de Preenchimento do Nível de Água · RAP01 · Miranorte"
+            :title="t('monitoring.level_title_mir')"
           />
         </div>
       </div>
@@ -174,7 +174,7 @@
 
     <!-- Footer -->
     <div class="dashboard-footer">
-      <span>prana · AIIoT · Monitoramento em Tempo Real</span>
+      <span>{{ t('monitoring.footer_text') }}</span>
     </div>
 
   </div>

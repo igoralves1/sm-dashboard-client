@@ -242,6 +242,138 @@ See `.env.example` for the full list of `VITE_SENSOR_*` variable names.
 
 ---
 
+## Internationalization (i18n)
+
+The application is fully bilingual — **English (EN)** and **Portuguese (PT)** — powered by [vue-i18n v9](https://vue-i18n.intlify.dev/) in Composition API mode.
+
+### How locale is detected and stored
+
+```
+1. First visit
+   └─ Calls ipapi.co to detect country by IP
+      ├─ Brazil (BR) → PT
+      └─ Anywhere else → EN
+      Result cached in sessionStorage['prana_geo_v1']
+
+2. User manually switches flag (EN ↔ PT)
+   └─ Choice saved to localStorage['prana_locale_v1']
+      Persists across browser sessions
+
+3. On every page load
+   └─ localStorage checked first → overrides IP detection
+```
+
+### Runtime reactivity
+
+```
+useLocale() composable
+  └─ Module-level ref<Locale> (_locale)
+       └─ main.ts watches it → syncs to i18n.global.locale.value
+            └─ All t() calls in every component re-run instantly
+```
+
+### Locale files
+
+```
+src/locales/
+├── en.json   ← English (default)
+└── pt.json   ← Portuguese
+```
+
+Both files share identical key structure. Sections:
+
+| Section | Covers |
+|---|---|
+| `nav` | Sidebar menu, section headers, user dropdown |
+| `topbar` | Search, messages, notifications (all items + timestamps) |
+| `login` | Sign-in page copy, feature pills, status bar |
+| `new_password` | Forced password change page |
+| `dashboard` | Stat cards, charts, alerts, stat model text |
+| `monitoring` | Dashboard-SM page — IoT titles, chart labels, thresholds |
+| `megamenu` | Top megamenu header and all link items |
+| `data` | Timeline events, quarterly reports, project stats |
+| `activity` | User activity page — all sections, labels, empty states |
+
+### Adding a new translatable string
+
+1. Add the key to **both** `en.json` and `pt.json`:
+```json
+// en.json
+"my_section": {
+  "my_key": "My English text"
+}
+
+// pt.json
+"my_section": {
+  "my_key": "Meu texto em português"
+}
+```
+
+2. Use `t()` in the Vue component:
+```vue
+<script setup>
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
+</script>
+
+<template>
+  <p>{{ t('my_section.my_key') }}</p>
+</template>
+```
+
+### D3.js charts and locale switching
+
+D3 renders directly to the DOM — Vue template bindings do not apply to SVG text nodes. Every D3 chart that has translatable labels (axis labels, legend text) must redraw on locale change:
+
+```ts
+import { useI18n } from 'vue-i18n'
+const { t, locale } = useI18n()
+
+function draw() {
+  // ...
+  svg.append('text').text(t('monitoring.hour_of_day'))  // uses current locale
+}
+
+watch(locale, draw)  // redraw when user switches language
+```
+
+Components that follow this pattern: `LevelTimeSeries.vue`, `FlowTimeSeries.vue`, `ProductionBar.vue`, `DonutChart.vue`, `StackedAreaChart.vue`.
+
+### Static data arrays with i18n
+
+Arrays defined outside Vue components (e.g. in `data.ts`) cannot call `useI18n()`. Use getter functions that receive `t` as a parameter:
+
+```ts
+// data.ts
+export function getStatCards(t: (k: string) => string): StatCard[] {
+  return [
+    { title: t('dashboard.active_sensors_card'), ... },
+  ]
+}
+
+// component
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { getStatCards } from './data'
+
+const { t } = useI18n()
+const statCards = computed(() => getStatCards(t))
+// computed re-runs automatically when locale changes
+```
+
+### Unit system
+
+The locale also controls the measurement unit system:
+
+| Locale | Water unit | Energy unit | Currency |
+|---|---|---|---|
+| `en` | `gal` | `kWh` | `US$` |
+| `pt` | `m³` | `kWh` | `R$` |
+
+Keys: `dashboard.water_unit`, `dashboard.energy_unit`.
+
+---
+
 ## License
 
 This is an open source project licensed under the **Apache 2.0 License**, developed by **Dr. Igor Lemos Alves**.

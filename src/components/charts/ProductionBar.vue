@@ -2,7 +2,7 @@
   <div class="bar-wrapper">
     <!-- Header: title + legend -->
     <div class="chart-header">
-      <div class="chart-main-title">{{ title ?? 'Produção · PTPs · Silvanópolis' }}</div>
+      <div class="chart-main-title">{{ title ?? t('monitoring.production_title_fallback') }}</div>
       <div class="chart-legend">
         <span v-for="key in ptpKeys" :key="key" class="legend-item">
           <span class="legend-dot" :style="{ background: colorOf(key) }"></span>
@@ -35,7 +35,7 @@
           <span class="alert-text">
             {{ anomaly.detail }}
             <span :class="['alert-prob', `alert-prob--${anomaly.severity}`]">
-              Prob. em operação normal: {{ fmtP(anomaly.pValuePct / 100) }}
+              {{ t('monitoring.prob_normal_op') }} {{ fmtP(anomaly.pValuePct / 100) }}
             </span>
           </span>
         </div>
@@ -45,53 +45,31 @@
     <!-- Statistical model explanation (collapsible) -->
     <div v-if="computedAlerts.length" class="model-section">
       <button class="model-toggle" @click="showModel = !showModel">
-        {{ showModel ? '▾' : '▸' }} Modelo estatístico utilizado
+        {{ showModel ? '▾' : '▸' }} {{ t('dashboard.stat_model') }}
       </button>
       <div v-if="showModel" ref="mathRef" class="model-body">
-        <p class="model-intro">
-          Os diagnósticos acima são gerados por dois estágios complementares.
-          Para cada PTP, os parâmetros são calculados <em>independentemente</em>
-          usando apenas os valores daquela série.
-        </p>
+        <p class="model-intro">{{ t('monitoring.stat_intro_bar') }}</p>
 
-        <p class="model-subtitle">1 — Detecção de bomba desligada</p>
-        <p class="model-text">
-          Um valor \(x\) é classificado como <em>bomba desligada</em> se:
-        </p>
+        <p class="model-subtitle">{{ t('monitoring.stat_h1_bar') }}</p>
+        <p class="model-text">{{ t('monitoring.stat_p1_bar') }}</p>
         \[ x \;\leq\; \tau, \qquad \tau = 0{,}05 \cdot \max(x_i) \]
 
-        <p class="model-subtitle">2 — Limites IQR (valores em operação)</p>
-        <p class="model-text">
-          Os quartis e a cerca de Tukey definem os limites de controle:
-        </p>
+        <p class="model-subtitle">{{ t('dashboard.stat_model_h2') }}</p>
+        <p class="model-text">{{ t('dashboard.stat_model_p2') }}</p>
         \[
           L^{-} = Q_1 - 1{,}5 \cdot \text{IQR}, \qquad
           L^{+} = Q_3 + 1{,}5 \cdot \text{IQR}, \qquad
           \text{IQR} = Q_3 - Q_1
         \]
-        <p class="model-text">
-          Guarda adicional: o desvio relativo à mediana deve superar 30%
-          para evitar falsos positivos em séries muito estáveis:
-        </p>
+        <p class="model-text">{{ t('dashboard.stat_model_p2b') }}</p>
         \[ \frac{|x - \tilde{x}|}{\tilde{x}} \;>\; 0{,}30 \]
 
-        <p class="model-subtitle">3 — P-valor (gráfico de controle)</p>
-        <p class="model-text">
-          Para cada ponto anômalo calcula-se o z-score em relação à
-          distribuição normal dos valores em operação \((\mu,\,\sigma)\):
-        </p>
+        <p class="model-subtitle">{{ t('dashboard.stat_model_h3') }}</p>
+        <p class="model-text">{{ t('dashboard.stat_model_p3') }}</p>
         \[ z = \frac{x - \mu}{\sigma} \]
-        <p class="model-text">
-          O p-valor bicaudal é obtido via função de distribuição acumulada
-          normal \(\Phi\):
-        </p>
+        <p class="model-text">{{ t('dashboard.stat_model_p4') }}</p>
         \[ p = 2\,\bigl(1 - \Phi(|z|)\bigr), \qquad \Phi(z) = \frac{1}{2}\!\left[1 + \operatorname{erf}\!\left(\frac{z}{\sqrt{2}}\right)\right] \]
-        <p class="model-text">
-          Um p-valor baixo (ex.: \(p = 0{,}3\%\)) indica que há apenas
-          \(0{,}3\%\) de probabilidade de aquele valor ocorrer em condições
-          normais de operação — não identifica a causa, apenas sinaliza que
-          o valor <strong>não é esperado</strong>.
-        </p>
+        <p class="model-text" v-html="t('dashboard.stat_model_p5')"></p>
       </div>
     </div>
   </div>
@@ -99,10 +77,12 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch, computed, nextTick } from 'vue'
+import { useI18n } from 'vue-i18n'
 import * as d3 from 'd3'
 import { detectAnomalies, fmtP, type Anomaly } from '@/composables/useAnomalyDetection'
 import { useAlertStore } from '@/composables/useAlertStore'
 
+const { t, locale } = useI18n()
 const { ingestAnomalies } = useAlertStore()
 
 const props = defineProps<{
@@ -288,7 +268,7 @@ function draw() {
     .attr('y', margin.top + H + margin.bottom - 2)
     .attr('text-anchor', 'middle')
     .attr('fill', '#666').attr('font-size', '10px')
-    .text(props.xField === 'hour' ? 'Hora do dia' : 'Dia')
+    .text(props.xField === 'hour' ? t('monitoring.hour_of_day') : t('monitoring.day_label'))
 }
 
 onMounted(() => {
@@ -298,6 +278,7 @@ onMounted(() => {
 })
 onUnmounted(() => resizeObserver?.disconnect())
 watch(() => props.data, draw, { deep: true })
+watch(locale, draw)
 </script>
 
 <style scoped>

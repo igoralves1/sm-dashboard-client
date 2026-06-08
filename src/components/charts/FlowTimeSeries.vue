@@ -2,7 +2,7 @@
   <div class="flow-wrapper">
     <!-- Header: title + PTP legend -->
     <div class="chart-header">
-      <div class="chart-main-title">Vazão em M³/h · PTPs · Silvanópolis</div>
+      <div class="chart-main-title">{{ t('monitoring.flow_title') }}</div>
       <div class="chart-legend">
         <span v-for="s in data" :key="s.name" class="legend-item">
           <span class="legend-dot" :style="{ background: colorOf(s.name) }"></span>
@@ -27,10 +27,12 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import * as d3 from 'd3'
 
 interface Series { name: string; values: { time: Date; value: number }[] }
 const props = defineProps<{ data: Series[]; height?: number }>()
+const { t, locale } = useI18n()
 const containerRef = ref<HTMLDivElement | null>(null)
 const tooltipRef   = ref<HTMLDivElement | null>(null)
 let resizeObserver: ResizeObserver
@@ -108,7 +110,7 @@ function draw() {
     .attr('y', margin.top + H + margin.bottom - 2)
     .attr('text-anchor', 'middle')
     .attr('fill', '#666').attr('font-size', '10px')
-    .text('Hora do dia')
+    .text(t('monitoring.hour_of_day'))
 
   // ── Tooltip ──────────────────────────────────────────────────────────────
   const bisect = d3.bisector((d: { time: Date; value: number }) => d.time).left
@@ -170,6 +172,7 @@ onMounted(() => {
 })
 onUnmounted(() => resizeObserver?.disconnect())
 watch(() => props.data, draw, { deep: true })
+watch(locale, draw)
 </script>
 
 <style scoped>

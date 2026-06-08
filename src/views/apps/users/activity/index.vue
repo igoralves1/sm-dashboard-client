@@ -11,13 +11,13 @@
         <BCol xs="auto" class="d-flex gap-2 align-items-center flex-wrap">
           <span v-if="loading" class="text-muted fs-xs d-flex align-items-center gap-1">
             <Icon icon="tabler:loader-2" width="14" class="spin" />
-            {{ syncing ? `Enviando ${syncCount} sessões para S3…` : 'Carregando S3…' }}
+            {{ syncing ? t('activity.syncing', { count: syncCount }) : t('activity.loading_s3') }}
           </span>
           <span v-if="syncCount > 0 && !loading && !s3Error" class="text-success fs-xs d-flex align-items-center gap-1">
-            <Icon icon="tabler:circle-check" width="14" /> {{ syncCount }} sessões sincronizadas
+            <Icon icon="tabler:circle-check" width="14" /> {{ t('activity.sessions_synced', { count: syncCount }) }}
           </span>
           <span v-if="s3Error && !loading" class="text-danger fs-xs d-flex align-items-center gap-1">
-            <Icon icon="tabler:alert-circle" width="14" /> Erro ao acessar S3
+            <Icon icon="tabler:alert-circle" width="14" /> {{ t('activity.s3_error') }}
           </span>
           <button class="act-btn act-btn--ghost" :disabled="loading" @click="refresh">
             <Icon icon="tabler:refresh" width="15" /> {{ t('activity.refresh') }}
@@ -78,14 +78,14 @@
           </div>
           <div class="d-flex align-items-center gap-2">
             <span v-if="cognitoLoading" class="text-muted fs-xs d-flex align-items-center gap-1">
-              <Icon icon="tabler:loader-2" width="13" class="spin" /> Carregando…
+              <Icon icon="tabler:loader-2" width="13" class="spin" /> {{ t('activity.loading_cognito') }}
             </span>
             <span v-if="cognitoError" class="text-danger fs-xs">{{ cognitoError }}</span>
             <Icon :icon="cognitoOpen ? 'tabler:chevron-up' : 'tabler:chevron-down'" width="16" class="text-muted" />
           </div>
         </div>
         <div v-if="cognitoOpen" class="cog-body">
-          <div v-if="!cognitoUsers.length && !cognitoLoading" class="cog-empty">Nenhum usuário encontrado.</div>
+          <div v-if="!cognitoUsers.length && !cognitoLoading" class="cog-empty">{{ t('activity.no_users_found') }}</div>
           <table v-else class="cog-table">
             <thead>
               <tr>
@@ -150,7 +150,7 @@
           >
             <Icon v-if="u === 'Todos'" icon="tabler:layout-grid" width="13" />
             <Icon v-else icon="tabler:user-circle" width="13" />
-            {{ u === 'Todos' ? 'Todos' : u }}
+            {{ u === 'Todos' ? t('activity.all') : u }}
             <span class="user-tab-count">{{ u === 'Todos' ? sessions.length : sessionsByUser(u).length }}</span>
           </button>
         </div>
@@ -165,8 +165,8 @@
           <div class="user-hero-info">
             <div class="user-hero-name">{{ selectedUser }}</div>
             <div class="user-hero-meta">
-              <span><Icon icon="tabler:calendar" width="12" /> Primeiro acesso: {{ fmtFull(userStats.firstSeen) }}</span>
-              <span><Icon icon="tabler:clock" width="12" /> Último acesso: {{ fmtFull(userStats.lastSeen) }}</span>
+              <span><Icon icon="tabler:calendar" width="12" /> {{ t('activity.first_access') }} {{ fmtFull(userStats.firstSeen) }}</span>
+              <span><Icon icon="tabler:clock" width="12" /> {{ t('activity.last_access_label') }} {{ fmtFull(userStats.lastSeen) }}</span>
               <span v-if="userStats.lastGeo">
                 <Icon icon="tabler:map-pin" width="12" />
                 {{ userStats.lastGeo.city }}, {{ userStats.lastGeo.country }}
@@ -175,7 +175,7 @@
           </div>
           <div class="user-hero-status" :class="userStats.isOnline ? 'status--online' : 'status--offline'">
             <span class="status-dot"></span>
-            {{ userStats.isOnline ? 'Online agora' : 'Offline' }}
+            {{ userStats.isOnline ? t('activity.online_status') : t('activity.offline') }}
           </div>
         </div>
 
@@ -184,25 +184,25 @@
           <BCol sm="6" lg="3">
             <div class="stat-card stat-card--accent">
               <div class="stat-icon stat-icon--blue"><Icon icon="tabler:timeline" width="20" /></div>
-              <div><div class="stat-val">{{ userStats.totalSessions }}</div><div class="stat-label">Sessões totais</div></div>
+              <div><div class="stat-val">{{ userStats.totalSessions }}</div><div class="stat-label">{{ t('activity.total_sessions_user') }}</div></div>
             </div>
           </BCol>
           <BCol sm="6" lg="3">
             <div class="stat-card stat-card--accent">
               <div class="stat-icon stat-icon--green"><Icon icon="tabler:clock" width="20" /></div>
-              <div><div class="stat-val">{{ userStats.totalTime }}s</div><div class="stat-label">Tempo total no sistema</div></div>
+              <div><div class="stat-val">{{ userStats.totalTime }}s</div><div class="stat-label">{{ t('activity.total_time') }}</div></div>
             </div>
           </BCol>
           <BCol sm="6" lg="3">
             <div class="stat-card stat-card--accent">
               <div class="stat-icon stat-icon--orange"><Icon icon="tabler:pointer" width="20" /></div>
-              <div><div class="stat-val">{{ userStats.totalClicks }}</div><div class="stat-label">Cliques totais</div></div>
+              <div><div class="stat-val">{{ userStats.totalClicks }}</div><div class="stat-label">{{ t('activity.total_clicks_user') }}</div></div>
             </div>
           </BCol>
           <BCol sm="6" lg="3">
             <div class="stat-card stat-card--accent">
               <div class="stat-icon stat-icon--purple"><Icon icon="tabler:route" width="20" /></div>
-              <div><div class="stat-val">{{ userStats.uniquePages }}</div><div class="stat-label">Páginas distintas</div></div>
+              <div><div class="stat-val">{{ userStats.uniquePages }}</div><div class="stat-label">{{ t('activity.distinct_pages') }}</div></div>
             </div>
           </BCol>
         </BRow>
@@ -212,7 +212,7 @@
           <!-- IP & Geolocation history -->
           <BCol lg="4">
             <div class="detail-panel">
-              <div class="panel-title"><Icon icon="tabler:map-pin" width="14" /> IPs e Localização</div>
+              <div class="panel-title"><Icon icon="tabler:map-pin" width="14" /> {{ t('activity.ips_location') }}</div>
               <div class="ip-list">
                 <div v-for="(geo, ip) in userStats.geoByIp" :key="ip" class="ip-row">
                   <div class="ip-flag"><Icon icon="tabler:world" width="14" /></div>
@@ -224,7 +224,7 @@
                   <div class="ip-count">{{ geo.count }}×</div>
                 </div>
                 <div v-if="!Object.keys(userStats.geoByIp).length" class="panel-empty">
-                  Sem dados de localização
+                  {{ t('activity.no_location_data') }}
                 </div>
               </div>
             </div>
@@ -233,7 +233,7 @@
           <!-- Pages visited breakdown -->
           <BCol lg="4">
             <div class="detail-panel">
-              <div class="panel-title"><Icon icon="tabler:files" width="14" /> Páginas Visitadas</div>
+              <div class="panel-title"><Icon icon="tabler:files" width="14" /> {{ t('activity.pages_visited') }}</div>
               <div class="page-list">
                 <div v-for="p in userStats.pageBreakdown" :key="p.page" class="page-row">
                   <div class="page-path">{{ p.page }}</div>
@@ -245,7 +245,7 @@
                   </div>
                   <div class="page-time">ø {{ p.avgTime }}s</div>
                 </div>
-                <div v-if="!userStats.pageBreakdown.length" class="panel-empty">Sem dados</div>
+                <div v-if="!userStats.pageBreakdown.length" class="panel-empty">{{ t('activity.no_data') }}</div>
               </div>
             </div>
           </BCol>
@@ -253,7 +253,7 @@
           <!-- Top clicked elements -->
           <BCol lg="4">
             <div class="detail-panel">
-              <div class="panel-title"><Icon icon="tabler:pointer" width="14" /> Elementos Mais Clicados</div>
+              <div class="panel-title"><Icon icon="tabler:pointer" width="14" /> {{ t('activity.top_clicked') }}</div>
               <div class="click-list">
                 <div v-for="(c, i) in userStats.topClicks" :key="i" class="top-click-row">
                   <span class="top-click-rank">#{{ i + 1 }}</span>
@@ -263,7 +263,7 @@
                   </div>
                   <span class="top-click-count">{{ c.count }}×</span>
                 </div>
-                <div v-if="!userStats.topClicks.length" class="panel-empty">Nenhum clique registrado</div>
+                <div v-if="!userStats.topClicks.length" class="panel-empty">{{ t('activity.no_clicks_recorded') }}</div>
               </div>
             </div>
           </BCol>
@@ -271,7 +271,7 @@
 
         <!-- Session timeline -->
         <div class="detail-panel mb-3">
-          <div class="panel-title"><Icon icon="tabler:timeline" width="14" /> Histórico de Sessões</div>
+          <div class="panel-title"><Icon icon="tabler:timeline" width="14" /> {{ t('activity.session_history') }}</div>
           <div class="session-timeline">
             <div v-for="s in userStats.sessions" :key="s.id" class="stl-item" @click="toggle(s.id)">
               <div class="stl-left">
@@ -295,13 +295,13 @@
                 <div v-if="expandedId === s.id" class="stl-detail-body">
                   <div class="stl-detail-grid">
                     <div>
-                      <div class="detail-mini-title">Linha do tempo</div>
-                      <div class="tl-item"><span class="tl-dot tl-dot--green"></span><span class="tl-text">Entrou</span><span class="tl-ts">{{ fmtFull(s.enteredAt) }}</span></div>
-                      <div v-if="s.exitedAt" class="tl-item"><span class="tl-dot tl-dot--gray"></span><span class="tl-text">Saiu · {{ s.duration }}s</span><span class="tl-ts">{{ fmtFull(s.exitedAt) }}</span></div>
+                      <div class="detail-mini-title">{{ t('activity.timeline') }}</div>
+                      <div class="tl-item"><span class="tl-dot tl-dot--green"></span><span class="tl-text">{{ t('activity.entered') }}</span><span class="tl-ts">{{ fmtFull(s.enteredAt) }}</span></div>
+                      <div v-if="s.exitedAt" class="tl-item"><span class="tl-dot tl-dot--gray"></span><span class="tl-text">{{ t('activity.left_duration', { dur: s.duration }) }}</span><span class="tl-ts">{{ fmtFull(s.exitedAt) }}</span></div>
                       <div v-if="s.geo" class="tl-item mt-2"><span class="tl-dot" style="background:#6f42c1"></span><span class="tl-text">IP: <code style="font-size:0.68rem">{{ s.geo.ip }}</code> · {{ s.geo.city }}, {{ s.geo.country }}</span></div>
                     </div>
                     <div>
-                      <div class="detail-mini-title">Rastro do mouse ({{ s.mouseTrails.length }} amostras)</div>
+                      <div class="detail-mini-title">{{ t('activity.mouse_trail') }} ({{ s.mouseTrails.length }} {{ t('activity.samples') }})</div>
                       <div class="mouse-trail">
                         <div v-for="(m, i) in s.mouseTrails" :key="i" class="mouse-row">
                           <span class="mouse-t">+{{ m.t }}s</span>
@@ -309,18 +309,18 @@
                           <span class="mouse-pos">{{ m.x }},{{ m.y }}px</span>
                           <span class="mouse-el">{{ m.element }}</span>
                         </div>
-                        <div v-if="!s.mouseTrails.length" class="panel-empty">Sem dados</div>
+                        <div v-if="!s.mouseTrails.length" class="panel-empty">{{ t('activity.no_data') }}</div>
                       </div>
                     </div>
                     <div>
-                      <div class="detail-mini-title">Cliques ({{ s.clicks.length }})</div>
+                      <div class="detail-mini-title">{{ t('activity.clicks') }} ({{ s.clicks.length }})</div>
                       <div class="clicks-list">
                         <div v-for="(c, i) in s.clicks" :key="i" class="click-row">
                           <span class="click-t">+{{ c.t }}s</span>
                           <span class="click-el">{{ c.element }}</span>
                           <span v-if="c.text" class="click-text">"{{ c.text }}"</span>
                         </div>
-                        <div v-if="!s.clicks.length" class="panel-empty">Sem cliques</div>
+                        <div v-if="!s.clicks.length" class="panel-empty">{{ t('activity.no_clicks_recorded') }}</div>
                       </div>
                     </div>
                   </div>
@@ -357,17 +357,17 @@
               <div v-if="expandedId === s.id" class="session-body">
                 <!-- Device -->
                 <div class="detail-section">
-                  <div class="detail-title"><Icon icon="tabler:device-laptop" width="13" /> Dispositivo & Navegador</div>
+                  <div class="detail-title"><Icon icon="tabler:device-laptop" width="13" /> {{ t('activity.device_browser') }}</div>
                   <div v-if="s.device" class="detail-geo">
                     <div class="geo-row">
-                      <span class="geo-label">Tipo</span>
+                      <span class="geo-label">{{ t('activity.type') }}</span>
                       <span class="geo-val d-flex align-items-center gap-1">
                         <Icon :icon="s.device.type === 'mobile' ? 'tabler:device-mobile' : s.device.type === 'tablet' ? 'tabler:device-tablet' : 'tabler:device-laptop'" width="13" />
-                        {{ s.device.type === 'mobile' ? 'Celular' : s.device.type === 'tablet' ? 'Tablet' : 'Desktop' }}
+                        {{ s.device.type === 'mobile' ? t('activity.device_mobile') : s.device.type === 'tablet' ? t('activity.device_tablet') : t('activity.device_desktop') }}
                       </span>
                     </div>
-                    <div class="geo-row"><span class="geo-label">Navegador</span><span class="geo-val">{{ s.device.browser }}</span></div>
-                    <div class="geo-row"><span class="geo-label">Sistema</span><span class="geo-val">{{ s.device.os }}</span></div>
+                    <div class="geo-row"><span class="geo-label">{{ t('activity.browser') }}</span><span class="geo-val">{{ s.device.browser }}</span></div>
+                    <div class="geo-row"><span class="geo-label">{{ t('activity.os') }}</span><span class="geo-val">{{ s.device.os }}</span></div>
                     <div v-if="s.gps" class="geo-row">
                       <span class="geo-label">GPS</span>
                       <span class="geo-val">
@@ -379,32 +379,32 @@
                       </span>
                     </div>
                     <div v-else-if="s.device.type !== 'desktop'" class="geo-row">
-                      <span class="geo-label">GPS</span><span class="geo-val geo-val--muted">Não autorizado ou indisponível</span>
+                      <span class="geo-label">GPS</span><span class="geo-val geo-val--muted">{{ t('activity.gps_unavailable') }}</span>
                     </div>
                   </div>
-                  <div v-else class="detail-empty">Dispositivo não identificado</div>
+                  <div v-else class="detail-empty">{{ t('activity.device_unknown') }}</div>
                 </div>
                 <!-- Location / IP -->
                 <div class="detail-section">
-                  <div class="detail-title"><Icon icon="tabler:map-pin" width="13" /> Localização & IP</div>
+                  <div class="detail-title"><Icon icon="tabler:map-pin" width="13" /> {{ t('activity.location_ip') }}</div>
                   <div v-if="s.geo" class="detail-geo">
                     <div class="geo-row"><span class="geo-label">IP</span><code class="geo-val">{{ s.geo.ip }}</code></div>
-                    <div class="geo-row"><span class="geo-label">Cidade</span><span class="geo-val">{{ s.geo.city }}, {{ s.geo.region }}</span></div>
-                    <div class="geo-row"><span class="geo-label">País</span><span class="geo-val">{{ s.geo.country }}</span></div>
-                    <div class="geo-row"><span class="geo-label">Coordenadas (IP)</span><span class="geo-val">{{ s.geo.lat.toFixed(4) }}, {{ s.geo.lng.toFixed(4) }}</span></div>
+                    <div class="geo-row"><span class="geo-label">{{ t('activity.city') }}</span><span class="geo-val">{{ s.geo.city }}, {{ s.geo.region }}</span></div>
+                    <div class="geo-row"><span class="geo-label">{{ t('activity.country') }}</span><span class="geo-val">{{ s.geo.country }}</span></div>
+                    <div class="geo-row"><span class="geo-label">{{ t('activity.coordinates_ip') }}</span><span class="geo-val">{{ s.geo.lat.toFixed(4) }}, {{ s.geo.lng.toFixed(4) }}</span></div>
                   </div>
-                  <div v-else class="detail-empty">Localização não disponível</div>
+                  <div v-else class="detail-empty">{{ t('activity.location_unavailable') }}</div>
                 </div>
                 <div class="detail-section">
-                  <div class="detail-title"><Icon icon="tabler:timeline" width="13" /> Linha do tempo</div>
+                  <div class="detail-title"><Icon icon="tabler:timeline" width="13" /> {{ t('activity.timeline') }}</div>
                   <div class="timeline">
-                    <div class="tl-item tl-item--entry"><span class="tl-dot tl-dot--green"></span><span class="tl-text">Entrou na página</span><span class="tl-ts">{{ fmtFull(s.enteredAt) }}</span></div>
-                    <div v-if="s.exitedAt" class="tl-item"><span class="tl-dot tl-dot--gray"></span><span class="tl-text">Saiu · {{ s.duration }}s</span><span class="tl-ts">{{ fmtFull(s.exitedAt) }}</span></div>
-                    <div v-else class="tl-item"><span class="tl-dot tl-dot--pulse"></span><span class="tl-text tl-text--live">Em sessão agora</span></div>
+                    <div class="tl-item tl-item--entry"><span class="tl-dot tl-dot--green"></span><span class="tl-text">{{ t('activity.entered_page') }}</span><span class="tl-ts">{{ fmtFull(s.enteredAt) }}</span></div>
+                    <div v-if="s.exitedAt" class="tl-item"><span class="tl-dot tl-dot--gray"></span><span class="tl-text">{{ t('activity.left_duration', { dur: s.duration }) }}</span><span class="tl-ts">{{ fmtFull(s.exitedAt) }}</span></div>
+                    <div v-else class="tl-item"><span class="tl-dot tl-dot--pulse"></span><span class="tl-text tl-text--live">{{ t('activity.in_session') }}</span></div>
                   </div>
                 </div>
                 <div class="detail-section">
-                  <div class="detail-title"><Icon icon="tabler:brand-mouse" width="13" /> Rastro do mouse <span class="detail-badge">{{ s.mouseTrails.length }} amostras</span></div>
+                  <div class="detail-title"><Icon icon="tabler:brand-mouse" width="13" /> {{ t('activity.mouse_trail') }} <span class="detail-badge">{{ s.mouseTrails.length }} {{ t('activity.samples') }}</span></div>
                   <div v-if="s.mouseTrails.length" class="mouse-trail">
                     <div v-for="(m, i) in s.mouseTrails" :key="i" class="mouse-row">
                       <span class="mouse-t">+{{ m.t }}s</span>
@@ -413,10 +413,10 @@
                       <span class="mouse-el">{{ m.element }}</span>
                     </div>
                   </div>
-                  <div v-else class="detail-empty">Nenhum dado de mouse</div>
+                  <div v-else class="detail-empty">{{ t('activity.no_mouse') }}</div>
                 </div>
                 <div class="detail-section">
-                  <div class="detail-title"><Icon icon="tabler:pointer" width="13" /> Cliques <span class="detail-badge">{{ s.clicks.length }}</span></div>
+                  <div class="detail-title"><Icon icon="tabler:pointer" width="13" /> {{ t('activity.clicks') }} <span class="detail-badge">{{ s.clicks.length }}</span></div>
                   <div v-if="s.clicks.length" class="clicks-list">
                     <div v-for="(c, i) in s.clicks" :key="i" class="click-row">
                       <span class="click-t">+{{ c.t }}s</span>
@@ -425,7 +425,7 @@
                       <span v-if="c.text" class="click-text">"{{ c.text }}"</span>
                     </div>
                   </div>
-                  <div v-else class="detail-empty">Nenhum clique registrado</div>
+                  <div v-else class="detail-empty">{{ t('activity.no_clicks') }}</div>
                 </div>
               </div>
             </div>
@@ -433,8 +433,8 @@
           <BCol v-if="!filteredSessions.length" xs="12">
             <div class="empty-state">
               <Icon icon="tabler:mood-empty" width="48" class="empty-icon" />
-              <p>Nenhuma sessão registrada ainda.</p>
-              <small>Navegue pelo sistema para gerar dados de atividade.</small>
+              <p>{{ t('activity.no_sessions') }}</p>
+              <small>{{ t('activity.no_sessions_hint') }}</small>
             </div>
           </BCol>
         </BRow>
@@ -454,7 +454,7 @@ import { useSessionTracker, type PageSession } from '@/composables/useSessionTra
 import { useS3Activity } from '@/composables/useS3Activity'
 import { useCognitoUsers, type CognitoUser } from '@/composables/useCognitoUsers'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const { getSessions, clear } = useSessionTracker()
 const { loadAllSessions, uploadSession } = useS3Activity()
 const { listUsers } = useCognitoUsers()
@@ -472,7 +472,7 @@ watch(cognitoOpen, async (open) => {
   try {
     cognitoUsers.value = await listUsers()
   } catch (e: any) {
-    cognitoError.value = e?.message ?? 'Erro ao carregar usuários'
+    cognitoError.value = e?.message ?? t('activity.error_load_users')
   } finally {
     cognitoLoading.value = false
   }
@@ -535,7 +535,7 @@ async function refresh() {
 }
 
 function clearAll() {
-  if (confirm('Apagar todos os dados de atividade?')) { clear(); sessions.value = [] }
+  if (confirm(t('activity.confirm_clear'))) { clear(); sessions.value = [] }
 }
 
 function toggle(id: string) {
@@ -631,15 +631,17 @@ function avatarLetter(user: string) { return user === 'anonymous' ? '?' : user[0
 
 function fmtTime(iso: string) {
   const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 60000)
-  if (diff < 1)  return 'agora'
-  if (diff < 60) return `${diff}min atrás`
+  const loc = locale.value === 'pt' ? 'pt-BR' : 'en-US'
+  if (diff < 1)  return t('activity.now')
+  if (diff < 60) return t('activity.min_ago', { m: diff })
   const h = Math.floor(diff / 60)
-  if (h < 24)   return `${h}h atrás`
-  return new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
+  if (h < 24)   return t('activity.hours_ago', { h })
+  return new Date(iso).toLocaleDateString(loc, { day: '2-digit', month: '2-digit' })
 }
 
 function fmtFull(iso: string) {
-  return new Date(iso).toLocaleString('pt-BR', {
+  const loc = locale.value === 'pt' ? 'pt-BR' : 'en-US'
+  return new Date(iso).toLocaleString(loc, {
     day: '2-digit', month: '2-digit', year: 'numeric',
     hour: '2-digit', minute: '2-digit', second: '2-digit',
   })

@@ -16,10 +16,10 @@
       <div class="px-3 py-2 border-bottom">
         <BRow class="align-items-center">
           <BCol>
-            <h6 class="m-0 fs-md fw-semibold">Messages</h6>
+            <h6 class="m-0 fs-md fw-semibold">{{ t('topbar.messages_title') }}</h6>
           </BCol>
           <BCol class="text-end">
-            <a href="#" class="badge badge-soft-success badge-label py-1">09 Notifications</a>
+            <a href="#" class="badge badge-soft-success badge-label py-1">{{ t('topbar.notifications_count_badge') }}</a>
           </BCol>
         </BRow>
       </div>
@@ -54,10 +54,10 @@
 
             <span class="flex-grow-1 text-muted">
               <span class="fw-medium text-body">{{ message.user.name }}</span>
-              {{ message.action }}
+              {{ t(message.actionKey) }}
               <span class="fw-medium text-body text-wrap">{{ message.context }}</span>
               <br />
-              <span class="fs-xs">{{ message.timestamp }}</span>
+              <span class="fs-xs">{{ t(message.timestampKey) }}</span>
             </span>
 
             <BButton variant="link" class="flex-shrink-0 text-muted p-0">
@@ -70,13 +70,15 @@
       <BDropdownItem
         class="text-center text-reset text-decoration-underline link-offset-2 fw-bold notify-item border-top border-light"
       >
-        Read All Messages
+        {{ t('topbar.read_all_messages') }}
       </BDropdownItem>
     </BDropdown>
   </div>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import simplebar from 'simplebar-vue'
 import { Icon } from '@iconify/vue'
 import user1 from '@/assets/images/users/user-1.jpg'
@@ -84,6 +86,8 @@ import user2 from '@/assets/images/users/user-2.jpg'
 import user4 from '@/assets/images/users/user-4.jpg'
 import user5 from '@/assets/images/users/user-5.jpg'
 import user6 from '@/assets/images/users/user-6.jpg'
+
+const { t } = useI18n()
 
 type MessageItemType = {
   id: string
@@ -93,74 +97,55 @@ type MessageItemType = {
     icon?: string
     bgClass?: string
   }
-  action: string
+  actionKey: string
   context: string
-  timestamp: string
+  timestampKey: string
   active?: boolean
 }
 
 const messages: MessageItemType[] = [
   {
     id: 'message-1',
-    user: {
-      name: 'Liam Carter',
-      avatar: user1,
-    },
-    action: 'uploaded a new document to',
+    user: { name: 'Liam Carter', avatar: user1 },
+    actionKey: 'topbar.msg_uploaded',
     context: 'Project Phoenix',
-    timestamp: '5 minutes ago',
+    timestampKey: 'topbar.ts_5min',
     active: true,
   },
   {
     id: 'message-2',
-    user: {
-      name: 'Ava Mitchell',
-      avatar: user2,
-    },
-    action: 'commented on',
+    user: { name: 'Ava Mitchell', avatar: user2 },
+    actionKey: 'topbar.msg_commented',
     context: 'Marketing Campaign Q3',
-    timestamp: '12 minutes ago',
+    timestampKey: 'topbar.ts_12min',
   },
   {
     id: 'message-3',
-    user: {
-      name: 'Noah Blake',
-      icon: 'lucide:shield-check',
-      bgClass: 'text-bg-info',
-    },
-    action: 'updated the status of',
+    user: { name: 'Noah Blake', icon: 'lucide:shield-check', bgClass: 'text-bg-info' },
+    actionKey: 'topbar.msg_updated_status',
     context: 'Client Onboarding',
-    timestamp: '30 minutes ago',
+    timestampKey: 'topbar.ts_30min',
   },
   {
     id: 'message-4',
-    user: {
-      name: 'Sophia Taylor',
-      avatar: user4,
-    },
-    action: 'sent an invoice for',
+    user: { name: 'Sophia Taylor', avatar: user4 },
+    actionKey: 'topbar.msg_sent_invoice',
     context: 'Service Renewal',
-    timestamp: '1 hour ago',
+    timestampKey: 'topbar.ts_1h',
   },
   {
     id: 'message-5',
-    user: {
-      name: 'Ethan Moore',
-      avatar: user5,
-    },
-    action: 'completed the task',
+    user: { name: 'Ethan Moore', avatar: user5 },
+    actionKey: 'topbar.msg_completed_task',
     context: 'UI Review',
-    timestamp: '2 hours ago',
+    timestampKey: 'topbar.ts_2h',
   },
   {
     id: 'message-6',
-    user: {
-      name: 'Olivia White',
-      avatar: user6,
-    },
-    action: 'assigned you a task in',
+    user: { name: 'Olivia White', avatar: user6 },
+    actionKey: 'topbar.msg_assigned_task',
     context: 'Sales Pipeline',
-    timestamp: 'Yesterday',
+    timestampKey: 'topbar.ts_yesterday',
   },
 ]
 </script>
