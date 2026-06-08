@@ -1,6 +1,8 @@
 {
   "nav": {
     "dashboard": "Painel",
+    "dashboards": "Painéis",
+    "hf_water": "HF - Água",
     "monitoring": "Monitoramento",
     "users": "Usuários",
     "contacts": "Contatos",
