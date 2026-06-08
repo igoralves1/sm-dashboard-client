@@ -19,12 +19,12 @@
     <div class="sac-stats">
       <div class="sac-stat">
         <span class="sac-stat__label">{{ t('dashboard.accumulated') }}</span>
-        <span class="sac-stat__value">R$ {{ accumulatedCost }}</span>
+        <span class="sac-stat__value">{{ currencySymbol }} {{ accumulatedCost }}</span>
         <span class="sac-stat__badge sac-stat__badge--up">↑ 8.3%</span>
       </div>
       <div class="sac-stat">
         <span class="sac-stat__label">{{ t('dashboard.forecast') }}</span>
-        <span class="sac-stat__value">R$ {{ projectedCost }}</span>
+        <span class="sac-stat__value">{{ currencySymbol }} {{ projectedCost }}</span>
         <span class="sac-stat__badge sac-stat__badge--neutral">{{ t('dashboard.ai_estimate') }}</span>
       </div>
       <div class="sac-stat">
@@ -72,11 +72,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import * as d3 from 'd3'
 import { useI18n } from 'vue-i18n'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 const container = ref<HTMLDivElement | null>(null)
 const modelBody = ref<HTMLElement | null>(null)
@@ -117,8 +117,10 @@ const now = new Date()
 const today = now.getDate()
 const year = now.getFullYear()
 const daysInMonth = new Date(year, now.getMonth() + 1, 0).getDate()
-const monthName = now.toLocaleString('pt-BR', { month: 'long' })
-  .replace(/^\w/, c => c.toUpperCase())
+const monthName = computed(() =>
+  now.toLocaleString(locale.value === 'pt' ? 'pt-BR' : 'en-US', { month: 'long' })
+    .replace(/^\w/, c => c.toUpperCase())
+)
 
 // ── Generate fake data: one entry per day up to today ─────
 function generateData() {
@@ -135,18 +137,24 @@ function generateData() {
 const rawData = generateData()
 
 // ── Stats ─────────────────────────────────────────────────
-const ratePerKwh = 0.87  // fake R$/kWh
+const ratePerKwh = 0.87  // fake rate per kWh
+const currencySymbol = computed(() => locale.value === 'pt' ? 'R$' : 'US$')
+const numLocale     = computed(() => locale.value === 'pt' ? 'pt-BR' : 'en-US')
+const fmtCurrency   = (val: number) =>
+  val.toLocaleString(numLocale.value, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+
 const accumulatedCost = computed(() => {
   const total = rawData.reduce((s, d) => s + d.energia, 0)
-  return (total * ratePerKwh).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  return fmtCurrency(total * ratePerKwh)
 })
 const projectedCost = computed(() => {
   const avg = rawData.reduce((s, d) => s + d.energia, 0) / rawData.length
-  return (avg * daysInMonth * ratePerKwh).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  return fmtCurrency(avg * daysInMonth * ratePerKwh)
 })
 const peakDay = computed(() => {
   const peak = rawData.reduce((a, b) => a.energia > b.energia ? a : b)
-  return `Dia ${peak.day} — ${peak.energia} kWh`
+  const dayLabel = locale.value === 'pt' ? `Dia ${peak.day}` : `Day ${peak.day}`
+  return `${dayLabel} — ${peak.energia} kWh`
 })
 
 // ── Colors ────────────────────────────────────────────────
@@ -226,7 +234,7 @@ function draw(el: HTMLDivElement) {
   svg.append('text')
     .attr('x', x(today) + 4).attr('y', mt + 10)
     .attr('fill', 'var(--bs-primary)').style('font-size', '10px')
-    .text('hoje')
+    .text(locale.value === 'pt' ? 'hoje' : 'today')
 
   // Areas + lines
   series.forEach(s => {
@@ -250,7 +258,7 @@ function draw(el: HTMLDivElement) {
 
   // Y axis — R$
   svg.append('g').attr('transform', `translate(${ml},0)`)
-    .call(d3.axisLeft(y).ticks(4).tickFormat(d => `R$${d}`))
+    .call(d3.axisLeft(y).ticks(4).tickFormat(d => `${currencySymbol.value}${d}`))
     .call(g => g.select('.domain').remove())
     .call(g => g.selectAll('line').remove())
     .call(g => g.selectAll('text').attr('fill', 'var(--bs-secondary-color)').style('font-size', '11px'))
@@ -272,9 +280,9 @@ function draw(el: HTMLDivElement) {
         .style('left', `${Math.min(cx + 8, width - 160)}px`)
         .style('top', `${y(total) - 8}px`)
         .html(`
-          <div class="sac-tooltip__day">Dia ${d.day}</div>
-          <div class="sac-tooltip__row"><span style="color:${colors.energia}">●</span> Consumo: <b>${d.energia} kWh</b> · R$ ${(d.energia * ratePerKwh).toFixed(2)}</div>
-          <div class="sac-tooltip__row"><span style="color:${colors.sensores}">●</span> Sensores: <b>${d.sensores}</b></div>
+          <div class="sac-tooltip__day">${locale.value === 'pt' ? 'Dia' : 'Day'} ${d.day}</div>
+          <div class="sac-tooltip__row"><span style="color:${colors.energia}">●</span> ${locale.value === 'pt' ? 'Consumo' : 'Usage'}: <b>${d.energia} kWh</b> · ${currencySymbol.value} ${(d.energia * ratePerKwh).toFixed(2)}</div>
+          <div class="sac-tooltip__row"><span style="color:${colors.sensores}">●</span> ${locale.value === 'pt' ? 'Sensores' : 'Sensors'}: <b>${d.sensores}</b></div>
         `)
     })
     .on('mouseleave', () => tooltip.style('display', 'none'))
@@ -287,6 +295,9 @@ onMounted(() => {
   resizeObserver.observe(container.value)
 })
 onUnmounted(() => resizeObserver?.disconnect())
+
+// Redraw D3 chart when locale switches (Y-axis currency, labels)
+watch(locale, () => { if (container.value) draw(container.value) })
 </script>
 
 <style scoped>
