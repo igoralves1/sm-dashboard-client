@@ -6,6 +6,7 @@ import {
   AuthenticationDetails,
   CognitoUserSession,
 } from 'amazon-cognito-identity-js'
+import { useActivityTracker } from '@/composables/useActivityTracker'
 
 // ── Cognito config (values injected via environment variables) ───────────────
 const USER_POOL_ID = import.meta.env.VITE_USER_POOL_ID      as string
@@ -81,6 +82,7 @@ export const useAuthStore = defineStore('auth', () => {
         onSuccess(session) {
           setSession(session)
           loading.value = false
+          useActivityTracker().trackLogin(email)
           resolve('ok')
         },
         onFailure(err) {
@@ -137,6 +139,7 @@ export const useAuthStore = defineStore('auth', () => {
   // ── Logout ────────────────────────────────────────────────────────────────
   function logout() {
     const currentUser = userPool.getCurrentUser()
+    if (user.value?.email) useActivityTracker().trackLogout(user.value.email)
     currentUser?.signOut()
     clearSession()
   }

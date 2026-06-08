@@ -37,3 +37,8 @@ app.use(router)
 app.use(vue3Tour)
 app.use(SimpleTypeahead);
 app.mount('#app')
+
+// Finalize the active page session when the tab closes
+import('@/composables/useSessionTracker').then(({ useSessionTracker }) => {
+  window.addEventListener('beforeunload', () => useSessionTracker().endPage())
+})

@@ -101,7 +101,9 @@
 import { ref, onMounted, onUnmounted, watch, computed, nextTick } from 'vue'
 import * as d3 from 'd3'
 import { detectAnomalies, fmtP, type Anomaly } from '@/composables/useAnomalyDetection'
+import { useAlertStore } from '@/composables/useAlertStore'
 
+const { ingestAnomalies } = useAlertStore()
 
 const props = defineProps<{
   data: Record<string, any>[]
@@ -141,6 +143,12 @@ const computedAlerts = computed<Anomaly[]>(() => {
   if (!props.data.length || !ptpKeys.value.length) return []
   return detectAnomalies(props.data, props.xField, ptpKeys.value)
 })
+
+// Persist detected anomalies to the shared alert store
+watch(computedAlerts, (anomalies) => {
+  const source = props.xField === 'hour' ? 'dashboard-sm-24h' : 'dashboard-sm-5d'
+  ingestAnomalies(anomalies, source)
+}, { immediate: true })
 
 function draw() {
   if (!containerRef.value || !props.data.length) return

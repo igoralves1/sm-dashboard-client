@@ -125,12 +125,13 @@ export const menuItems: MenuItemType[] = [
     },
     {
         key: 'users',
-        label: 'Users',
+        label: 'Usuários',
         icon: 'tabler:users',
         children: [
-            { key: 'contacts', label: 'Contacts', url: '/users/contacts' },
-            { key: 'roles', label: 'Roles', url: '/users/roles' },
-            { key: 'permissions', label: 'Permissions', url: '/users/permissions' },
+            { key: 'contacts', label: 'Contatos', url: '/users/contacts' },
+            { key: 'roles', label: 'Funções', url: '/users/roles' },
+            { key: 'permissions', label: 'Permissões', url: '/users/permissions' },
+            { key: 'user-activity', label: 'Atividade', url: '/users/activity' },
         ],
     },
     {
