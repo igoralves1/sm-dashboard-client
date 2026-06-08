@@ -30,25 +30,37 @@
 
       <!-- Global stat cards (Todos only) -->
       <BRow v-if="selectedUser === 'Todos'" class="g-3 mb-3">
-        <BCol sm="6" xl="3">
+        <BCol sm="6" xl>
           <div class="stat-card">
             <div class="stat-icon stat-icon--blue"><Icon icon="tabler:users" width="20" /></div>
             <div><div class="stat-val">{{ uniqueUsers.length }}</div><div class="stat-label">Usuários distintos</div></div>
           </div>
         </BCol>
-        <BCol sm="6" xl="3">
+        <BCol sm="6" xl>
+          <div class="stat-card stat-card--online">
+            <div class="stat-icon stat-icon--teal" style="position:relative">
+              <Icon icon="tabler:wifi" width="20" />
+              <span class="online-pulse" />
+            </div>
+            <div>
+              <div class="stat-val" style="color:#26b8a5">{{ onlineNow }}</div>
+              <div class="stat-label">Online agora</div>
+            </div>
+          </div>
+        </BCol>
+        <BCol sm="6" xl>
           <div class="stat-card">
             <div class="stat-icon stat-icon--green"><Icon icon="tabler:file-analytics" width="20" /></div>
             <div><div class="stat-val">{{ sessions.length }}</div><div class="stat-label">Total de sessões</div></div>
           </div>
         </BCol>
-        <BCol sm="6" xl="3">
+        <BCol sm="6" xl>
           <div class="stat-card">
             <div class="stat-icon stat-icon--orange"><Icon icon="tabler:pointer" width="20" /></div>
             <div><div class="stat-val">{{ totalClicks }}</div><div class="stat-label">Cliques registrados</div></div>
           </div>
         </BCol>
-        <BCol sm="6" xl="3">
+        <BCol sm="6" xl>
           <div class="stat-card">
             <div class="stat-icon stat-icon--purple"><Icon icon="tabler:clock" width="20" /></div>
             <div><div class="stat-val">{{ avgDuration }}s</div><div class="stat-label">Tempo médio por página</div></div>
@@ -415,6 +427,9 @@ const filteredSessions = computed(() =>
 )
 
 // ── Global stats (Todos) ────────────────────────────────────────────────────
+const onlineNow = computed(() =>
+  new Set(sessions.value.filter(s => !s.exitedAt).map(s => s.user)).size
+)
 const totalClicks = computed(() => sessions.value.reduce((a, s) => a + s.clicks.length, 0))
 const avgDuration = computed(() => {
   const w = sessions.value.filter(s => s.duration != null)
@@ -504,8 +519,17 @@ function fmtFull(iso: string) {
 </script>
 
 <style scoped>
-@keyframes spin { to { transform: rotate(360deg) } }
-.spin { animation: spin 1s linear infinite; display: inline-block; }
+@keyframes spin  { to { transform: rotate(360deg) } }
+@keyframes pulse { 0%,100% { transform: scale(1); opacity:.8 } 50% { transform: scale(1.6); opacity:0 } }
+.spin  { animation: spin 1s linear infinite; display: inline-block; }
+
+.stat-icon--teal { background: #e0faf6 !important; color: #26b8a5 !important; }
+.online-pulse {
+  position: absolute; top: 2px; right: 2px;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #26b8a5;
+  animation: pulse 1.6s ease-in-out infinite;
+}
 
 /* ── Stat cards ─────────────────────────────────────────────────────────── */
 .stat-card {
