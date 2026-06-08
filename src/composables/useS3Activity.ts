@@ -109,14 +109,38 @@ export function useS3Activity() {
 
   // ── Alerts ────────────────────────────────────────────────────────────────
 
+  const LATEST_KEY   = 'alerts/_latest.json'
+  const MAX_IN_INDEX = 200
+
+  /** Upload one alert object + update the rolling _latest.json index. */
   async function uploadAlert(alert: StoredAlert): Promise<void> {
     if (!isAuthenticated()) return
     try {
       const client = makeClient()
+
+      // 1. Upload the individual record
       await client.send(new PutObjectCommand({
         Bucket:      BUCKET,
         Key:         `alerts/${alert.id}.json`,
         Body:        JSON.stringify(alert),
+        ContentType: 'application/json',
+      }))
+
+      // 2. Read current index, prepend new alert, write back
+      let existing: StoredAlert[] = []
+      try {
+        const obj  = await client.send(new GetObjectCommand({ Bucket: BUCKET, Key: LATEST_KEY }))
+        const text = await obj.Body!.transformToString()
+        existing   = JSON.parse(text) as StoredAlert[]
+      } catch { /* index doesn't exist yet */ }
+
+      const merged = [alert, ...existing.filter(a => a.id !== alert.id)]
+        .slice(0, MAX_IN_INDEX)
+
+      await client.send(new PutObjectCommand({
+        Bucket:      BUCKET,
+        Key:         LATEST_KEY,
+        Body:        JSON.stringify(merged),
         ContentType: 'application/json',
       }))
     } catch (e) {
@@ -124,10 +148,29 @@ export function useS3Activity() {
     }
   }
 
+  /** Fast single-GET poll — returns the rolling index, not a full list scan. */
+  async function loadLatestAlerts(): Promise<StoredAlert[]> {
+    if (!isAuthenticated()) return []
+    try {
+      const client = makeClient()
+      const obj    = await client.send(new GetObjectCommand({ Bucket: BUCKET, Key: LATEST_KEY }))
+      const text   = await obj.Body!.transformToString()
+      return JSON.parse(text) as StoredAlert[]
+    } catch {
+      return []
+    }
+  }
+
+  /** Full scan (used only on first load to also catch individually written objects). */
   async function loadAllAlerts(): Promise<StoredAlert[]> {
     if (!isAuthenticated()) return []
     try {
-      const client  = makeClient()
+      // Try the fast path first
+      const latest = await loadLatestAlerts()
+      if (latest.length) return latest
+
+      // Fall back to full list scan (first time, no index yet)
+      const client = makeClient()
       const alerts: StoredAlert[] = []
       let continuationToken: string | undefined
       do {
@@ -136,7 +179,9 @@ export function useS3Activity() {
           Prefix:            'alerts/',
           ContinuationToken: continuationToken,
         }))
-        const keys = (listResp.Contents ?? []).map(o => o.Key!).filter(Boolean)
+        const keys = (listResp.Contents ?? [])
+          .map(o => o.Key!)
+          .filter(k => k && k !== LATEST_KEY)
         await Promise.all(keys.map(async (key) => {
           try {
             const obj  = await client.send(new GetObjectCommand({ Bucket: BUCKET, Key: key }))
@@ -154,5 +199,5 @@ export function useS3Activity() {
     }
   }
 
-  return { uploadSession, loadAllSessions, uploadAlert, loadAllAlerts }
+  return { uploadSession, loadAllSessions, uploadAlert, loadLatestAlerts, loadAllAlerts }
 }

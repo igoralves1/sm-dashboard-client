@@ -223,7 +223,7 @@ import { useAlertStore } from '@/composables/useAlertStore'
 import SiteMap from '@/components/charts/SiteMap.vue'
 
 const router = useRouter()
-const { initFromS3 } = useAlertStore()
+const { initFromS3, startPolling, stopPolling } = useAlertStore()
 
 const siteMarkers = [
   { lat: -11.15430944152578, lng: -48.172973779141344, label: 'RAP01 Silvanópolis', color: '#4da6ff' },
@@ -254,8 +254,8 @@ async function doRefresh() {
 }
 
 onMounted(async () => {
-  // Seed alert store from S3 before sensor data arrives
-  initFromS3()
+  await initFromS3()
+  startPolling()
   await doRefresh()
   refreshTimer = setInterval(doRefresh, REFRESH_SECS * 1000)
   tickTimer = setInterval(() => {
@@ -265,6 +265,7 @@ onMounted(async () => {
 onUnmounted(() => {
   clearInterval(refreshTimer)
   clearInterval(tickTimer)
+  stopPolling()
 })
 </script>
 

@@ -103,7 +103,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, onUnmounted } from 'vue'
 import { BCard, BCol, BRow } from 'bootstrap-vue-next'
 import CountUp from 'vue-countup-v3'
 import { Icon } from '@iconify/vue'
@@ -113,10 +113,13 @@ import { useAlertStore } from '@/composables/useAlertStore'
 import type { StoredAlert } from '@/composables/useAlertStore'
 import pranaLogoRaw from '/pranalogototal.svg?raw'
 
-const { alerts, alerts24h, initFromS3 } = useAlertStore()
+const { alerts, alerts24h, initFromS3, startPolling, stopPolling } = useAlertStore()
 
-// Load alerts from S3 on mount — replaces local data with S3 source of truth
-onMounted(() => { initFromS3() })
+onMounted(async () => {
+  await initFromS3()   // load S3 data immediately on open
+  startPolling()        // then poll every 15s for new alerts from any user/page
+})
+onUnmounted(() => { stopPolling() })
 
 const recentAlerts = computed(() => alerts.value.slice(0, 8))
 const count24h     = computed(() => alerts24h.value.length)
