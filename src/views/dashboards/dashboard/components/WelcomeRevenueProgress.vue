@@ -18,7 +18,7 @@
                         <!-- Empty state -->
                         <div v-if="!recentAlerts.length" class="alert-empty">
                             <Icon icon="tabler:checks" width="28" class="alert-empty-icon" />
-                            <span>Sem alertas recentes</span>
+                            <span>{{ t('dashboard.no_alerts') }}</span>
                         </div>
 
                         <!-- Alert feed -->
@@ -63,7 +63,7 @@
                             <BCol>
                                 <div class="bg-light bg-opacity-50 p-2">
                                     <h5 class="m-0">
-                                        <span class="text-muted me-1">Consumo Total:</span>
+                                        <span class="text-muted me-1">{{ t('dashboard.total_consumption') }}:</span>
                                         <CountUp class="d-inline-flex" :end-val="1847"
                                             :options="{ suffix: ' MWh', enableScrollSpy: true, scrollSpyOnce: true }" />
                                     </h5>
@@ -72,7 +72,7 @@
                             <BCol>
                                 <div class="bg-light bg-opacity-50 p-2">
                                     <h5 class="m-0">
-                                        <span class="text-muted me-1">Sensores Ativos:</span>
+                                        <span class="text-muted me-1">{{ t('dashboard.active_sensors') }}:</span>
                                         <CountUp class="d-inline-flex" :end-val="2847"
                                             :options="{ separator: '.' }" />
                                     </h5>
@@ -85,8 +85,8 @@
 
                 <BCol xxl="3" xl="6" class="order-xl-2 order-xxl-2">
                     <div class="p-3">
-                        <h4 class="card-title mb-1">Status das Estações de Água</h4>
-                        <p class="text-muted fs-xs">21 estações monitoradas em tempo real.</p>
+                        <h4 class="card-title mb-1">{{ t('dashboard.water_stations') }}</h4>
+                        <p class="text-muted fs-xs">21 {{ t('dashboard.stations_monitored') }}</p>
 
                         <b-row class="mt-4">
                             <BCol>

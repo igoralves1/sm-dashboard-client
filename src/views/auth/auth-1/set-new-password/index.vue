@@ -31,8 +31,8 @@
         </div>
 
         <div class="sm-auth__tagline">
-          <h1>Monitoramento Inteligente através do AIIoT</h1>
-          <p>Transforme dados de energia, água e telemetria em decisões precisas — IA e IoT unidos para construir cidades mais eficientes e sustentáveis.</p>
+          <h1>{{ t('login.title') }}</h1>
+          <p>{{ t('login.subtitle') }}</p>
         </div>
 
         <div class="sm-auth__features">
@@ -41,8 +41,8 @@
               <Icon icon="tabler:bolt" />
             </span>
             <div>
-              <div class="sm-feature__title">Energy Monitoring</div>
-              <div class="sm-feature__sub">Consumption, demand & power quality</div>
+              <div class="sm-feature__title">{{ t('login.energy_monitoring') }}</div>
+              <div class="sm-feature__sub">{{ t('login.energy_sub') }}</div>
             </div>
           </div>
           <div class="sm-feature">
@@ -50,8 +50,8 @@
               <Icon icon="tabler:droplet" />
             </span>
             <div>
-              <div class="sm-feature__title">Water Monitoring</div>
-              <div class="sm-feature__sub">Flow rate, pressure & quality sensors</div>
+              <div class="sm-feature__title">{{ t('login.water_monitoring') }}</div>
+              <div class="sm-feature__sub">{{ t('login.water_sub') }}</div>
             </div>
           </div>
           <div class="sm-feature">
@@ -59,15 +59,15 @@
               <Icon icon="tabler:activity" />
             </span>
             <div>
-              <div class="sm-feature__title">Telemetry Data</div>
-              <div class="sm-feature__sub">Multi-sensor aggregation & alerts</div>
+              <div class="sm-feature__title">{{ t('login.telemetry') }}</div>
+              <div class="sm-feature__sub">{{ t('login.telemetry_sub') }}</div>
             </div>
           </div>
         </div>
 
         <div class="sm-auth__status">
           <span class="sm-status-dot"></span>
-          <span>Platform online · 2,847 devices connected</span>
+          <span>{{ t('login.platform_online') }} · 2,847 {{ t('login.devices_connected') }}</span>
         </div>
       </div>
     </div>
@@ -77,8 +77,8 @@
       <div class="sm-auth__form-wrap">
 
         <div class="sm-auth__form-header">
-          <h2>Set New Password</h2>
-          <p>This is your first login. Please set a permanent password.</p>
+          <h2>{{ t('new_password.title') }}</h2>
+          <p>{{ t('new_password.subtitle') }}</p>
         </div>
 
         <BAlert v-if="error" variant="danger" :model-value="true" dismissible class="mb-4" @dismissed="error = ''">
@@ -87,7 +87,7 @@
 
         <BForm @submit.prevent="handleSubmit">
           <div class="sm-field mb-4">
-            <label for="newPassword">New Password</label>
+            <label for="newPassword">{{ t('new_password.new_password') }}</label>
             <div class="sm-field__input-wrap">
               <Icon icon="tabler:lock" class="sm-field__icon" />
               <BFormInput
@@ -105,7 +105,7 @@
           </div>
 
           <div class="sm-field mb-4">
-            <label for="confirmPassword">Confirm Password</label>
+            <label for="confirmPassword">{{ t('new_password.confirm_password') }}</label>
             <div class="sm-field__input-wrap">
               <Icon icon="tabler:lock-check" class="sm-field__icon" />
               <BFormInput
@@ -125,12 +125,12 @@
           <BButton type="submit" class="sm-btn-primary w-100 mb-4" :disabled="loading">
             <span v-if="loading" class="sm-spinner"></span>
             <Icon v-else icon="tabler:shield-check" class="me-2" />
-            {{ loading ? 'Saving…' : 'Set Password & Sign In' }}
+            {{ loading ? t('new_password.loading') : t('new_password.submit') }}
           </BButton>
         </BForm>
 
         <p class="sm-auth__register">
-          Back to <RouterLink to="/login">Sign in</RouterLink>
+          {{ t('new_password.back_to_login') }} <RouterLink to="/login">{{ t('login.sign_in') }}</RouterLink>
         </p>
 
         <div class="sm-auth__footer">
@@ -148,6 +148,9 @@ import { Icon } from '@iconify/vue'
 import { currentYear } from '@/helpers'
 import pranLogo from '@/assets/images/pranafinal_300px.svg'
 import { useAuthStore } from '@/stores/auth.ts'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const auth = useAuthStore()
 const router = useRouter()

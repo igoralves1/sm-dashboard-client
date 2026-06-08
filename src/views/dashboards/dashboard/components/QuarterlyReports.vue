@@ -1,5 +1,5 @@
 <template>
-    <UICard title="Relatórios Trimestrais" body-class="p-0" is-collapsable is-reloadable is-closeable>
+    <UICard :title="t('dashboard.quarterly_reports')" body-class="p-0" is-collapsable is-reloadable is-closeable>
         <div class="table-responsive">
             <table  class="table table-hover table-custom table-nowrap table-centered mb-0">
                 <thead class="bg-light bg-opacity-25 thead-sm">
@@ -43,6 +43,9 @@ import { PieChart } from 'echarts/charts';
 import { GridComponent, TooltipComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import CustomEChart from '@/components/CustomEChart.vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n()
 
 
 </script>

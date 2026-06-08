@@ -34,8 +34,8 @@
         </div>
 
         <div class="sm-auth__tagline">
-          <h1>Monitoramento Inteligente através do AIIoT</h1>
-          <p>Transforme dados de energia, água e telemetria em decisões precisas — IA e IoT unidos para construir cidades mais eficientes e sustentáveis.</p>
+          <h1>{{ t('login.title') }}</h1>
+          <p>{{ t('login.subtitle') }}</p>
         </div>
 
         <!-- Feature pills -->
@@ -45,8 +45,8 @@
               <Icon icon="tabler:bolt" />
             </span>
             <div>
-              <div class="sm-feature__title">Energy Monitoring</div>
-              <div class="sm-feature__sub">Consumption, demand & power quality</div>
+              <div class="sm-feature__title">{{ t('login.energy_monitoring') }}</div>
+              <div class="sm-feature__sub">{{ t('login.energy_sub') }}</div>
             </div>
           </div>
           <div class="sm-feature">
@@ -54,8 +54,8 @@
               <Icon icon="tabler:droplet" />
             </span>
             <div>
-              <div class="sm-feature__title">Water Monitoring</div>
-              <div class="sm-feature__sub">Flow rate, pressure & quality sensors</div>
+              <div class="sm-feature__title">{{ t('login.water_monitoring') }}</div>
+              <div class="sm-feature__sub">{{ t('login.water_sub') }}</div>
             </div>
           </div>
           <div class="sm-feature">
@@ -63,8 +63,8 @@
               <Icon icon="tabler:activity" />
             </span>
             <div>
-              <div class="sm-feature__title">Telemetry Data</div>
-              <div class="sm-feature__sub">Multi-sensor aggregation & alerts</div>
+              <div class="sm-feature__title">{{ t('login.telemetry') }}</div>
+              <div class="sm-feature__sub">{{ t('login.telemetry_sub') }}</div>
             </div>
           </div>
         </div>
@@ -72,7 +72,7 @@
         <!-- Live status bar -->
         <div class="sm-auth__status">
           <span class="sm-status-dot"></span>
-          <span>Platform online · {{ deviceCount.toLocaleString() }} devices connected</span>
+          <span>{{ t('login.platform_online') }} · {{ deviceCount.toLocaleString() }} {{ t('login.devices_connected') }}</span>
         </div>
       </div>
     </div>
@@ -82,7 +82,7 @@
       <div class="sm-auth__form-wrap">
 
         <div class="sm-auth__form-header">
-          <h2>{{ t('login.submit') }}</h2>
+          <h2>{{ t('login.sign_in') }}</h2>
           <p>{{ t('login.title') }}</p>
         </div>
 
@@ -109,7 +109,7 @@
           <div class="sm-field mb-4">
             <div class="d-flex justify-content-between align-items-center">
               <label for="userPassword">{{ t('login.password') }}</label>
-              <RouterLink to="/forgot-password" class="sm-link-forgot">Forgot password?</RouterLink>
+              <RouterLink to="/forgot-password" class="sm-link-forgot">{{ t('login.forgot_password') }}</RouterLink>
             </div>
             <div class="sm-field__input-wrap">
               <Icon icon="tabler:lock" class="sm-field__icon" />
@@ -129,7 +129,7 @@
 
           <div class="d-flex align-items-center mb-4">
             <BFormCheckbox id="keepSignedIn" v-model="keepSignedIn" class="sm-checkbox">
-              Keep me signed in
+              {{ t('login.keep_signed') }}
             </BFormCheckbox>
           </div>
 
@@ -141,8 +141,8 @@
         </BForm>
 
         <p class="sm-auth__register">
-          Don't have an account?
-          <RouterLink to="/register">Create one</RouterLink>
+          {{ t('login.no_account') }}
+          <RouterLink to="/register">{{ t('login.create_one') }}</RouterLink>
         </p>
 
         <div class="sm-auth__footer">

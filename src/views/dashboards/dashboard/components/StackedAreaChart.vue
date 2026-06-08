@@ -3,12 +3,12 @@
     <!-- Header -->
     <div class="sac-header">
       <div>
-        <h4 class="card-title mb-1">Consumo de energia em R$ por mês</h4>
-        <p class="text-muted fs-xs mb-0">{{ monthName }} {{ year }} · até dia {{ today }}</p>
+        <h4 class="card-title mb-1">{{ t('dashboard.energy_chart_title') }}</h4>
+        <p class="text-muted fs-xs mb-0">{{ monthName }} {{ year }} · {{ t('dashboard.energy_until') }} {{ today }}</p>
       </div>
       <div class="sac-legend">
-        <span class="sac-legend__item"><span class="sac-legend__dot sac-legend__dot--energia"></span>kWh</span>
-        <span class="sac-legend__item"><span class="sac-legend__dot sac-legend__dot--sensores"></span>Sensores</span>
+        <span class="sac-legend__item"><span class="sac-legend__dot sac-legend__dot--energia"></span>{{ t('dashboard.kwh_legend') }}</span>
+        <span class="sac-legend__item"><span class="sac-legend__dot sac-legend__dot--sensores"></span>{{ t('dashboard.sensors_legend') }}</span>
       </div>
     </div>
 
@@ -18,35 +18,35 @@
     <!-- Stats row -->
     <div class="sac-stats">
       <div class="sac-stat">
-        <span class="sac-stat__label">Consumo acumulado</span>
+        <span class="sac-stat__label">{{ t('dashboard.accumulated') }}</span>
         <span class="sac-stat__value">R$ {{ accumulatedCost }}</span>
         <span class="sac-stat__badge sac-stat__badge--up">↑ 8.3%</span>
       </div>
       <div class="sac-stat">
-        <span class="sac-stat__label">Previsão do mês</span>
+        <span class="sac-stat__label">{{ t('dashboard.forecast') }}</span>
         <span class="sac-stat__value">R$ {{ projectedCost }}</span>
-        <span class="sac-stat__badge sac-stat__badge--neutral">IA estimativa</span>
+        <span class="sac-stat__badge sac-stat__badge--neutral">{{ t('dashboard.ai_estimate') }}</span>
       </div>
       <div class="sac-stat">
-        <span class="sac-stat__label">Pico do dia</span>
+        <span class="sac-stat__label">{{ t('dashboard.peak_day') }}</span>
         <span class="sac-stat__value">{{ peakDay }}</span>
         <span class="sac-stat__badge sac-stat__badge--down">↓ 4.1%</span>
       </div>
       <div class="sac-stat">
-        <span class="sac-stat__label">Eficiência energética</span>
+        <span class="sac-stat__label">{{ t('dashboard.energy_efficiency') }}</span>
         <span class="sac-stat__value">94.7%</span>
         <span class="sac-stat__badge sac-stat__badge--up">↑ meta</span>
       </div>
       <div class="sac-stat">
-        <span class="sac-stat__label">Alerta de demanda</span>
-        <span class="sac-stat__value">Baixo risco</span>
+        <span class="sac-stat__label">{{ t('dashboard.demand_alert') }}</span>
+        <span class="sac-stat__value">{{ t('dashboard.low_risk') }}</span>
         <span class="sac-stat__badge sac-stat__badge--neutral">IA</span>
       </div>
     </div>
 
     <!-- Collapsible model explanation -->
     <details class="sac-model" @toggle="onToggle">
-      <summary class="sac-model__summary">Modelo estatístico utilizado</summary>
+      <summary class="sac-model__summary">{{ t('dashboard.stat_model') }}</summary>
       <div ref="modelBody" class="sac-model__body">
         <p>Os diagnósticos acima são gerados por dois estágios complementares. Para cada série, os parâmetros são calculados <em>independentemente</em> usando apenas os valores daquela série.</p>
 
@@ -74,6 +74,9 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import * as d3 from 'd3'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const container = ref<HTMLDivElement | null>(null)
 const modelBody = ref<HTMLElement | null>(null)

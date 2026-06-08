@@ -2,13 +2,13 @@
     <BCard no-body>
         <BCardHeader class="d-flex justify-content-between align-items-center">
             <h5 class="card-title mb-0">
-                Discussões
+                {{ t('dashboard.discussions') }}
                 <BBadge variant="primary" class="bg-primary-subtle text-primary ms-2">
                     Pro+
                 </BBadge>
             </h5>
             <RouterLink to="#" class="badge text-bg-light fs-xs fw-semibold p-1">
-                Marcar como lidas
+                {{ t('dashboard.mark_read') }}
             </RouterLink>
         </BCardHeader>
 
@@ -18,10 +18,9 @@
                     <img :src="mailImg" height="36" alt="message img" />
                 </div>
                 <div class="flex-grow-1">
-                    <h4 class="fs-sm mb-1">Novas mensagens dos condomínios</h4>
+                    <h4 class="fs-sm mb-1">{{ t('dashboard.new_messages') }}</h4>
                     <p class="fs-xs mb-0 text-body-secondary">
-                        Você tem <span class="text-body fw-semibold">22</span> novas mensagens e
-                        <span class="text-body fw-semibold"> 16</span> aguardando resposta.
+                        {{ t('dashboard.messages_waiting', { count: 22, waiting: 16 }) }}
                     </p>
                 </div>
             </div>
@@ -58,7 +57,7 @@
 
             <div class="text-center mt-3">
                 <RouterLink to="/chat" class="link-reset text-decoration-underline d-flex align-items-center justify-content-center gap-1 fw-semibold link-offset-3">
-                    Ir para o Chat
+                    {{ t('dashboard.go_chat') }}
                     <Icon icon="tabler:send-2" />
                 </RouterLink>
             </div>
@@ -71,6 +70,9 @@ import { BCardBody, BCardHeader, BListGroup, BListGroupItem } from 'bootstrap-vu
 import { discussionMessages } from './data';
 import mailImg from '@/assets/images/message-mail.png'
 import { Icon } from '@iconify/vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n()
 
 </script>
 

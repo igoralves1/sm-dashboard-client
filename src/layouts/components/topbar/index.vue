@@ -33,7 +33,7 @@
             type="search"
             class="topbar-search"
             name="search"
-            placeholder="Search for something..."
+            :placeholder="t('topbar.search')"
           />
           <Icon icon="lucide:search"  class="app-search-icon text-muted" />
         </div>
@@ -68,6 +68,9 @@ import ThemeToggler from '@/layouts/components/topbar/components/ThemeToggler.vu
 import UserProfile from '@/layouts/components/topbar/components/UserProfile.vue'
 import { useLayout } from '@/stores/layout.ts'
 import { Icon } from '@iconify/vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 import logo from '@/assets/images/pranalogototal.svg'
 import logoSm from '@/assets/images/pranalogototal.svg'

@@ -1,5 +1,5 @@
 <template>
-    <UICard title="Desempenho das Estações" body-class="p-0" is-collapsable is-reloadable is-closeable>
+    <UICard :title="t('dashboard.station_performance')" body-class="p-0" is-collapsable is-reloadable is-closeable>
         <BCardBody>
             <div>
                 <div v-for="(stat, index) in projectStats" :key="index">
@@ -26,6 +26,9 @@ import { BProgress } from 'bootstrap-vue-next';
 import { projectStats } from './data';
 import UICard from '@/components/UICard.vue';
 import { Icon } from '@iconify/vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n()
 
 </script>
 
