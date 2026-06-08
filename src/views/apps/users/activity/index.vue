@@ -8,12 +8,16 @@
           <h4 class="mb-0 fw-semibold">Atividade de Usuários</h4>
           <p class="text-muted fs-xs mb-0">Sessões, páginas visitadas, cliques e localização em tempo real.</p>
         </BCol>
-        <BCol xs="auto" class="d-flex gap-2 align-items-center">
+        <BCol xs="auto" class="d-flex gap-2 align-items-center flex-wrap">
           <span v-if="loading" class="text-muted fs-xs d-flex align-items-center gap-1">
-            <Icon icon="tabler:loader-2" width="14" class="spin" /> Carregando S3…
+            <Icon icon="tabler:loader-2" width="14" class="spin" />
+            {{ syncing ? `Enviando ${syncCount} sessões para S3…` : 'Carregando S3…' }}
+          </span>
+          <span v-if="syncCount > 0 && !loading && !s3Error" class="text-success fs-xs d-flex align-items-center gap-1">
+            <Icon icon="tabler:circle-check" width="14" /> {{ syncCount }} sessões sincronizadas
           </span>
           <span v-if="s3Error && !loading" class="text-danger fs-xs d-flex align-items-center gap-1">
-            <Icon icon="tabler:alert-circle" width="14" /> Erro S3
+            <Icon icon="tabler:alert-circle" width="14" /> Erro ao acessar S3
           </span>
           <button class="act-btn act-btn--ghost" :disabled="loading" @click="refresh">
             <Icon icon="tabler:refresh" width="15" /> Atualizar
@@ -332,29 +336,43 @@ import { useSessionTracker, type PageSession } from '@/composables/useSessionTra
 import { useS3Activity } from '@/composables/useS3Activity'
 
 const { getSessions, clear } = useSessionTracker()
-const { loadAllSessions }    = useS3Activity()
+const { loadAllSessions, uploadSession } = useS3Activity()
 
 const sessions     = ref<PageSession[]>(getSessions())
 const expandedId   = ref<string | null>(null)
 const selectedUser = ref('Todos')
 const loading      = ref(false)
+const syncing      = ref(false)
 const s3Error      = ref(false)
+const syncCount    = ref(0)   // sessions pushed in last sync
 
-// Load from S3 on mount — merges with localStorage data
+// Upload any local sessions not yet in S3, return merged list
+async function syncAndLoad(): Promise<PageSession[]> {
+  const s3Sessions = await loadAllSessions()
+  const s3Ids      = new Set(s3Sessions.map(s => s.id))
+  const localOnly  = getSessions().filter(s => !s3Ids.has(s.id))
+
+  if (localOnly.length) {
+    syncing.value  = true
+    syncCount.value = localOnly.length
+    await Promise.all(localOnly.map(s => uploadSession(s)))
+    syncing.value  = false
+  } else {
+    syncCount.value = 0
+  }
+
+  return [...s3Sessions, ...localOnly].sort((a, b) => b.enteredAt.localeCompare(a.enteredAt))
+}
+
+// Load from S3 on mount — also pushes any local-only sessions
 onMounted(async () => {
   loading.value = true
   s3Error.value = false
   try {
-    const s3Sessions = await loadAllSessions()
-    if (s3Sessions.length) {
-      // Merge: S3 is source of truth; keep any local sessions not yet pushed
-      const s3Ids = new Set(s3Sessions.map(s => s.id))
-      const localOnly = getSessions().filter(s => !s3Ids.has(s.id))
-      sessions.value = [...s3Sessions, ...localOnly]
-        .sort((a, b) => b.enteredAt.localeCompare(a.enteredAt))
-    }
+    sessions.value = await syncAndLoad()
   } catch {
     s3Error.value = true
+    sessions.value = getSessions()
   } finally {
     loading.value = false
   }
@@ -367,11 +385,7 @@ async function refresh() {
   loading.value = true
   s3Error.value = false
   try {
-    const s3Sessions = await loadAllSessions()
-    const s3Ids = new Set(s3Sessions.map(s => s.id))
-    const localOnly = getSessions().filter(s => !s3Ids.has(s.id))
-    sessions.value = [...s3Sessions, ...localOnly]
-      .sort((a, b) => b.enteredAt.localeCompare(a.enteredAt))
+    sessions.value = await syncAndLoad()
   } catch {
     s3Error.value = true
     sessions.value = getSessions()
