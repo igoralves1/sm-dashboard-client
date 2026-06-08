@@ -286,7 +286,7 @@ onUnmounted(() => {
 .context-banner__chevron--open { transform: rotate(180deg); }
 
 .context-banner {
-  margin: 0 16px 8px;
+  margin: 0 1.75rem 8px;
   padding: 28px 32px;
   background: linear-gradient(135deg, #111620 0%, #0e1520 100%);
   border: 1px solid #1e2a3a;
