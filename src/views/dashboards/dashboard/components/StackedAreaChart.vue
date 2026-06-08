@@ -48,24 +48,24 @@
     <details class="sac-model" @toggle="onToggle">
       <summary class="sac-model__summary">{{ t('dashboard.stat_model') }}</summary>
       <div ref="modelBody" class="sac-model__body">
-        <p>Os diagnósticos acima são gerados por dois estágios complementares. Para cada série, os parâmetros são calculados <em>independentemente</em> usando apenas os valores daquela série.</p>
+        <p>{{ t('dashboard.stat_model_intro') }}</p>
 
-        <h6>1 — Detecção de valor atípico</h6>
-        <p>Um valor \(x\) é classificado como <em>fora do padrão</em> se:</p>
+        <h6>{{ t('dashboard.stat_model_h1') }}</h6>
+        <p>{{ t('dashboard.stat_model_p1') }}</p>
         <div class="sac-formula">\[ x \leq \tau, \qquad \tau = 0{,}05 \cdot \max(x_i) \]</div>
 
-        <h6>2 — Limites IQR (valores em operação)</h6>
-        <p>Os quartis e a cerca de Tukey definem os limites de controle:</p>
+        <h6>{{ t('dashboard.stat_model_h2') }}</h6>
+        <p>{{ t('dashboard.stat_model_p2') }}</p>
         <div class="sac-formula">\[ L^{-} = Q_1 - 1{,}5 \cdot \text{IQR}, \qquad L^{+} = Q_3 + 1{,}5 \cdot \text{IQR}, \qquad \text{IQR} = Q_3 - Q_1 \]</div>
-        <p>Guarda adicional: o desvio relativo à mediana deve superar 30% para evitar falsos positivos em séries muito estáveis:</p>
+        <p>{{ t('dashboard.stat_model_p2b') }}</p>
         <div class="sac-formula">\[ \frac{|x - \tilde{x}|}{\tilde{x}} > 0{,}30 \]</div>
 
-        <h6>3 — P-valor (gráfico de controle)</h6>
-        <p>Para cada ponto anômalo calcula-se o z-score em relação à distribuição normal dos valores em operação \((\mu,\,\sigma)\):</p>
+        <h6>{{ t('dashboard.stat_model_h3') }}</h6>
+        <p>{{ t('dashboard.stat_model_p3') }}</p>
         <div class="sac-formula">\[ z = \frac{x - \mu}{\sigma} \]</div>
-        <p>O p-valor bicaudal é obtido via função de distribuição acumulada normal \(\Phi\):</p>
+        <p>{{ t('dashboard.stat_model_p4') }}</p>
         <div class="sac-formula">\[ p = 2\left(1 - \Phi(|z|)\right), \qquad \Phi(z) = \frac{1}{2}\!\left[1 + \operatorname{erf}\!\left(\frac{z}{\sqrt{2}}\right)\right] \]</div>
-        <p>Um p-valor baixo (ex.: \(p = 0{,}3\%\)) indica que há apenas 0,3% de probabilidade de aquele valor ocorrer em condições normais de operação — não identifica a causa, apenas sinaliza que o valor <strong>não é esperado</strong>.</p>
+        <p v-html="t('dashboard.stat_model_p5')"></p>
       </div>
     </details>
   </div>

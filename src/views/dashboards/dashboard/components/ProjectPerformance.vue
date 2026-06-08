@@ -23,12 +23,14 @@
 
 <script setup lang="ts">
 import { BProgress } from 'bootstrap-vue-next';
-import { projectStats } from './data';
+import { getProjectStats } from './data';
 import UICard from '@/components/UICard.vue';
 import { Icon } from '@iconify/vue';
 import { useI18n } from 'vue-i18n';
+import { computed } from 'vue';
 
 const { t } = useI18n()
+const projectStats = computed(() => getProjectStats(t))
 
 </script>
 

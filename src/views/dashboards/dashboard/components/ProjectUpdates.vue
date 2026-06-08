@@ -40,11 +40,13 @@
 
 <script setup lang="ts">
 import { BBadge, BCard, BCardBody, BCardHeader } from 'bootstrap-vue-next';
-import { timelineEvents } from './data';
+import { getTimelineEvents } from './data';
 import { Icon } from '@iconify/vue';
 import { useI18n } from 'vue-i18n';
+import { computed } from 'vue';
 
 const { t } = useI18n()
+const timelineEvents = computed(() => getTimelineEvents(t))
 
 
 </script>

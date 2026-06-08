@@ -11,215 +11,133 @@ import user7 from '@/assets/images/users/user-7.jpg'
 import user8 from '@/assets/images/users/user-8.jpg'
 import user9 from '@/assets/images/users/user-9.jpg'
 
-export const statCards: StatCard[] = [
-  {
-    id: 1,
-    title: 'Sensores Ativos',
-    value: 2847,
-    badgeText: '+12 Novos',
-    badgeVariant: 'primary',
-    icon: 'tabler:cpu',
-    pointColor: 'primary',
-    description: 'Total de Sensores',
-    total: '3.200',
-  },
-  {
-    id: 2,
-    title: 'Alertas',
-    value: 38,
-    badgeText: '+5 Novos',
-    badgeVariant: 'secondary',
-    icon: 'tabler:bell-ringing',
-    pointColor: 'secondary',
-    description: 'Total de Alertas',
-    total: '1.240',
-  },
-  {
-    id: 3,
-    title: 'Consumo de Água',
-    value: 847,
-    suffix: 'm³',
+export function getStatCards(t: (k: string, p?: any) => string): StatCard[] {
+  return [
+    {
+      id: 1,
+      title: t('dashboard.active_sensors_card'),
+      value: 2847,
+      badgeText: t('dashboard.new_badge', { n: 12 }),
+      badgeVariant: 'primary',
+      icon: 'tabler:cpu',
+      pointColor: 'primary',
+      description: t('dashboard.total_sensors'),
+      total: '3.200',
+    },
+    {
+      id: 2,
+      title: t('dashboard.alerts_card'),
+      value: 38,
+      badgeText: t('dashboard.new_badge', { n: 5 }),
+      badgeVariant: 'secondary',
+      icon: 'tabler:bell-ringing',
+      pointColor: 'secondary',
+      description: t('dashboard.total_alerts'),
+      total: '1.240',
+    },
+    {
+      id: 3,
+      title: t('dashboard.water_consumption'),
+      value: 847,
+      suffix: 'm³',
+      badgeText: '-3.2%',
+      badgeVariant: 'light',
+      icon: 'tabler:droplet',
+      pointColor: 'primary',
+      description: t('dashboard.monthly_total'),
+      total: '12.450 m³',
+    },
+    {
+      id: 4,
+      title: t('dashboard.energy_card'),
+      value: 1847,
+      suffix: 'kWh',
+      badgeText: '+2.1%',
+      badgeVariant: 'secondary',
+      icon: 'tabler:bolt',
+      pointColor: 'secondary',
+      description: t('dashboard.monthly_total'),
+      total: '48.200 kWh',
+    },
+    {
+      id: 5,
+      title: t('dashboard.connected_cities'),
+      value: 14,
+      badgeText: t('dashboard.new_badge', { n: 2 }),
+      badgeVariant: 'primary',
+      icon: 'tabler:building-community',
+      pointColor: 'primary',
+      description: t('dashboard.total_cities'),
+      total: '18',
+    },
+  ]
+}
+/** @deprecated use getStatCards(t) */
+export const statCards: StatCard[] = [] // kept for TS compatibility — overridden at runtime
 
-    badgeText: '-3.2%',
-    badgeVariant: 'light',
-    icon: 'tabler:droplet',
-    pointColor: 'primary',
-    description: 'Total do Mês',
-    total: '12.450 m³',
-  },
-  {
-    id: 4,
-    title: 'Energia',
-    value: 1847,
-    suffix: 'kWh',
-    badgeText: '+2.1%',
-    badgeVariant: 'secondary',
-    icon: 'tabler:bolt',
-    pointColor: 'secondary',
-    description: 'Total do Mês',
-    total: '48.200 kWh',
-  },
-  {
-    id: 5,
-    title: 'Cidades Conectadas',
-    value: 14,
-    badgeText: '+2 Novas',
-    badgeVariant: 'primary',
-    icon: 'tabler:building-community',
-    pointColor: 'primary',
-    description: 'Total de Cidades',
-    total: '18',
-  },
-]
+export function getQuarterlyReports(t: (k: string) => string): QuarterlyReport[] {
+  return [
+    { id: 1, quarter: t('data.q1'), period: t('data.q1_period'), revenue: '12.400 m³', expense: '38.200 kWh', margin: '98,2%' },
+    { id: 2, quarter: t('data.q2'), period: t('data.q2_period'), revenue: '11.800 m³', expense: '41.500 kWh', margin: '97,8%' },
+    { id: 3, quarter: t('data.q3'), period: t('data.q3_period'), revenue: '13.200 m³', expense: '44.100 kWh', margin: '96,5%' },
+    { id: 4, quarter: t('data.q4'), period: t('data.q4_period'), revenue: '10.900 m³', expense: '36.800 kWh', margin: '99,1%' },
+  ]
+}
+/** @deprecated use getQuarterlyReports(t) */
+export const quarterlyReports: QuarterlyReport[] = []
 
-export const quarterlyReports: QuarterlyReport[] = [
-  {
-    id: 1,
-    quarter: 'Trimestre 1',
-    period: 'Janeiro - Março 2025',
-    revenue: '12.400 m³',
-    expense: '38.200 kWh',
-    margin: '98,2%',
-  },
-  {
-    id: 2,
-    quarter: 'Trimestre 2',
-    period: 'Abril - Junho 2025',
-    revenue: '11.800 m³',
-    expense: '41.500 kWh',
-    margin: '97,8%',
-  },
-  {
-    id: 3,
-    quarter: 'Trimestre 3',
-    period: 'Julho - Setembro 2025',
-    revenue: '13.200 m³',
-    expense: '44.100 kWh',
-    margin: '96,5%',
-  },
-  {
-    id: 4,
-    quarter: 'Trimestre 4',
-    period: 'Outubro - Dezembro 2025',
-    revenue: '10.900 m³',
-    expense: '36.800 kWh',
-    margin: '99,1%',
-  },
-]
+export function getProjectStats(t: (k: string) => string): ProjectStat[] {
+  return [
+    { id: 1, title: t('data.stations_operational'), count: '+ 2.340', percentage: 82.2, variant: 'secondary', showPercentage: true },
+    { id: 2, title: t('data.in_maintenance'),       count: '+ 420',   percentage: 14.75, variant: 'info',      showPercentage: true },
+    { id: 3, title: t('data.pending_alerts'),        count: '+ 87',    percentage: 3.05,  variant: 'secondary', showPercentage: true },
+  ]
+}
+/** @deprecated use getProjectStats(t) */
+export const projectStats: ProjectStat[] = []
 
-export const projectStats: ProjectStat[] = [
-  {
-    id: 1,
-    title: 'Estações Operacionais',
-    count: '+ 2.340',
-    percentage: 82.2,
-    variant: 'secondary',
-    showPercentage: true,
-  },
-  {
-    id: 2,
-    title: 'Em Manutenção',
-    count: '+ 420',
-    percentage: 14.75,
-    variant: 'info',
-    showPercentage: true,
-  },
-  {
-    id: 3,
-    title: 'Alertas Pendentes',
-    count: '+ 87',
-    percentage: 3.05,
-    variant: 'secondary',
-    showPercentage: true,
-  },
-]
-
-export const timelineEvents: TimelineEvent[] = [
-  {
-    id: 1,
-    icon: 'tabler:droplet-filled',
-    iconColor: 'primary',
-    title: 'Alerta de Nível Crítico — RAP01 Silvanópolis',
-    time: 'Hoje às 15:45',
-    description: 'Nível do reservatório atingiu 18%. Bombeamento automático acionado.',
-    tag: 'Crítico',
-    tagVariant: 'danger',
-    userName: 'Sistema AIIoT',
-    userImage: user1,
-    userLink: '/pages/profile',
-    hasDivider: true,
-  },
-  {
-    id: 2,
-    icon: 'tabler:bolt',
-    iconColor: 'warning',
-    title: 'Pico de Demanda Energética — Miranorte',
-    time: 'Hoje às 14:00',
-    description: 'Consumo 34% acima da média. Alerta enviado à equipe de operações.',
-    tag: 'Energia',
-    tagVariant: 'warning',
-    userName: 'Sensor PTP-07',
-    userImage: user6,
-    userLink: '/pages/profile',
-    hasDivider: true,
-  },
-  {
-    id: 3,
-    icon: 'tabler:settings-check',
-    iconColor: 'success',
-    title: 'Manutenção Preventiva Concluída',
-    time: 'Hoje às 13:15',
-    description: 'Calibração dos sensores de fluxo PTP-01 a PTP-04 realizada com sucesso.',
-    tag: 'Manutenção',
-    tagVariant: 'success',
-    userName: 'Carlos Souza',
-    userImage: user9,
-    userLink: '/pages/profile',
-    hasDivider: true,
-  },
-  {
-    id: 4,
-    icon: 'tabler:building-community',
-    iconColor: 'info',
-    title: 'Nova Cidade Integrada — Palmas/TO',
-    time: 'Hoje às 12:30',
-    description: '147 sensores IoT ativados. Monitoramento de água e energia iniciado.',
-    tag: 'Expansão',
-    tagVariant: 'info',
-    userName: 'Equipe prana',
-    userImage: user10,
-    userLink: '/pages/profile',
-    hasDivider: true,
-  },
-  {
-    id: 5,
-    icon: 'tabler:chart-bar',
-    iconColor: 'primary',
-    title: 'Relatório Mensal Gerado',
-    time: 'Hoje às 11:00',
-    description: 'Relatório de consumo de água e energia de maio/2026 disponível para download.',
-    tag: 'Relatório',
-    tagVariant: 'secondary',
-    userName: 'Sistema AIIoT',
-    userImage: user8,
-    userLink: '/pages/profile',
-    hasDivider: true,
-  },
-  {
-    id: 6,
-    icon: 'tabler:wifi',
-    iconColor: 'success',
-    title: 'Reconexão de Sensor — PTP-03',
-    time: 'Hoje às 10:15',
-    description: 'Sensor PTP-03 Silvanópolis reconectado após queda de sinal de 8 minutos.',
-    tag: 'Conectividade',
-    tagVariant: 'primary',
-    userName: 'Monitor de Rede',
-    userImage: user7,
-    userLink: '/pages/profile',
-    hasDivider: false,
-  },
-]
+export function getTimelineEvents(t: (k: string) => string): TimelineEvent[] {
+  return [
+    {
+      id: 1, icon: 'tabler:droplet-filled', iconColor: 'primary',
+      title: t('data.ev1_title'), time: t('data.ev1_time'), description: t('data.ev1_desc'),
+      tag: t('data.tag_critical'), tagVariant: 'danger',
+      userName: t('data.user_system'), userImage: user1, userLink: '/pages/profile', hasDivider: true,
+    },
+    {
+      id: 2, icon: 'tabler:bolt', iconColor: 'warning',
+      title: t('data.ev2_title'), time: t('data.ev2_time'), description: t('data.ev2_desc'),
+      tag: t('data.tag_energy'), tagVariant: 'warning',
+      userName: 'Sensor PTP-07', userImage: user6, userLink: '/pages/profile', hasDivider: true,
+    },
+    {
+      id: 3, icon: 'tabler:settings-check', iconColor: 'success',
+      title: t('data.ev3_title'), time: t('data.ev3_time'), description: t('data.ev3_desc'),
+      tag: t('data.tag_maintenance'), tagVariant: 'success',
+      userName: 'Carlos Souza', userImage: user9, userLink: '/pages/profile', hasDivider: true,
+    },
+    {
+      id: 4, icon: 'tabler:building-community', iconColor: 'info',
+      title: t('data.ev4_title'), time: t('data.ev4_time'), description: t('data.ev4_desc'),
+      tag: t('data.tag_expansion'), tagVariant: 'info',
+      userName: t('data.user_prana_team'), userImage: user10, userLink: '/pages/profile', hasDivider: true,
+    },
+    {
+      id: 5, icon: 'tabler:chart-bar', iconColor: 'primary',
+      title: t('data.ev5_title'), time: t('data.ev5_time'), description: t('data.ev5_desc'),
+      tag: t('data.tag_report'), tagVariant: 'secondary',
+      userName: t('data.user_system'), userImage: user8, userLink: '/pages/profile', hasDivider: true,
+    },
+    {
+      id: 6, icon: 'tabler:wifi', iconColor: 'success',
+      title: t('data.ev6_title'), time: t('data.ev6_time'), description: t('data.ev6_desc'),
+      tag: t('data.tag_connectivity'), tagVariant: 'primary',
+      userName: t('data.user_network_monitor'), userImage: user7, userLink: '/pages/profile', hasDivider: false,
+    },
+  ]
+}
+/** @deprecated use getTimelineEvents(t) */
+export const timelineEvents: TimelineEvent[] = []
 
 export const discussionMessages: DiscussionMessage[] = [
   {
