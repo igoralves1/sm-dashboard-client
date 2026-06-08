@@ -82,8 +82,8 @@
       <div class="sm-auth__form-wrap">
 
         <div class="sm-auth__form-header">
-          <h2>Sign in</h2>
-          <p>Access your monitoring dashboard</p>
+          <h2>{{ t('login.submit') }}</h2>
+          <p>{{ t('login.title') }}</p>
         </div>
 
         <BForm @submit.prevent="handleLogin">
@@ -108,7 +108,7 @@
 
           <div class="sm-field mb-4">
             <div class="d-flex justify-content-between align-items-center">
-              <label for="userPassword">Password</label>
+              <label for="userPassword">{{ t('login.password') }}</label>
               <RouterLink to="/forgot-password" class="sm-link-forgot">Forgot password?</RouterLink>
             </div>
             <div class="sm-field__input-wrap">
@@ -136,7 +136,7 @@
           <BButton type="submit" class="sm-btn-primary w-100 mb-4" :disabled="loading">
             <span v-if="loading" class="sm-spinner"></span>
             <Icon v-else icon="tabler:login" class="me-2" />
-            {{ loading ? 'Signing in…' : 'Sign In' }}
+            {{ loading ? t('login.loading') : t('login.submit') }}
           </BButton>
         </BForm>
 
@@ -161,9 +161,11 @@ import { currentYear } from '@/helpers'
 import pranLogo from '@/assets/images/pranafinal_300px.svg'
 import { usePageMeta } from '@/composables/usePageMeta.ts'
 import { useAuthStore } from '@/stores/auth.ts'
+import { useI18n } from 'vue-i18n'
 
 usePageMeta('Sign In')
 
+const { t } = useI18n()
 const auth = useAuthStore()
 const router = useRouter()
 const route = useRoute()

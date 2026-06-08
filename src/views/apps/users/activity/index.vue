@@ -5,8 +5,8 @@
       <!-- Page header -->
       <BRow class="mb-3 align-items-center">
         <BCol>
-          <h4 class="mb-0 fw-semibold">Atividade de Usuários</h4>
-          <p class="text-muted fs-xs mb-0">Sessões, páginas visitadas, cliques e localização em tempo real.</p>
+          <h4 class="mb-0 fw-semibold">{{ t('activity.title') }}</h4>
+          <p class="text-muted fs-xs mb-0">{{ t('activity.subtitle') }}</p>
         </BCol>
         <BCol xs="auto" class="d-flex gap-2 align-items-center flex-wrap">
           <span v-if="loading" class="text-muted fs-xs d-flex align-items-center gap-1">
@@ -20,10 +20,10 @@
             <Icon icon="tabler:alert-circle" width="14" /> Erro ao acessar S3
           </span>
           <button class="act-btn act-btn--ghost" :disabled="loading" @click="refresh">
-            <Icon icon="tabler:refresh" width="15" /> Atualizar
+            <Icon icon="tabler:refresh" width="15" /> {{ t('activity.refresh') }}
           </button>
           <button class="act-btn act-btn--danger" @click="clearAll">
-            <Icon icon="tabler:trash" width="15" /> Limpar dados
+            <Icon icon="tabler:trash" width="15" /> {{ t('activity.clear') }}
           </button>
         </BCol>
       </BRow>
@@ -33,7 +33,7 @@
         <BCol sm="6" xl>
           <div class="stat-card">
             <div class="stat-icon stat-icon--blue"><Icon icon="tabler:users" width="20" /></div>
-            <div><div class="stat-val">{{ uniqueUsers.length }}</div><div class="stat-label">Usuários distintos</div></div>
+            <div><div class="stat-val">{{ uniqueUsers.length }}</div><div class="stat-label">{{ t('activity.distinct_users') }}</div></div>
           </div>
         </BCol>
         <BCol sm="6" xl>
@@ -44,26 +44,26 @@
             </div>
             <div>
               <div class="stat-val" style="color:#26b8a5">{{ onlineNow }}</div>
-              <div class="stat-label">Online agora</div>
+              <div class="stat-label">{{ t('activity.online_now') }}</div>
             </div>
           </div>
         </BCol>
         <BCol sm="6" xl>
           <div class="stat-card">
             <div class="stat-icon stat-icon--green"><Icon icon="tabler:file-analytics" width="20" /></div>
-            <div><div class="stat-val">{{ sessions.length }}</div><div class="stat-label">Total de sessões</div></div>
+            <div><div class="stat-val">{{ sessions.length }}</div><div class="stat-label">{{ t('activity.total_sessions') }}</div></div>
           </div>
         </BCol>
         <BCol sm="6" xl>
           <div class="stat-card">
             <div class="stat-icon stat-icon--orange"><Icon icon="tabler:pointer" width="20" /></div>
-            <div><div class="stat-val">{{ totalClicks }}</div><div class="stat-label">Cliques registrados</div></div>
+            <div><div class="stat-val">{{ totalClicks }}</div><div class="stat-label">{{ t('activity.clicks') }}</div></div>
           </div>
         </BCol>
         <BCol sm="6" xl>
           <div class="stat-card">
             <div class="stat-icon stat-icon--purple"><Icon icon="tabler:clock" width="20" /></div>
-            <div><div class="stat-val">{{ avgDuration }}s</div><div class="stat-label">Tempo médio por página</div></div>
+            <div><div class="stat-val">{{ avgDuration }}s</div><div class="stat-label">{{ t('activity.avg_time') }}</div></div>
           </div>
         </BCol>
       </BRow>
@@ -73,7 +73,7 @@
         <div class="cog-header" @click="cognitoOpen = !cognitoOpen">
           <div class="d-flex align-items-center gap-2">
             <Icon icon="tabler:shield-lock" width="16" class="text-primary" />
-            <span class="fw-semibold fs-sm">Usuários Cognito</span>
+            <span class="fw-semibold fs-sm">{{ t('activity.cognito_title') }}</span>
             <span v-if="cognitoUsers.length" class="cog-badge">{{ cognitoUsers.length }}</span>
           </div>
           <div class="d-flex align-items-center gap-2">
@@ -89,14 +89,14 @@
           <table v-else class="cog-table">
             <thead>
               <tr>
-                <th>Email</th>
-                <th>Status</th>
-                <th>Ativo</th>
-                <th>Senha definida</th>
-                <th>Criado em</th>
-                <th>Última modificação</th>
-                <th>Sessões</th>
-                <th>Último acesso</th>
+                <th>{{ t('activity.col_email') }}</th>
+                <th>{{ t('activity.col_status') }}</th>
+                <th>{{ t('activity.col_active') }}</th>
+                <th>{{ t('activity.col_password') }}</th>
+                <th>{{ t('activity.col_created') }}</th>
+                <th>{{ t('activity.col_modified') }}</th>
+                <th>{{ t('activity.col_sessions') }}</th>
+                <th>{{ t('activity.col_last_access') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -110,19 +110,19 @@
                 <td>
                   <span class="cog-status" :class="`cog-status--${u.status.toLowerCase()}`">
                     <Icon :icon="u.status === 'CONFIRMED' ? 'tabler:circle-check' : 'tabler:clock-exclamation'" width="12" />
-                    {{ u.status === 'CONFIRMED' ? 'Confirmado' : u.status === 'FORCE_CHANGE_PASSWORD' ? 'Aguardando senha' : u.status }}
+                    {{ u.status === 'CONFIRMED' ? t('activity.status_confirmed') : u.status === 'FORCE_CHANGE_PASSWORD' ? t('activity.status_pending') : u.status }}
                   </span>
                 </td>
                 <td>
                   <span class="cog-bool" :class="u.enabled ? 'cog-bool--yes' : 'cog-bool--no'">
                     <Icon :icon="u.enabled ? 'tabler:check' : 'tabler:x'" width="12" />
-                    {{ u.enabled ? 'Sim' : 'Não' }}
+                    {{ u.enabled ? t('activity.yes') : t('activity.no') }}
                   </span>
                 </td>
                 <td>
                   <span class="cog-bool" :class="u.passwordSet ? 'cog-bool--yes' : 'cog-bool--no'">
                     <Icon :icon="u.passwordSet ? 'tabler:lock-check' : 'tabler:lock-open'" width="12" />
-                    {{ u.passwordSet ? 'Sim' : 'Pendente' }}
+                    {{ u.passwordSet ? t('activity.password_set') : t('activity.password_pending') }}
                   </span>
                 </td>
                 <td class="cog-date">{{ fmtFull(u.createdAt) }}</td>
@@ -449,10 +449,12 @@ import { ref, computed, watch, onMounted } from 'vue'
 import { BCard, BCol, BContainer, BRow } from 'bootstrap-vue-next'
 import { Icon } from '@iconify/vue'
 import MainLayout from '@/layouts/MainLayout.vue'
+import { useI18n } from 'vue-i18n'
 import { useSessionTracker, type PageSession } from '@/composables/useSessionTracker'
 import { useS3Activity } from '@/composables/useS3Activity'
 import { useCognitoUsers, type CognitoUser } from '@/composables/useCognitoUsers'
 
+const { t } = useI18n()
 const { getSessions, clear } = useSessionTracker()
 const { loadAllSessions, uploadSession } = useS3Activity()
 const { listUsers } = useCognitoUsers()

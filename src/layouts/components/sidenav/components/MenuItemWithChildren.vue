@@ -2,7 +2,7 @@
   <li class="side-nav-item" :class="{ active: isOpen }">
     <button class="side-nav-link" :aria-expanded="isOpen" @click="toggleOpen">
       <span v-if="item.icon" class="menu-icon"><Icon :icon="item.icon" /></span>
-      <span class="menu-text" data-lang="dashboards">{{ item.label }}</span>
+      <span class="menu-text" data-lang="dashboards">{{ tLabel(item.label) }}</span>
       <span v-if="item.badge" :class="`badge bg-${item.badge.variant}`">{{ item.badge.text }}</span>
       <span v-else class="menu-arrow"><Icon icon="tabler:chevron-down" /></span>
     </button>
@@ -29,6 +29,7 @@ import type { MenuItemType } from '@/types/layout'
 import MenuItem from '@/layouts/components/sidenav/components/MenuItem.vue'
 import { useRoute } from 'vue-router'
 import { computed, ref, watchEffect } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 type PropsType = {
   item: MenuItemType
@@ -38,6 +39,19 @@ type PropsType = {
 }
 
 const props = defineProps<PropsType>()
+const { t } = useI18n()
+
+const NAV_MAP: Record<string, string> = {
+  'Usuários': 'nav.users', 'Contatos': 'nav.contacts',
+  'Funções': 'nav.roles', 'Permissões': 'nav.permissions',
+  'Atividade': 'nav.activity', 'Alertas': 'nav.alerts',
+  'Dashboard': 'nav.dashboard', 'Monitoramento': 'nav.monitoring',
+  'Dashboards': 'nav.dashboard',
+}
+function tLabel(label: string | undefined) {
+  if (!label) return ''
+  return NAV_MAP[label] ? t(NAV_MAP[label]) : label
+}
 
 const route = useRoute()
 const pathname = computed(() => route.path)
