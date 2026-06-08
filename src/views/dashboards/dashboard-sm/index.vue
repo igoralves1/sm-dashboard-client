@@ -19,12 +19,12 @@
         </div>
       </div>
       <div class="top-bar__right">
-        <button class="export-btn" @click="router.push('/dashboard')" title="Voltar ao início">
-          ← Início
+        <button class="export-btn" @click="router.push('/dashboard')" :title="t('monitoring.back')">
+          {{ t('monitoring.back') }}
         </button>
         <RefreshCountdown :duration-seconds="300" :seconds-left="secondsLeft" :size="44" />
-        <button class="export-btn" @click="exportLog()" :title="`Export ${getSnapshotCount()} snapshots`">
-          <span class="export-icon">↓</span> Export JSON
+        <button class="export-btn" @click="exportLog()" :title="`${t('monitoring.export')} · ${getSnapshotCount()} ${t('monitoring.snapshots')}`">
+          <span class="export-icon">↓</span> {{ t('monitoring.export') }}
         </button>
       </div>
     </div>
@@ -41,65 +41,36 @@
     <div class="context-banner">
       <button class="context-banner__toggle" @click="bannerOpen = !bannerOpen">
         <span class="context-banner__dot"></span>
-        Sistema Ativo · Estado do Tocantins &nbsp;·&nbsp; Monitoramento Hídrico em Tempo Real
+        {{ t('monitoring.system_active') }} &nbsp;·&nbsp; {{ t('monitoring.title') }}
         <span class="context-banner__chevron" :class="{ 'context-banner__chevron--open': bannerOpen }">▾</span>
       </button>
       <div class="context-banner__grid" v-show="bannerOpen">
 
         <div class="context-banner__lead">
-          <h2 class="context-banner__title">
-            Monitoramento Hídrico em Tempo Real
-          </h2>
-          <p class="context-banner__desc">
-            Plataforma de supervisão contínua dos sistemas de abastecimento de água dos municípios de
-            <strong>Silvanópolis</strong> e <strong>Miranorte</strong>, no Estado do Tocantins.
-            Dados coletados por sensores IoT instalados nos reservatórios e nas estações de bombeamento
-            são transmitidos e processados em tempo real, permitindo uma visão precisa e atualizada
-            do estado operacional de toda a infraestrutura hídrica municipal.
-          </p>
+          <h2 class="context-banner__title">{{ t('monitoring.title') }}</h2>
+          <p class="context-banner__desc">{{ t('monitoring.subtitle') }}</p>
         </div>
 
         <div class="context-banner__cards">
           <div class="context-banner__card">
             <div class="context-banner__card-icon">🏙️</div>
-            <div class="context-banner__card-title">Cidade Inteligente 4.0</div>
-            <div class="context-banner__card-text">
-              Integrado ao conceito de Smart City 4.0, este sistema conecta infraestrutura física
-              a uma camada digital de inteligência — sensores, telemetria e análise em tempo real —
-              para tornar a gestão pública mais eficiente, transparente e responsiva.
-              Todos os processos são supervisionados de forma contínua e permanente por algoritmos
-              de inteligência artificial que monitoram padrões operacionais, identificam desvios
-              e anomalias automaticamente, e emitem alertas imediatos para os gestores ou técnicos
-              designados — garantindo que cada ocorrência seja tratada pela pessoa certa,
-              no momento certo, antes de se transformar em um problema crítico para a população.
-            </div>
+            <div class="context-banner__card-title">{{ t('monitoring.smart_city_title') }}</div>
+            <div class="context-banner__card-text">{{ t('monitoring.smart_city_text') }}</div>
           </div>
           <div class="context-banner__card">
             <div class="context-banner__card-icon">📊</div>
-            <div class="context-banner__card-title">Decisão Baseada em Dados</div>
-            <div class="context-banner__card-text">
-              Gestores municipais e equipes técnicas acompanham níveis de reservatório, vazão
-              das bombas e produção diária sem depender de vistorias presenciais — reduzindo
-              custos operacionais e tempo de resposta a falhas ou quedas de pressão.
-            </div>
+            <div class="context-banner__card-title">{{ t('monitoring.data_decision_title') }}</div>
+            <div class="context-banner__card-text">{{ t('monitoring.data_decision_text') }}</div>
           </div>
           <div class="context-banner__card">
             <div class="context-banner__card-icon">⚡</div>
-            <div class="context-banner__card-title">Resposta Imediata a Incidentes</div>
-            <div class="context-banner__card-text">
-              Anomalias nos padrões de consumo ou falhas em bombas são detectadas automaticamente.
-              A equipe é alertada em tempo real, podendo agir antes que o desabastecimento
-              afete a população — garantindo continuidade no serviço essencial de água tratada.
-            </div>
+            <div class="context-banner__card-title">{{ t('monitoring.incident_title') }}</div>
+            <div class="context-banner__card-text">{{ t('monitoring.incident_text') }}</div>
           </div>
           <div class="context-banner__card">
             <div class="context-banner__card-icon">🌱</div>
-            <div class="context-banner__card-title">Sustentabilidade e Eficiência</div>
-            <div class="context-banner__card-text">
-              O controle preciso do bombeamento reduz o consumo de energia elétrica e o desperdício
-              hídrico. Com dados históricos e projeções de tendência, a gestão pode planejar
-              manutenções preventivas e investimentos com base em evidências concretas.
-            </div>
+            <div class="context-banner__card-title">{{ t('monitoring.sustainability_title') }}</div>
+            <div class="context-banner__card-text">{{ t('monitoring.sustainability_text') }}</div>
           </div>
         </div>
 
@@ -212,6 +183,7 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import TankGauge from '@/components/charts/TankGauge.vue'
 import LevelTimeSeries from '@/components/charts/LevelTimeSeries.vue'
 import FlowTimeSeries from '@/components/charts/FlowTimeSeries.vue'
@@ -223,6 +195,7 @@ import { useAlertStore } from '@/composables/useAlertStore'
 import SiteMap from '@/components/charts/SiteMap.vue'
 
 const router = useRouter()
+const { t }  = useI18n()
 const { initFromS3, startPolling, stopPolling } = useAlertStore()
 
 const siteMarkers = [

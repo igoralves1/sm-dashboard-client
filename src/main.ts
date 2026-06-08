@@ -16,16 +16,32 @@ import 'vue-multiselect/dist/vue-multiselect.css'
 import '@/assets/scss/app.scss'
 
 import 'jsvectormap'
-import { createApp } from 'vue'
+import { createApp, watch } from 'vue'
 import { createPinia } from 'pinia'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import { createBootstrap } from 'bootstrap-vue-next'
 import { createHead } from '@vueuse/head'
+import { createI18n } from 'vue-i18n'
 
 import App from './App.vue'
 import router from './router'
 import vue3Tour from 'vue3-tour';
 import SimpleTypeahead from 'vue3-simple-typeahead';
+import en from './locales/en.json'
+import pt from './locales/pt.json'
+import { detectLocaleFromIP, useLocale } from './composables/useLocale'
+
+const { locale } = useLocale()
+
+const i18n = createI18n({
+  legacy: false,
+  locale: locale.value,
+  fallbackLocale: 'en',
+  messages: { en, pt },
+})
+
+// Keep vue-i18n in sync when user switches flag
+watch(locale, lang => { (i18n.global.locale as { value: string }).value = lang })
 
 const app = createApp(App)
 const head = createHead()
@@ -35,8 +51,12 @@ app.use(createBootstrap())
 app.use(head)
 app.use(router)
 app.use(vue3Tour)
-app.use(SimpleTypeahead);
+app.use(SimpleTypeahead)
+app.use(i18n)
 app.mount('#app')
+
+// Detect locale from IP after mount (non-blocking — updates reactively)
+detectLocaleFromIP()
 
 // Finalize the active page session when the tab closes
 import('@/composables/useSessionTracker').then(({ useSessionTracker }) => {

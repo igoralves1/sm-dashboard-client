@@ -6,14 +6,13 @@
                     <div class="p-4 border-end border-dashed alert-history-panel">
                         <!-- Header -->
                         <div class="d-flex align-items-center justify-content-between mb-1">
-                            <h4 class="card-title mb-0">Histórico de Alertas e Eventos</h4>
+                            <h4 class="card-title mb-0">{{ t('dashboard.alerts_title') }}</h4>
                             <span v-if="count24h > 0" class="badge-24h">
                                 {{ count24h }}<span class="badge-24h-label">&nbsp;/24h</span>
                             </span>
                         </div>
                         <p class="text-muted fs-xs mb-3">
-                            Anomalias detectadas em tempo real pelos sensores IoT nas
-                            <strong>últimas 24 horas</strong>.
+                            {{ t('dashboard.alerts_subtitle', { hours: 24 }) }}
                         </p>
 
                         <!-- Empty state -->
@@ -47,11 +46,11 @@
                         <div class="alert-footer">
                             <router-link to="/alerts" class="alert-footer-link">
                                 <Icon icon="tabler:bell-ringing" width="14" />
-                                Todos Alarmes
+                                {{ t('dashboard.all_alerts') }}
                             </router-link>
                             <button class="alert-footer-link alert-footer-link--report" @click="downloadReport">
                                 <Icon icon="tabler:file-type-pdf" width="14" />
-                                Ver relatório
+                                {{ t('dashboard.view_report') }}
                             </button>
                         </div>
                     </div>
@@ -104,6 +103,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { BCard, BCol, BRow } from 'bootstrap-vue-next'
 import CountUp from 'vue-countup-v3'
 import { Icon } from '@iconify/vue'
@@ -122,12 +122,13 @@ onMounted(async () => {
 onUnmounted(() => { stopPolling() })
 
 const recentAlerts = computed(() => alerts.value.slice(0, 8))
-const count24h     = computed(() => alerts24h.value.length)
+const count24h = computed(() => alerts24h.value.length)
+const { t }    = useI18n()
 
 function severityLabel(s: string) {
-  if (s === 'critical') return 'Crítico'
-  if (s === 'warning')  return 'Atenção'
-  return 'Info'
+  if (s === 'critical') return t('dashboard.severity_critical')
+  if (s === 'warning')  return t('dashboard.severity_warning')
+  return t('dashboard.severity_info')
 }
 
 function severityColor(s: string) {
