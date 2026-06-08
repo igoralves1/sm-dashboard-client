@@ -6,24 +6,21 @@ type UserDropdownItemType = {
   url?: string
   isDivider?: boolean
   isHeader?: boolean
+  isLogout?: boolean
   class?: string
 }
 
-export function getUserDropdownItems(t: (k: string) => string): UserDropdownItemType[] {
-  return [
-    { label: t('nav.welcome_back'), isHeader: true },
-    { label: t('nav.my_profile'),            icon: 'tabler:user-circle', url: '#' },
-    { label: t('nav.sensor_notifications'),  icon: 'tabler:bell-ringing', url: '#' },
-    { label: t('nav.my_building'),           icon: 'tabler:building', url: '#' },
-    { label: t('nav.account_settings'),      icon: 'tabler:settings-2', url: '#' },
-    { label: t('nav.support'),               icon: 'tabler:headphones', url: '#' },
-    { isDivider: true },
-    { label: t('nav.lock_screen'),           icon: 'tabler:lock', url: '/auth-1/lock-screen' },
-    { label: t('nav.logout'),                icon: 'tabler:logout-2', url: '#', class: 'text-danger fw-semibold' },
-  ]
-}
-/** @deprecated use getUserDropdownItems(t) */
-export const userDropdownItems: UserDropdownItemType[] = []
+export const userDropdownItems: UserDropdownItemType[] = [
+  { label: 'nav.welcome_back', isHeader: true },
+  { label: 'nav.my_profile',           icon: 'tabler:user-circle', url: '#' },
+  { label: 'nav.sensor_notifications', icon: 'tabler:bell-ringing', url: '#' },
+  { label: 'nav.my_building',          icon: 'tabler:building', url: '#' },
+  { label: 'nav.account_settings',     icon: 'tabler:settings-2', url: '#' },
+  { label: 'nav.support',              icon: 'tabler:headphones', url: '#' },
+  { isDivider: true },
+  { label: 'nav.lock_screen',          icon: 'tabler:lock', url: '/auth-1/lock-screen' },
+  { label: 'nav.logout',               icon: 'tabler:logout-2', url: '#', class: 'text-danger fw-semibold', isLogout: true },
+]
 
 export const menuItems: MenuItemType[] = [
     { key: 'menu', label: 'Menu', isTitle: true },

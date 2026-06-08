@@ -22,19 +22,19 @@
 
         <template v-for="(item, idx) in userDropdownItems" :key="idx">
           <BDropdownHeader v-if="item.isHeader" class="noti-title">
-            <h6 class="text-overflow m-0">{{ item.label }}</h6>
+            <h6 class="text-overflow m-0">{{ t(item.label!) }}</h6>
           </BDropdownHeader>
 
           <BDropdownDivider v-else-if="item.isDivider" />
 
           <button
-            v-else-if="item.url === '#' && item.class?.includes('danger')"
+            v-else-if="item.isLogout"
             class="dropdown-item d-flex align-items-center"
             :class="item.class"
             @click="handleLogout"
           >
             <Icon v-if="item.icon" :icon="item.icon" class="me-2 fs-17 align-middle" />
-            <span class="align-middle">{{ item.label }}</span>
+            <span class="align-middle">{{ t(item.label!) }}</span>
           </button>
 
           <RouterLink
@@ -44,7 +44,7 @@
             :class="item.class"
           >
             <Icon v-if="item.icon" :icon="item.icon" class="me-2 fs-17 align-middle" />
-            <span class="align-middle">{{ item.label }}</span>
+            <span class="align-middle">{{ t(item.label!) }}</span>
           </RouterLink>
         </template>
       </BDropdown>
@@ -55,17 +55,14 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
 import { useRouter } from 'vue-router'
-import { computed } from 'vue'
 import user2 from '@/assets/images/users/user-2.jpg'
-import { getUserDropdownItems } from '@/layouts/components/data'
+import { userDropdownItems } from '@/layouts/components/data'
 import { useAuthStore } from '@/stores/auth.ts'
 import { useI18n } from 'vue-i18n'
 
 const auth = useAuthStore()
 const router = useRouter()
 const { t } = useI18n()
-
-const userDropdownItems = computed(() => getUserDropdownItems(t))
 
 function handleLogout() {
   auth.logout()
