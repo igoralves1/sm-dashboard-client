@@ -29,6 +29,8 @@ import vue3Tour from 'vue3-tour';
 import SimpleTypeahead from 'vue3-simple-typeahead';
 import en from './locales/en.json'
 import pt from './locales/pt.json'
+import es from './locales/es.json'
+import fr from './locales/fr.json'
 import { detectLocaleFromIP, useLocale } from './composables/useLocale'
 
 const { locale } = useLocale()
@@ -37,7 +39,7 @@ const i18n = createI18n({
   legacy: false,
   locale: locale.value,
   fallbackLocale: 'en',
-  messages: { en, pt },
+  messages: { en, pt, es, fr },
 })
 
 // Keep vue-i18n in sync when user switches flag

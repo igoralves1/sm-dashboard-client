@@ -6,7 +6,7 @@
       class="lang-btn"
       :class="{ 'lang-btn--active': locale === lang.code }"
       :title="lang.name"
-      @click="setLocale(lang.code as 'en' | 'pt')"
+      @click="setLocale(lang.code)"
     >
       <img :src="lang.flag" :alt="lang.name" class="lang-flag" />
       <span class="lang-code">{{ lang.label }}</span>
@@ -16,14 +16,19 @@
 
 <script setup lang="ts">
 import { useLocale } from '@/composables/useLocale'
+import type { Locale } from '@/composables/useLocale'
 import usFlag from '@/assets/images/flags/us.svg'
 import brFlag from '@/assets/images/flags/br.svg'
+import esFlag from '@/assets/images/flags/es.svg'
+import frFlag from '@/assets/images/flags/fr.svg'
 
 const { locale, setLocale } = useLocale()
 
-const languages = [
-  { code: 'en', name: 'English', label: 'EN', flag: usFlag },
-  { code: 'pt', name: 'Português', label: 'PT', flag: brFlag },
+const languages: { code: Locale; name: string; label: string; flag: string }[] = [
+  { code: 'en', name: 'English',    label: 'EN', flag: usFlag },
+  { code: 'pt', name: 'Português',  label: 'PT', flag: brFlag },
+  { code: 'es', name: 'Español',    label: 'ES', flag: esFlag },
+  { code: 'fr', name: 'Français',   label: 'FR', flag: frFlag },
 ]
 </script>
 

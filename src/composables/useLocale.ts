@@ -4,7 +4,7 @@
  */
 import { ref, watch } from 'vue'
 
-export type Locale = 'en' | 'pt'
+export type Locale = 'en' | 'pt' | 'es' | 'fr'
 
 const STORAGE_KEY = 'prana_locale_v1'
 const GEO_CACHE   = 'prana_geo_v1'   // shared with session tracker
@@ -13,7 +13,7 @@ const _locale = ref<Locale>(_loadSaved())
 
 function _loadSaved(): Locale {
   const saved = localStorage.getItem(STORAGE_KEY)
-  if (saved === 'pt' || saved === 'en') return saved
+  if (saved === 'en' || saved === 'pt' || saved === 'es' || saved === 'fr') return saved as Locale
   return _detectFromBrowser()
 }
 
