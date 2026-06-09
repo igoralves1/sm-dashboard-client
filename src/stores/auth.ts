@@ -54,7 +54,7 @@ export const useAuthStore = defineStore('auth', () => {
     user.value = {
       name: payload['name'] ?? email ?? 'User',
       email,
-      isAdmin: groups.includes('admin') && email === 'igoralves1@gmail.com',
+      isAdmin: groups.includes('admin'),
     }
   }
 
