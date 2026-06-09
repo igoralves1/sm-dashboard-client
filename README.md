@@ -382,9 +382,66 @@ This is an open-source repository. The frontend code is fully visible by design.
 
 ### Full security architecture diagram
 
-![Security Architecture](https://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/igoralves1/sm-dashboard-client/alle/docs/security.puml)
+```mermaid
+sequenceDiagram
+    actor Attacker
+    participant Browser
+    participant CognitoPool as Cognito User Pool
+    participant IdentityPool as Cognito Identity Pool
+    participant Timestream as Timestream<br/>(3 table ARNs only)
+    participant S3 as S3<br/><S3_BUCKET>
+    participant CloudTrail as CloudTrail<br/><CLOUDTRAIL_NAME>
+    participant CWAlarm as CloudWatch Alarm<br/>≥50 queries / 5 min
+    participant Budget as AWS Budget<br/>$5 limit
+    participant SNS as SNS<br/><SNS_TOPIC>
+    participant Lambda as Lambda<br/><LAMBDA_NAME>
+    actor Administrator
 
-> Source: [`docs/security.puml`](docs/security.puml)
+    rect rgb(220, 230, 255)
+        Note over Attacker,IdentityPool: Step 1 — Authentication
+        Attacker->>Browser: Login with valid credentials
+        Browser->>CognitoPool: authenticateUser()
+        CognitoPool-->>Browser: idToken (1h) + refreshToken (30d)
+        Browser->>IdentityPool: Exchange idToken for STS credentials
+        IdentityPool-->>Browser: AccessKeyId + SecretKey + SessionToken (TTL 1h)
+        Note over Browser: Credentials visible in DevTools → Network tab
+    end
+
+    rect rgb(255, 220, 220)
+        Note over Attacker,S3: Step 2 — Attack vectors with extracted credentials
+        Attacker->>Timestream: VECTOR A — SELECT * (3 queries, <1 sec, ~$0.001)<br/>Full 11-month database dump
+        Timestream-->>Attacker: 1.1M rows: water levels, GPS coords, flow rates
+        Attacker->>Timestream: VECTOR B — SELECT loop at 1–5 req/sec<br/>Cost abuse via programmatic queries
+        Attacker->>S3: VECTOR C — ListBucket + GetObject<br/>Read other users session logs
+    end
+
+    rect rgb(200, 240, 200)
+        Note over CloudTrail,Lambda: Layer 1 — Real-time detection (~2 minutes)
+        Timestream->>CloudTrail: Every API call logged in real time
+        CloudTrail->>CWAlarm: Stream to CloudWatch Logs → Metric Filter counts queries
+        Note over CWAlarm: Normal: ~6 queries/5min<br/>Attack at 1 req/s: 300/5min<br/>Threshold: 50 queries/5min
+        CWAlarm->>SNS: ALARM — threshold breached
+        SNS->>Administrator: Email alert
+        SNS->>Lambda: Invoke automatically (no human needed)
+        Lambda->>CognitoPool: AdminUserGlobalSignOut → all tokens invalidated
+        Lambda->>CognitoPool: AdminDisableUser → login blocked
+        Note over Lambda: Admin group users skipped
+        Attacker->>CognitoPool: Tries to refresh token
+        CognitoPool-->>Attacker: NotAuthorizedException
+        Attacker->>CognitoPool: Tries to re-login
+        CognitoPool-->>Attacker: UserNotConfirmedException (account disabled)
+    end
+
+    rect rgb(200, 240, 200)
+        Note over Budget,Lambda: Layer 2 — Cost kill switch (redundant backstop)
+        Budget->>Administrator: Email alert at $4 (80%)
+        Budget->>SNS: Fires at $5 (100%)
+        Budget->>Timestream: Attach IAM Deny to <AUTH_ROLE><br/>timestream:* → AccessDenied on ALL credentials immediately
+        SNS->>Lambda: Invoke lockdown again (belt and suspenders)
+    end
+
+    Note over Attacker: STS credentials expire after 1h hard limit<br/>Cannot renew — Cognito account disabled<br/>Attack window: max 1 hour, max damage: ~$0.03
+```
 
 ---
 
