@@ -178,6 +178,25 @@
             x-field="hour"
             :title="t('monitoring.production_24h_sil')"
           />
+          <div class="spc-panel">
+            <button class="spc-toggle" @click="statsOpenSilProd24h = !statsOpenSilProd24h">
+              <span class="spc-toggle__icon">▶ Statistical model used</span>
+              <span class="spc-chevron" :class="{ open: statsOpenSilProd24h }">▾</span>
+            </button>
+            <div v-show="statsOpenSilProd24h" class="spc-body">
+              <div class="spc-flow-grid">
+                <template v-for="(st, ptp) in silvanopolis.production24hStats" :key="ptp">
+                  <div class="spc-flow-col">
+                    <BoxPlot
+                      :stats="st"
+                      unit=" m³/h"
+                      :label="`${ptp} · 24h Production`"
+                    />
+                  </div>
+                </template>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       <div class="col-lg-6">
@@ -187,6 +206,25 @@
             x-field="day"
             :title="t('monitoring.production_daily_sil')"
           />
+          <div class="spc-panel">
+            <button class="spc-toggle" @click="statsOpenSilProdDay = !statsOpenSilProdDay">
+              <span class="spc-toggle__icon">▶ Statistical model used</span>
+              <span class="spc-chevron" :class="{ open: statsOpenSilProdDay }">▾</span>
+            </button>
+            <div v-show="statsOpenSilProdDay" class="spc-body">
+              <div class="spc-flow-grid">
+                <template v-for="(st, ptp) in silvanopolis.productionDailyStats" :key="ptp">
+                  <div class="spc-flow-col">
+                    <BoxPlot
+                      :stats="st"
+                      unit=" m³"
+                      :label="`${ptp} · Daily Production`"
+                    />
+                  </div>
+                </template>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -286,9 +324,11 @@ const levelThresholds = [
 ]
 
 const bannerOpen  = ref(false)   // collapsed by default
-const statsOpenSilLevel  = ref(false)
-const statsOpenSilFlow   = ref(false)
-const statsOpenMirLevel  = ref(false)
+const statsOpenSilLevel   = ref(false)
+const statsOpenSilFlow    = ref(false)
+const statsOpenSilProd24h = ref(false)
+const statsOpenSilProdDay = ref(false)
+const statsOpenMirLevel   = ref(false)
 
 // ── Auto-refresh every 1 min with countdown ──
 const REFRESH_SECS = 300

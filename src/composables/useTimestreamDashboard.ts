@@ -127,8 +127,22 @@ export interface LocationData {
   flowSeries: FlowSeries[]
   production24h: Record<string, any>[]
   productionDaily: Record<string, any>[]
-  levelStats: SensorStats | null
-  flowStats:  Record<string, SensorStats | null>   // keyed by PTP name
+  levelStats:          SensorStats | null
+  flowStats:           Record<string, SensorStats | null>   // keyed by PTP name
+  production24hStats:  Record<string, SensorStats | null>   // keyed by PTP name
+  productionDailyStats: Record<string, SensorStats | null>  // keyed by PTP name
+}
+
+/** Extract per-PTP stats from merged production rows */
+function productionStats(rows: Record<string, any>[]): Record<string, SensorStats | null> {
+  if (!rows.length) return {}
+  const ptpKeys = Object.keys(rows[0]).filter(k => k.startsWith('PTP'))
+  const result: Record<string, SensorStats | null> = {}
+  ptpKeys.forEach(k => {
+    const vals = rows.map(r => parseFloat(r[k] ?? '0')).filter(v => isFinite(v) && v > 0)
+    result[k] = computeStats(vals)
+  })
+  return result
 }
 
 // ── Fetch functions ───────────────────────────────────────────────────────────
@@ -223,11 +237,11 @@ async function fetchProductionDaily(): Promise<Record<string, any>[]> {
 export function useTimestreamDashboard() {
   const silvanopolis = ref<LocationData>({
     level: 0, levelSeries: [], flowSeries: [], production24h: [], productionDaily: [],
-    levelStats: null, flowStats: {}
+    levelStats: null, flowStats: {}, production24hStats: {}, productionDailyStats: {}
   })
   const miranorte = ref<LocationData>({
     level: 0, levelSeries: [], flowSeries: [], production24h: [], productionDaily: [],
-    levelStats: null, flowStats: {}
+    levelStats: null, flowStats: {}, production24hStats: {}, productionDailyStats: {}
   })
   const loading = ref(false)
   const error         = ref<string | null>(null)
@@ -261,6 +275,9 @@ export function useTimestreamDashboard() {
         flowStatsMap[s.name] = computeStats(s.values.map(d => d.value))
       })
 
+      const prod24hStats   = productionStats(prod24h)
+      const prodDailyStats = productionStats(prodDaily)
+
       silvanopolis.value = {
         level: silLevel,
         levelSeries: silSeries,
@@ -269,6 +286,8 @@ export function useTimestreamDashboard() {
         productionDaily: prodDaily,
         levelStats: silLevelStats,
         flowStats: flowStatsMap,
+        production24hStats:   prod24hStats,
+        productionDailyStats: prodDailyStats,
       }
       miranorte.value = {
         level: mirLevel,
@@ -278,6 +297,8 @@ export function useTimestreamDashboard() {
         productionDaily: prodDaily,
         levelStats: mirLevelStats,
         flowStats: flowStatsMap,
+        production24hStats:   prod24hStats,
+        productionDailyStats: prodDailyStats,
       }
       lastUpdated.value = new Date().toLocaleTimeString()
       appendSnapshot(silvanopolis.value, miranorte.value)
