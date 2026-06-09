@@ -374,6 +374,47 @@ Keys: `dashboard.water_unit`, `dashboard.energy_unit`.
 
 ---
 
+## Security
+
+This is an open-source project with a public GitHub repository. The frontend code is fully visible by design. However, the backend infrastructure is protected by multiple layers of automated guardrails.
+
+### ⚠️ Notice to anyone attempting to misuse this system
+
+If you extract temporary AWS credentials from the browser and attempt to abuse them programmatically, the following automated response chain will trigger:
+
+```
+Abnormal Timestream spend detected
+  │
+  ├─ 80% threshold → Alert email sent to the administrator
+  │
+  └─ 100% threshold ($5) → Two simultaneous automated actions:
+       │
+       ├─ IAM Emergency Deny
+       │    └─ Deny policy attached to the Cognito authenticated role
+       │         └─ All Timestream queries → AccessDenied immediately
+       │              (applies to all credentials already issued — no grace period)
+       │
+       └─ SNS → Lambda (automatic, no human intervention required)
+            ├─ Enumerates all active Cognito pool users
+            ├─ AdminUserGlobalSignOut → all active tokens invalidated instantly
+            └─ AdminDisableUser → all accounts locked, new logins blocked
+                 └─ Re-authentication is impossible until manually reviewed
+```
+
+**What this means in practice:**
+
+- Credentials extracted from the browser are valid for ≤ 1 hour (AWS STS limit)
+- Any programmatic SELECT loop that drives spend past $5 triggers a full pool lockdown
+- No human needs to be online — AWS Budget Actions and Lambda execute automatically
+- The administrator account is excluded from the lockdown and retains full access
+- Every lockdown event is logged in CloudWatch and triggers an email alert
+
+The IAM role available to authenticated users is scoped to read-only access on exactly 3 specific Timestream table ARNs. There is no write access, no S3 delete access, no Cognito admin access, and no access to any other AWS service.
+
+Attempting to abuse this system is not worth the effort.
+
+---
+
 ## License
 
 This is an open source project licensed under the **Apache 2.0 License**, developed by **Dr. Igor Lemos Alves**.
