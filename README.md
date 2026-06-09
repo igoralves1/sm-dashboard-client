@@ -430,7 +430,7 @@ sequenceDiagram
     participant Lambda as Lambda<br/><LAMBDA_NAME>
     actor Administrator
 
-    rect rgb(255, 255, 255)
+    rect rgba(0,0,0,0)
         Note over Attacker,IdentityPool: Step 1 — Authentication
         Attacker->>Browser: Login with valid credentials
         Browser->>CognitoPool: authenticateUser()
@@ -440,7 +440,7 @@ sequenceDiagram
         Note over Browser: Credentials visible in DevTools → Network tab
     end
 
-    rect rgb(255, 255, 255)
+    rect rgba(0,0,0,0)
         Note over Attacker,S3: Step 2 — Attack vectors with extracted credentials
         Attacker->>Timestream: VECTOR A — SELECT * (3 queries, <1 sec, ~$0.001)<br/>Full 11-month database dump
         Timestream-->>Attacker: 1.1M rows: water levels, GPS coords, flow rates
@@ -448,7 +448,7 @@ sequenceDiagram
         Attacker->>S3: VECTOR C — ListBucket + GetObject<br/>Read other users session logs
     end
 
-    rect rgb(255, 255, 255)
+    rect rgba(0,0,0,0)
         Note over CloudTrail,Lambda: Layer 1 — Real-time detection (~2 minutes)
         Timestream->>CloudTrail: Every API call logged in real time
         CloudTrail->>CWAlarm: Stream to CloudWatch Logs → Metric Filter counts queries
@@ -465,7 +465,7 @@ sequenceDiagram
         CognitoPool-->>Attacker: UserNotConfirmedException (account disabled)
     end
 
-    rect rgb(255, 255, 255)
+    rect rgba(0,0,0,0)
         Note over Budget,Lambda: Layer 2 — Cost kill switch (redundant backstop)
         Budget->>Administrator: Email alert at $4 (80%)
         Budget->>SNS: Fires at $5 (100%)
