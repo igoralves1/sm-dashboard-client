@@ -68,8 +68,8 @@
         </BCol>
       </BRow>
 
-      <!-- ═══ COGNITO USERS PANEL ═══ -->
-      <BCard no-body class="mb-3">
+      <!-- ═══ COGNITO USERS PANEL — admin only ═══ -->
+      <BCard v-if="isAdmin" no-body class="mb-3">
         <div class="cog-header" @click="cognitoOpen = !cognitoOpen">
           <div class="d-flex align-items-center gap-2">
             <Icon icon="tabler:shield-lock" width="16" class="text-primary" />
@@ -453,8 +453,11 @@ import { useI18n } from 'vue-i18n'
 import { useSessionTracker, type PageSession } from '@/composables/useSessionTracker'
 import { useS3Activity } from '@/composables/useS3Activity'
 import { useCognitoUsers, type CognitoUser } from '@/composables/useCognitoUsers'
+import { useAuthStore } from '@/stores/auth'
 
 const { t, locale } = useI18n()
+const auth = useAuthStore()
+const isAdmin = computed(() => auth.user?.isAdmin === true)
 const { getSessions, clear } = useSessionTracker()
 const { loadAllSessions, uploadSession } = useS3Activity()
 const { listUsers } = useCognitoUsers()

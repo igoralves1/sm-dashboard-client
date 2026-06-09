@@ -20,7 +20,7 @@ const userPool = new CognitoUserPool({
 })
 
 export const useAuthStore = defineStore('auth', () => {
-  const user = ref<{ name: string; email: string } | null>(null)
+  const user = ref<{ name: string; email: string; isAdmin: boolean } | null>(null)
   const accessToken = ref<string | null>(null)
   const idToken = ref<string | null>(null)
   const refreshToken = ref<string | null>(null)
@@ -49,9 +49,11 @@ export const useAuthStore = defineStore('auth', () => {
     tokenExpiry.value = Date.now() + TOKEN_EXPIRY_MINUTES * 60 * 1000
 
     const payload = session.getIdToken().decodePayload()
+    const groups: string[] = payload['cognito:groups'] ?? []
     user.value = {
       name: payload['name'] ?? payload['email'] ?? 'User',
       email: payload['email'] ?? '',
+      isAdmin: groups.includes('admin'),
     }
   }
 
