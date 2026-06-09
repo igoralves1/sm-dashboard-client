@@ -98,9 +98,11 @@ function draw() {
 
   const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`)
 
-  // Domain: extend to show outliers and UCL/LCL
-  const domainMin = Math.min(st.whiskerLow,  st.lcl, ...st.outliers) - (st.iqr * 0.1 || 1)
-  const domainMax = Math.max(st.whiskerHigh, st.ucl, ...st.outliers) + (st.iqr * 0.1 || 1)
+  // Domain: extend to show outliers and UCL/LCL (guard against empty outliers array)
+  const allPoints  = [st.whiskerLow, st.lcl, st.whiskerHigh, st.ucl, ...st.outliers]
+  const pad        = (st.iqr * 0.15) || (st.std * 0.5) || 1
+  const domainMin  = Math.min(...allPoints) - pad
+  const domainMax  = Math.max(...allPoints) + pad
 
   const x = d3.scaleLinear().domain([domainMin, domainMax]).range([0, W])
 
