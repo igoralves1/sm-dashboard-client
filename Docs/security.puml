@@ -1,0 +1,186 @@
+@startuml security
+!theme cerulean-outline
+skinparam backgroundColor #FAFAFA
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 12
+skinparam ArrowColor #444444
+skinparam NoteBackgroundColor #FFFDE7
+skinparam NoteBorderColor #F9A825
+
+title Prana — Security Architecture & Attacker Threat Model
+
+'─────────────────────────────────────────────
+' ACTORS
+'─────────────────────────────────────────────
+actor "Attacker" as ATK #Red
+actor "Administrator" as ADM #Green
+participant "Browser\n(DevTools)" as BR #LightCoral
+
+'─────────────────────────────────────────────
+' AWS AUTH LAYER
+'─────────────────────────────────────────────
+box "AWS Cognito" #E3F2FD
+  participant "User Pool\n<USER_POOL_ID>" as UP
+  participant "Identity Pool\n<IDENTITY_POOL_NAME>" as IP
+end box
+
+'─────────────────────────────────────────────
+' WHAT ATTACKER CAN REACH
+'─────────────────────────────────────────────
+box "Exposed Attack Surface (IAM scoped)" #FFF3E0
+  participant "Timestream\n3 table ARNs only" as TS #Orange
+  participant "S3 Bucket\n<S3_BUCKET>\n(PutObject + GetObject)" as S3 #Orange
+end box
+
+'─────────────────────────────────────────────
+' DEFENSE LAYER 1 — Real-time
+'─────────────────────────────────────────────
+box "Layer 1 — Real-time Detection (~2 min)" #E8F5E9
+  participant "CloudTrail\n<CLOUDTRAIL_NAME>" as CT #Green
+  participant "CloudWatch Logs\n/prana/cloudtrail" as CWL #Green
+  participant "CW Alarm\n≥50 queries/5min" as CWA #Green
+end box
+
+'─────────────────────────────────────────────
+' DEFENSE LAYER 2 — Cost kill switch
+'─────────────────────────────────────────────
+box "Layer 2 — Cost Kill Switch ($5)" #E8F5E9
+  participant "AWS Budget\n$5 Timestream guard" as BUD #Green
+  participant "IAM Emergency Deny\n<DENY_POLICY>" as DENY #Green
+end box
+
+'─────────────────────────────────────────────
+' RESPONSE
+'─────────────────────────────────────────────
+box "Automated Response" #E8F5E9
+  participant "SNS\n<SNS_TOPIC>" as SNS #Green
+  participant "Lambda\n<LAMBDA_NAME>" as LAM #Green
+end box
+
+'═════════════════════════════════════════════
+' SEQUENCE
+'═════════════════════════════════════════════
+
+== Step 1 — Authentication (legitimate) ==
+
+ATK -> BR : Opens app, logs in\nwith valid credentials
+BR -> UP : authenticateUser(email, password)
+UP --> BR : idToken (TTL: 1h)\naccessToken (TTL: 1h)\nrefreshToken (TTL: 30 days)
+BR -> IP : Exchange idToken for\nAWS STS credentials
+IP --> BR : AccessKeyId\nSecretAccessKey\nSessionToken\n(TTL: **1 hour hard limit**)
+
+note over BR #FFF9C4
+  **Credentials visible in:**
+  • DevTools → Network → Authorization header
+  • Browser memory (sessionStorage)
+  • Any HTTP proxy / Burp Suite
+end note
+
+== Step 2 — What attacker extracts ==
+
+ATK -> BR : Opens DevTools\nCopies STS credentials
+note over ATK #FFCDD2
+  **Attacker now has:**
+  AccessKeyId    = ASIA...
+  SecretKey      = xxxx...
+  SessionToken   = xxxx...
+  **Valid for: 1 hour from issuance**
+end note
+
+== Step 3 — Attack vectors with extracted credentials ==
+
+group "VECTOR A — Data exfiltration (3 queries, <1 second, ~$0.001)"
+  ATK -> TS : SELECT * FROM <TABLE_RT>\n(1.1M rows — 11 months history)
+  TS --> ATK : water_level, flux, lat/lng,\nbattery, signal strength
+  ATK -> TS : SELECT * FROM <TABLE_HOURLY>
+  TS --> ATK : hourly production aggregates
+  ATK -> TS : SELECT * FROM <TABLE_DAILY>
+  TS --> ATK : daily production aggregates
+  note over ATK #FFCDD2
+    **Cannot query any other table**
+    IAM scoped to exactly 3 ARNs
+    AccessDenied on all others
+  end note
+end
+
+group "VECTOR B — Cost abuse (SELECT loop, programmatic)"
+  ATK -> TS : SELECT * loop at 1–5 req/sec\nusing extracted STS keys
+  TS --> ATK : data + CumulativeBytesMetered\n(37.9MB per full scan)
+  note over ATK #FFCDD2
+    Cost: $0.00038 per full scan
+    At 5 req/sec → $6.84/hour potential
+    **Kill switch fires before this**
+  end note
+end
+
+group "VECTOR C — S3 session log read"
+  ATK -> S3 : ListBucket → enumerate all session files
+  ATK -> S3 : GetObject → read other users' session logs
+  note over ATK #FFCDD2
+    Can read: emails, IPs, pages visited
+    Cannot delete (s3:DeleteObject removed)
+    Cannot write to any other bucket
+  end note
+end
+
+== Step 4 — Layer 1 fires (~2 minutes after attack starts) ==
+
+ATK -> TS : Query loop continues...
+TS -> CT : Every API call logged\n(eventSource, eventName,\ncallerIdentity, timestamp)
+CT -> CWL : Real-time log stream
+CWL -> CWA : Metric Filter counts\nTimestream Query events
+CWA -> CWA : Sum ≥ 50 in 5-min window\nNORMAL max: ~6/5min\nATTACK at 1/sec: 300/5min
+
+CWA -> SNS : ALARM state → publish
+SNS -> ADM : Email alert
+SNS -> LAM : Invoke (automatic)
+
+LAM -> UP : ListUsers
+LAM -> UP : AdminListGroupsForUser\n(skip 'admin' group)
+LAM -> UP : AdminUserGlobalSignOut\n→ all refresh tokens invalidated
+LAM -> UP : AdminDisableUser\n→ login blocked
+
+note over LAM #C8E6C9
+  **Admin account: skipped entirely**
+  All other pool users: locked
+  Time from attack start: ~1–2 min
+  Max cost before lockdown: ~$0.03
+end note
+
+ATK -> UP : Tries to refresh token
+UP --> ATK : NotAuthorizedException\n(token invalidated)
+ATK -> UP : Tries to re-login
+UP --> ATK : UserNotConfirmedException\n(account disabled)
+
+== Step 5 — Layer 2 fires (if Layer 1 somehow missed) ==
+
+BUD -> BUD : Detects Timestream spend\napproaching $5\n(checked ~3x per day)
+BUD -> ADM : Email at $4 (80% threshold)
+BUD -> DENY : Attach deny policy to\n<AUTH_ROLE>
+DENY -> TS : All timestream:* calls\n→ AccessDenied\n(existing STS tokens blocked immediately)
+BUD -> SNS : $5 threshold → publish
+SNS -> LAM : Invoke lockdown Lambda (again)
+
+== Step 6 — STS credential expiry ==
+
+note over ATK #FFCDD2
+  Even if attacker avoids triggering alarms:
+  STS credentials expire after **1 hour**
+  Cannot be renewed (Cognito account disabled)
+  New login impossible (account locked)
+  **Attack window: max 1 hour**
+end note
+
+== TTL Summary ==
+
+note over UP, IP #E3F2FD
+  **Token TTLs:**
+  idToken / accessToken  → 1 hour
+  refreshToken           → 30 days (invalidated by AdminUserGlobalSignOut)
+  STS credentials        → 1 hour hard limit (non-renewable after lockdown)
+  CloudWatch alarm check → every 5 minutes
+  AWS Budget check       → every ~8 hours
+  Lambda execution       → ~3 seconds after SNS publish
+end note
+
+@enduml

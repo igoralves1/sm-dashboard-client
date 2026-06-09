@@ -422,12 +422,12 @@ sequenceDiagram
     participant CognitoPool as Cognito User Pool
     participant IdentityPool as Cognito Identity Pool
     participant Timestream as Timestream<br/>(3 table ARNs only)
-    participant S3 as S3<br/><S3_BUCKET>
-    participant CloudTrail as CloudTrail<br/><CLOUDTRAIL_NAME>
+    participant S3 as S3<br/>(activity bucket)
+    participant CloudTrail as CloudTrail
     participant CWAlarm as CloudWatch Alarm<br/>≥50 queries / 5 min
     participant Budget as AWS Budget<br/>$5 limit
-    participant SNS as SNS<br/><SNS_TOPIC>
-    participant Lambda as Lambda<br/><LAMBDA_NAME>
+    participant SNS as SNS
+    participant Lambda as Lambda<br/>(lockdown function)
     actor Administrator
 
     rect rgba(0,0,0,0)
@@ -469,7 +469,7 @@ sequenceDiagram
         Note over Budget,Lambda: Layer 2 — Cost kill switch (redundant backstop)
         Budget->>Administrator: Email alert at $4 (80%)
         Budget->>SNS: Fires at $5 (100%)
-        Budget->>Timestream: Attach IAM Deny to <AUTH_ROLE><br/>timestream:* → AccessDenied on ALL credentials immediately
+        Budget->>Timestream: Attach IAM Deny to authenticated-user role<br/>timestream:* → AccessDenied on ALL credentials immediately
         SNS->>Lambda: Invoke lockdown again (belt and suspenders)
     end
 
@@ -510,14 +510,14 @@ aws timestream-query query --query-string "SELECT * FROM ..."
 
 ### Step 2 — Attack surface with extracted credentials
 
-The IAM role assigned to authenticated users (`<AUTH_ROLE>`) is scoped to the minimum required:
+The IAM role assigned to authenticated users is scoped to the minimum required:
 
 | Action | Resource | What the attacker can do | Impact |
 |---|---|---|---|
 | `timestream:Select` | 3 specific table ARNs only | Read sensor data (water levels, flow rates, GPS coords, device health) | 🟡 Medium — operational IoT data |
 | `timestream:DescribeEndpoints` | `*` (AWS SDK requirement) | Resolve the regional endpoint | 🟢 None |
-| `s3:PutObject` / `s3:GetObject` | `<S3_BUCKET>/*` only | Read other users' session logs (emails, IPs, pages visited) | 🟡 Medium — privacy |
-| `s3:ListBucket` | `<S3_BUCKET>` only | List session log filenames | 🟢 Low |
+| `s3:PutObject` / `s3:GetObject` | activity bucket only | Read other users' session logs (emails, IPs, pages visited) | 🟡 Medium — privacy |
+| `s3:ListBucket` | activity bucket only | List session log filenames | 🟢 Low |
 | **Everything else** | — | `AccessDenied` | — |
 
 **What is explicitly blocked:**
@@ -527,16 +527,16 @@ The IAM role assigned to authenticated users (`<AUTH_ROLE>`) is scoped to the mi
 - ❌ No access to any other S3 bucket in the account
 - ❌ No `cognito-idp:ListUsers` (removed from this role)
 - ❌ No IAM permissions
-- ❌ No access to the other 17 Timestream tables in the database
+- ❌ No access to any other Timestream tables in the database
 - ❌ No access to any other AWS service
 
 **Potential attack vectors:**
 
 ```
 VECTOR A — Data exfiltration (3 queries, < 1 second, cost ~$0.001)
-  SELECT * FROM <TABLE_RT>          → 1.1M rows, 11 months of sensor history
-  SELECT * FROM <TABLE_HOURLY>   → hourly production aggregates
-  SELECT * FROM <TABLE_DAILY>    → daily production aggregates
+  SELECT * FROM <realtime_table>          → sensor history (months of data)
+  SELECT * FROM <hourly_table>            → hourly production aggregates
+  SELECT * FROM <daily_table>             → daily production aggregates
   Result: complete database dump in seconds — no way to prevent this
 
 VECTOR B — Cost abuse (SELECT loop, programmatic)
@@ -590,8 +590,8 @@ The only vector with no automated prevention is a one-shot data exfiltration (Ve
 
 ```
 Every Timestream API call
-  → AWS CloudTrail (<CLOUDTRAIL_NAME>) — permanent audit log
-  → CloudWatch Logs (/prana/cloudtrail) — real-time stream, 30-day retention
+  → AWS CloudTrail — permanent audit log
+  → CloudWatch Logs — real-time stream, 30-day retention
   → CloudWatch Metric Filter (TimestreamQueryCount)
   → CloudWatch Alarm evaluates every 5 minutes
 
@@ -600,10 +600,9 @@ Attack at 1 req/sec → 300 queries per 5-min window
 Alarm threshold     →  50 queries per 5-min window
 
 On ALARM:
-  → SNS: <SNS_TOPIC>
-      ├─ Email → administrator
-      └─ Lambda: <LAMBDA_NAME>
-           ├─ Lists all users in Cognito pool <USER_POOL_ID>
+  → SNS topic → Email to administrator
+      └─ Lambda (lockdown function)
+           ├─ Lists all users in the Cognito User Pool
            ├─ Skips users in 'admin' group (administrator unaffected)
            ├─ AdminUserGlobalSignOut → all refresh tokens invalidated
            └─ AdminDisableUser → accounts locked, re-login impossible
@@ -614,14 +613,13 @@ On ALARM:
 ### Layer 2 — Cost kill switch (redundant backstop)
 
 ```
-AWS Budget: prana-timestream-cost-guard ($5/month limit)
+AWS Budget ($5/month limit on Timestream spend)
 
 Spend reaches $4 (80%)  → Email alert to administrator
 Spend reaches $5 (100%) → Two simultaneous automated actions:
 
   Action 1 — IAM Emergency Deny (Budget Action, automatic)
-    Attaches policy <DENY_POLICY>
-    to role <AUTH_ROLE>
+    Attaches emergency deny policy to the authenticated-user IAM role
     Effect: timestream:* → AccessDenied on ALL credentials
     Scope: Cognito pool users only — IoT rules, Grafana, Lambdas unaffected
 
@@ -641,9 +639,9 @@ Spend reaches $5 (100%) → Two simultaneous automated actions:
 | Scheduled Timestream queries | Uses `RoleTimestreamSchedule` — different role |
 | Lambda functions | Each has its own execution role |
 | Administrator account | Explicitly skipped by Lambda (`admin` Cognito group check) |
-| Other Cognito pools in the account | Lambda scoped to pool ID `<USER_POOL_ID>` only |
+| Other Cognito pools in the account | Lambda scoped to this app's User Pool only |
 
-The lockdown is surgically scoped to credentials issued by the `<IDENTITY_POOL_NAME>` Identity Pool — whether used from a browser, AWS CLI, Python script, or any other SDK. Nothing else in the AWS account is interrupted.
+The lockdown is surgically scoped to credentials issued by this app's Identity Pool — whether used from a browser, AWS CLI, Python script, or any other SDK. Nothing else in the AWS account is interrupted.
 
 ---
 
