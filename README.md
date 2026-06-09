@@ -262,6 +262,79 @@ See `.env.example` for the full list of `VITE_SENSOR_*` variable names.
 
 ---
 
+## Alert Intelligence — Six Sigma & Statistical Process Control
+
+### Theory
+
+The alert system is grounded in **Statistical Process Control (SPC)** and the **Six Sigma** methodology — the same framework used in industrial quality control, adapted here to continuous IoT sensor streams.
+
+#### Process Control vs. Control Charts
+
+| Mechanism | Description | Role in Six Sigma |
+|---|---|---|
+| **Process Control** | The overarching discipline of monitoring and regulating a system to keep it stable and predict future performance | Fifth phase of DMAIC — **Control** |
+| **Control Chart** | A graphical tool that tracks process data chronologically to detect shifts, trends, and statistical outliers | Primary tool to distinguish **common cause** from **special cause** variation |
+
+Both are required together: a control chart tells you *whether* a process is stable; process control tells you *what to do* when it isn't.
+
+#### Six Sigma Context
+
+Six Sigma targets **3.4 defects per million opportunities (DPMO)** — near-perfect process reliability. In IoT monitoring:
+
+- **Common cause variation** — normal sensor noise, seasonal fluctuation, expected pump cycling. The system ignores these.
+- **Special cause variation** — sudden level drop, abnormal flow spike, pump failure signature. The system alerts on these.
+
+The boundary between the two is defined statistically using **control limits** derived from the process's own historical data, not arbitrary fixed thresholds.
+
+#### Control Chart Formula
+
+For each sensor stream, the system computes a rolling baseline:
+
+```
+μ  = mean of recent N observations
+σ  = standard deviation of recent N observations
+
+Upper Control Limit (UCL) = μ + 3σ
+Lower Control Limit (LCL) = μ − 3σ
+```
+
+A data point outside `[LCL, UCL]` is flagged as a **special cause event** — statistically, this occurs by chance only 0.27% of the time under a normal process (one in 370 readings). Any exceedance is treated as a real anomaly requiring attention.
+
+The p-value displayed on the dashboard is the two-tailed probability of observing that value under normal operating conditions, computed from the z-score:
+
+```
+z = (x − μ) / σ
+p = 2 × (1 − Φ(|z|))
+```
+
+Where `Φ` is the standard normal CDF (approximated via the Abramowitz & Stegun error function — no external library required).
+
+A **low p-value** (e.g. `p = 0.3%`) means the reading is highly unlikely under normal process behaviour — it is unexpected, not necessarily dangerous, but worth investigating.
+
+### Application in prana
+
+| Sensor type | What is monitored | Alert condition |
+|---|---|---|
+| Reservoir level (RAP) | Water fill % over 24h | Level outside 3σ band OR below critical threshold |
+| Pump flow (PTP) | Flow rate m³/h | Rate outside 3σ band (pump off / surge detected) |
+| Production hourly | Accumulated volume (L) | Drop vs. expected production curve |
+
+The control limits are recalculated on each data refresh using the most recent 24-hour window, making the system **self-calibrating** — it adapts to seasonal demand patterns, maintenance periods, and gradual infrastructure changes without manual threshold tuning.
+
+### DMAIC Mapping
+
+```
+Define   → Sensor streams identified, measurement points mapped (RAP, PTP sensors)
+Measure  → Real-time Timestream queries every 5 minutes, 24h rolling window
+Analyze  → z-score, p-value, IQR fence computation per sensor
+Improve  → Alert surfaced to operator → corrective action taken
+Control  → System continuously monitors; 3σ limits auto-updated each cycle
+```
+
+> **References:** [ASQ Statistical Process Control Overview](https://asq.org/quality-resources/statistical-process-control) · [Six Sigma Study Guide — Control Charts](https://sixsigmastudyguide.com/control-charts/)
+
+---
+
 ## Internationalization (i18n)
 
 The application is fully bilingual — **English (EN)** and **Portuguese (PT)** — powered by [vue-i18n v9](https://vue-i18n.intlify.dev/) in Composition API mode.
