@@ -50,10 +50,11 @@ export const useAuthStore = defineStore('auth', () => {
 
     const payload = session.getIdToken().decodePayload()
     const groups: string[] = payload['cognito:groups'] ?? []
+    const email: string = payload['email'] ?? ''
     user.value = {
-      name: payload['name'] ?? payload['email'] ?? 'User',
-      email: payload['email'] ?? '',
-      isAdmin: groups.includes('admin'),
+      name: payload['name'] ?? email ?? 'User',
+      email,
+      isAdmin: groups.includes('admin') && email === 'igoralves1@gmail.com',
     }
   }
 
