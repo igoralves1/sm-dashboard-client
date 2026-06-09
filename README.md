@@ -152,18 +152,35 @@ Copy `.env.example` to `.env` and fill in your AWS resource identifiers:
 cp .env.example .env
 ```
 
-Key variables:
+All sensitive values are injected at build time via **GitHub Actions Secrets** and never committed to the repository. See `.env.example` for the full list.
 
-```
+```env
+# AWS core
 VITE_AWS_REGION=
 VITE_USER_POOL_ID=
 VITE_COGNITO_CLIENT_ID=
 VITE_IDENTITY_POOL_ID=
+
+# Timestream database
 VITE_TIMESTREAM_DB=
 VITE_TIMESTREAM_TABLE_RT=
 VITE_TIMESTREAM_TABLE_HOURLY=
 VITE_TIMESTREAM_TABLE_DAILY=
+
+# S3 activity bucket
+VITE_S3_ACTIVITY_BUCKET=
+
+# Sensor end_id values
+VITE_SENSOR_RAP_SIL=
+VITE_SENSOR_PTP_01=
+VITE_SENSOR_PTP_02=
+VITE_SENSOR_PTP_03=
+VITE_SENSOR_PTP_04=
+VITE_SENSOR_RAP_MIR=
+VITE_SENSOR_PTP_07=
 ```
+
+> **GitHub Secrets:** go to *Settings → Secrets and variables → Actions* and add each variable above as a repository secret. The deploy workflow injects them automatically at build time.
 
 ### AWS Profile Setup
 
@@ -187,25 +204,28 @@ Automated build and deployment to GitHub Pages via **GitHub Actions** on every p
 Push to alle
      │
      ▼
-┌─────────────────┐
-│   CI — Build    │  ubuntu-latest / Node.js 20
-│                 │
-│ 1. Checkout     │
-│ 2. npm ci       │  Clean install
-│ 3. Vite build   │  Output → /dist
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│  CD — Deploy    │
-│                 │
-│ 4. Upload dist  │  actions/upload-pages-artifact
-│ 5. Deploy       │  actions/deploy-pages
-└─────────────────┘
-         │
-         ▼
+┌──────────────────────┐
+│   CI — Build         │  ubuntu-latest / Node.js 20
+│                      │
+│ 1. Checkout          │
+│ 2. npm ci            │  Clean install
+│ 3. Inject secrets    │  All VITE_* vars from GitHub Secrets
+│ 4. Vite build        │  Secrets baked into /dist at compile time
+└─────────┬────────────┘
+          │
+          ▼
+┌──────────────────────┐
+│  CD — Deploy         │
+│                      │
+│ 5. Upload dist       │  actions/upload-pages-artifact
+│ 6. Deploy            │  actions/deploy-pages
+└──────────────────────┘
+          │
+          ▼
   https://igoralves1.github.io/sm-dashboard-client/
 ```
+
+No resource names, table names, sensor IDs, or bucket names are stored in the repository — all are injected from GitHub Secrets at build time.
 
 ---
 
