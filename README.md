@@ -383,6 +383,39 @@ This is an open-source repository. The frontend code is fully visible by design.
 ### Full security architecture diagram
 
 ```mermaid
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "primaryColor": "#1a2a4a",
+    "primaryTextColor": "#ffffff",
+    "primaryBorderColor": "#4a90d9",
+    "secondaryColor": "#0d1b2a",
+    "tertiaryColor": "#0d1b2a",
+    "background": "#0d1b2a",
+    "mainBkg": "#1a2a4a",
+    "nodeBorder": "#4a90d9",
+    "clusterBkg": "#0d1b2a",
+    "titleColor": "#ffffff",
+    "edgeLabelBackground": "#1a2a4a",
+    "signalColor": "#4a90d9",
+    "signalTextColor": "#e0f0ff",
+    "labelBoxBkgColor": "#1a2a4a",
+    "labelBoxBorderColor": "#4a90d9",
+    "labelTextColor": "#e0f0ff",
+    "loopTextColor": "#e0f0ff",
+    "noteBkgColor": "#2a3a5a",
+    "noteTextColor": "#e0f0ff",
+    "noteBorderColor": "#4a90d9",
+    "activationBkgColor": "#2a4a7a",
+    "activationBorderColor": "#4a90d9",
+    "sequenceNumberColor": "#ffffff",
+    "actorBkg": "#1a2a4a",
+    "actorBorder": "#4a90d9",
+    "actorTextColor": "#e0f0ff",
+    "actorLineColor": "#4a90d9",
+    "dividerTextColor": "#e0f0ff"
+  }
+}}%%
 sequenceDiagram
     actor Attacker
     participant Browser
