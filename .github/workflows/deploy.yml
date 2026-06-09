@@ -34,11 +34,22 @@ jobs:
       - name: Build
         run: npm run build
         env:
-          VITE_AWS_REGION:        ${{ secrets.VITE_AWS_REGION }}
-          VITE_IDENTITY_POOL_ID:  ${{ secrets.VITE_IDENTITY_POOL_ID }}
-          VITE_USER_POOL_ID:      ${{ secrets.VITE_USER_POOL_ID }}
-          VITE_COGNITO_CLIENT_ID: ${{ secrets.VITE_COGNITO_CLIENT_ID }}
-          VITE_TIMESTREAM_DB:     ${{ secrets.VITE_TIMESTREAM_DB }}
+          VITE_AWS_REGION:               ${{ secrets.VITE_AWS_REGION }}
+          VITE_IDENTITY_POOL_ID:         ${{ secrets.VITE_IDENTITY_POOL_ID }}
+          VITE_USER_POOL_ID:             ${{ secrets.VITE_USER_POOL_ID }}
+          VITE_COGNITO_CLIENT_ID:        ${{ secrets.VITE_COGNITO_CLIENT_ID }}
+          VITE_TIMESTREAM_DB:            ${{ secrets.VITE_TIMESTREAM_DB }}
+          VITE_TIMESTREAM_TABLE_RT:      ${{ secrets.VITE_TIMESTREAM_TABLE_RT }}
+          VITE_TIMESTREAM_TABLE_HOURLY:  ${{ secrets.VITE_TIMESTREAM_TABLE_HOURLY }}
+          VITE_TIMESTREAM_TABLE_DAILY:   ${{ secrets.VITE_TIMESTREAM_TABLE_DAILY }}
+          VITE_S3_ACTIVITY_BUCKET:       ${{ secrets.VITE_S3_ACTIVITY_BUCKET }}
+          VITE_SENSOR_RAP_SIL:           ${{ secrets.VITE_SENSOR_RAP_SIL }}
+          VITE_SENSOR_PTP_01:            ${{ secrets.VITE_SENSOR_PTP_01 }}
+          VITE_SENSOR_PTP_02:            ${{ secrets.VITE_SENSOR_PTP_02 }}
+          VITE_SENSOR_PTP_03:            ${{ secrets.VITE_SENSOR_PTP_03 }}
+          VITE_SENSOR_PTP_04:            ${{ secrets.VITE_SENSOR_PTP_04 }}
+          VITE_SENSOR_RAP_MIR:           ${{ secrets.VITE_SENSOR_RAP_MIR }}
+          VITE_SENSOR_PTP_07:            ${{ secrets.VITE_SENSOR_PTP_07 }}
 
       - name: Setup Pages
         uses: actions/configure-pages@v4

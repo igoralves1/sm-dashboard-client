@@ -1,6 +1,6 @@
 /**
  * S3-backed storage for cross-user/cross-browser data.
- * Bucket: <S3_BUCKET> (us-east-2)
+ * Bucket: configured via VITE_S3_ACTIVITY_BUCKET env var
  * Layout:
  *   sessions/{userId}/{sessionId}.json
  *   alerts/{alertId}.json
@@ -20,7 +20,7 @@ import { useAuthStore } from '@/stores/auth'
 import type { PageSession } from './useSessionTracker'
 import type { StoredAlert } from './useAlertStore'
 
-const BUCKET  = '<S3_BUCKET>'
+const BUCKET  = import.meta.env.VITE_S3_ACTIVITY_BUCKET as string
 const REGION  = import.meta.env.VITE_AWS_REGION        as string
 const POOL_ID = import.meta.env.VITE_IDENTITY_POOL_ID  as string
 const UP_ID   = import.meta.env.VITE_USER_POOL_ID      as string
