@@ -103,6 +103,28 @@
             :thresholds="levelThresholds"
             :title="t('monitoring.level_title_sil')"
           />
+          <!-- SPC panel -->
+          <div class="spc-panel">
+            <button class="spc-toggle" @click="statsOpenSilLevel = !statsOpenSilLevel">
+              <span class="spc-toggle__icon">▶ Statistical model used</span>
+              <span class="spc-chevron" :class="{ open: statsOpenSilLevel }">▾</span>
+            </button>
+            <div v-show="statsOpenSilLevel" class="spc-body">
+              <ControlChart
+                :data="silvanopolis.levelSeries"
+                :stats="silvanopolis.levelStats"
+                unit="%"
+                title="Control Chart — Water Level · Silvanópolis"
+                :height="180"
+                :y-domain="[0, 110]"
+              />
+              <BoxPlot
+                :stats="silvanopolis.levelStats"
+                unit="%"
+                label="Box Plot · Water Level Distribution (24h)"
+              />
+            </div>
+          </div>
         </div>
       </div>
       <!-- Map -->
@@ -119,6 +141,33 @@
       <div class="col-12">
         <div class="chart-card">
           <FlowTimeSeries :data="silvanopolis.flowSeries" />
+          <!-- SPC panel -->
+          <div class="spc-panel">
+            <button class="spc-toggle" @click="statsOpenSilFlow = !statsOpenSilFlow">
+              <span class="spc-toggle__icon">▶ Statistical model used</span>
+              <span class="spc-chevron" :class="{ open: statsOpenSilFlow }">▾</span>
+            </button>
+            <div v-show="statsOpenSilFlow" class="spc-body">
+              <div class="spc-flow-grid">
+                <template v-for="s in silvanopolis.flowSeries" :key="s.name">
+                  <div class="spc-flow-col">
+                    <ControlChart
+                      :data="s.values"
+                      :stats="silvanopolis.flowStats[s.name] ?? null"
+                      unit=" m³/h"
+                      :title="`Control Chart — ${s.name}`"
+                      :height="160"
+                    />
+                    <BoxPlot
+                      :stats="silvanopolis.flowStats[s.name] ?? null"
+                      unit=" m³/h"
+                      :label="`${s.name} Distribution`"
+                    />
+                  </div>
+                </template>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       <!-- Bar charts -->
@@ -168,6 +217,28 @@
             :thresholds="levelThresholds"
             :title="t('monitoring.level_title_mir')"
           />
+          <!-- SPC panel -->
+          <div class="spc-panel">
+            <button class="spc-toggle" @click="statsOpenMirLevel = !statsOpenMirLevel">
+              <span class="spc-toggle__icon">▶ Statistical model used</span>
+              <span class="spc-chevron" :class="{ open: statsOpenMirLevel }">▾</span>
+            </button>
+            <div v-show="statsOpenMirLevel" class="spc-body">
+              <ControlChart
+                :data="miranorte.levelSeries"
+                :stats="miranorte.levelStats"
+                unit="%"
+                title="Control Chart — Water Level · Miranorte"
+                :height="180"
+                :y-domain="[0, 110]"
+              />
+              <BoxPlot
+                :stats="miranorte.levelStats"
+                unit="%"
+                label="Box Plot · Water Level Distribution (24h)"
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -189,6 +260,8 @@ import LevelTimeSeries from '@/components/charts/LevelTimeSeries.vue'
 import FlowTimeSeries from '@/components/charts/FlowTimeSeries.vue'
 import ProductionBar from '@/components/charts/ProductionBar.vue'
 import RefreshCountdown from '@/components/charts/RefreshCountdown.vue'
+import ControlChart from '@/components/charts/ControlChart.vue'
+import BoxPlot from '@/components/charts/BoxPlot.vue'
 import { useTimestreamDashboard } from '@/composables/useTimestreamDashboard'
 import { exportLog, getSnapshotCount } from '@/composables/useDashboardLogger'
 import { useAlertStore } from '@/composables/useAlertStore'
@@ -212,7 +285,10 @@ const levelThresholds = [
   { value: 100, color: '#73bf69', dash: '6,3' },
 ]
 
-const bannerOpen = ref(false)   // collapsed by default
+const bannerOpen  = ref(false)   // collapsed by default
+const statsOpenSilLevel  = ref(false)
+const statsOpenSilFlow   = ref(false)
+const statsOpenMirLevel  = ref(false)
 
 // ── Auto-refresh every 1 min with countdown ──
 const REFRESH_SECS = 300
@@ -542,5 +618,66 @@ onUnmounted(() => {
 @keyframes rl-blink {
   0%, 100% { opacity: 1; }
   50%       { opacity: 0.15; }
+}
+
+/* ── SPC / Statistical model panel ── */
+.spc-panel {
+  margin-top: 10px;
+  border-top: 1px solid #1a1d26;
+  padding-top: 6px;
+}
+
+.spc-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 2px;
+  width: 100%;
+  text-align: left;
+}
+
+.spc-toggle__icon {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #3a4a6a;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.spc-toggle:hover .spc-toggle__icon { color: #5a7aaa; }
+
+.spc-chevron {
+  margin-left: auto;
+  font-size: 14px;
+  color: #3a4a6a;
+  transition: transform 0.2s;
+  display: inline-block;
+}
+.spc-chevron.open { transform: rotate(180deg); }
+
+.spc-body {
+  padding: 10px 4px 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.spc-flow-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.spc-flow-col {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  background: #0d1018;
+  border: 1px solid #1a1d26;
+  border-radius: 6px;
 }
 </style>

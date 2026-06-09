@@ -5,6 +5,8 @@ import { CognitoIdentityClient } from '@aws-sdk/client-cognito-identity'
 import { useAuthStore } from '@/stores/auth'
 import { appendSnapshot } from './useDashboardLogger'
 import { checkRateLimit } from './useRateLimiter'
+import { computeStats, type SensorStats } from './useStatistics'
+import { saveBoxPlotRecord } from './useBoxPlotStorage'
 
 // ── AWS Config (values injected via environment variables) ───────────────────
 const REGION           = import.meta.env.VITE_AWS_REGION              as string
@@ -125,6 +127,8 @@ export interface LocationData {
   flowSeries: FlowSeries[]
   production24h: Record<string, any>[]
   productionDaily: Record<string, any>[]
+  levelStats: SensorStats | null
+  flowStats:  Record<string, SensorStats | null>   // keyed by PTP name
 }
 
 // ── Fetch functions ───────────────────────────────────────────────────────────
@@ -218,10 +222,12 @@ async function fetchProductionDaily(): Promise<Record<string, any>[]> {
 // ── Main composable ───────────────────────────────────────────────────────────
 export function useTimestreamDashboard() {
   const silvanopolis = ref<LocationData>({
-    level: 0, levelSeries: [], flowSeries: [], production24h: [], productionDaily: []
+    level: 0, levelSeries: [], flowSeries: [], production24h: [], productionDaily: [],
+    levelStats: null, flowStats: {}
   })
   const miranorte = ref<LocationData>({
-    level: 0, levelSeries: [], flowSeries: [], production24h: [], productionDaily: []
+    level: 0, levelSeries: [], flowSeries: [], production24h: [], productionDaily: [],
+    levelStats: null, flowStats: {}
   })
   const loading = ref(false)
   const error         = ref<string | null>(null)
@@ -246,22 +252,43 @@ export function useTimestreamDashboard() {
         fetchProductionDaily(),
       ])
 
+      // ── Compute stats ────────────────────────────────────────────────────
+      const silLevelStats = computeStats(silSeries.map(d => d.value))
+      const mirLevelStats = computeStats(mirSeries.map(d => d.value))
+
+      const flowStatsMap: Record<string, SensorStats | null> = {}
+      flowResults.forEach(s => {
+        flowStatsMap[s.name] = computeStats(s.values.map(d => d.value))
+      })
+
       silvanopolis.value = {
         level: silLevel,
         levelSeries: silSeries,
         flowSeries: flowResults,
         production24h: prod24h,
         productionDaily: prodDaily,
+        levelStats: silLevelStats,
+        flowStats: flowStatsMap,
       }
       miranorte.value = {
         level: mirLevel,
         levelSeries: mirSeries,
-        flowSeries: flowResults, // TODO: separate Miranorte PTPs
+        flowSeries: flowResults,
         production24h: prod24h,
         productionDaily: prodDaily,
+        levelStats: mirLevelStats,
+        flowStats: flowStatsMap,
       }
       lastUpdated.value = new Date().toLocaleTimeString()
       appendSnapshot(silvanopolis.value, miranorte.value)
+
+      // ── Persist boxplot stats to S3 (fire-and-forget) ───────────────────
+      if (silLevelStats) saveBoxPlotRecord(SENSOR_RAP_SIL, 'RAP_Silvanopolis', silLevelStats).catch(() => {})
+      if (mirLevelStats) saveBoxPlotRecord(SENSOR_RAP_MIR, 'RAP_Miranorte',    mirLevelStats).catch(() => {})
+      flowResults.forEach(s => {
+        const st = flowStatsMap[s.name]
+        if (st) saveBoxPlotRecord(s.name, s.name, st).catch(() => {})
+      })
     } catch (e: any) {
       const msg = e.message ?? ''
       if (msg.startsWith('RATE_LIMIT_EXCEEDED:')) {
