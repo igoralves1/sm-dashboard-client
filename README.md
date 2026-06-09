@@ -195,6 +195,22 @@ The executive summary dashboard aggregates data across all monitored cities. Sta
 
 ---
 
+### 🚨 Real-Time Alarms — Live Event Feed
+
+![Alarms history panel](screenshots/alarms-history-panel.png)
+
+The **Alerts & Events History** widget surfaces anomalies as they occur — 101 events detected in the last 24 hours. Each card shows the affected sensor (PTP_07), severity tag (Critical), a human-readable description of the condition, and how long ago it fired. **All Alarms** and **View report** links provide full drill-down access.
+
+---
+
+### 📄 Alarms & Anomalies Report — Auto-Generated PDF
+
+![Alarms report PDF](screenshots/alarms-report-pdf.webp)
+
+One click on **View report** generates a print-ready **Alarms & Anomalies Report** in the browser — 20 pages, exportable as PDF. The report includes a summary header (Total: 200, Critical: 105, Warning: 95), the prana logo, project metadata, and a numbered alarm log with sensor ID, type, description, source, affected hours, and statistical probability for each event. Fully i18n-aware: renders in the user's selected language.
+
+---
+
 ### 👤 Sidebar — User Profile & Navigation
 
 ![Sidebar user profile](screenshots/sidebar-user.png)
