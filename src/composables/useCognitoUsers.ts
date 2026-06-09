@@ -5,6 +5,9 @@
 import {
   CognitoIdentityProviderClient,
   ListUsersCommand,
+  AdminDisableUserCommand,
+  AdminEnableUserCommand,
+  AdminDeleteUserCommand,
   type UserType,
 } from '@aws-sdk/client-cognito-identity-provider'
 import { fromCognitoIdentityPool } from '@aws-sdk/credential-provider-cognito-identity'
@@ -76,5 +79,17 @@ export function useCognitoUsers() {
     return users.sort((a, b) => a.email.localeCompare(b.email))
   }
 
-  return { listUsers }
+  async function disableUser(username: string): Promise<void> {
+    await makeClient().send(new AdminDisableUserCommand({ UserPoolId: UP_ID, Username: username }))
+  }
+
+  async function enableUser(username: string): Promise<void> {
+    await makeClient().send(new AdminEnableUserCommand({ UserPoolId: UP_ID, Username: username }))
+  }
+
+  async function deleteUser(username: string): Promise<void> {
+    await makeClient().send(new AdminDeleteUserCommand({ UserPoolId: UP_ID, Username: username }))
+  }
+
+  return { listUsers, disableUser, enableUser, deleteUser }
 }

@@ -106,7 +106,7 @@
           <!-- SPC panel -->
           <div class="spc-panel">
             <button class="spc-toggle" @click="statsOpenSilLevel = !statsOpenSilLevel">
-              <span class="spc-toggle__icon">▶ Statistical model used</span>
+              <span class="spc-toggle__icon">▶ {{ t('spc.model_used') }}</span>
               <span class="spc-chevron" :class="{ open: statsOpenSilLevel }">▾</span>
             </button>
             <div v-show="statsOpenSilLevel" class="spc-body">
@@ -121,7 +121,7 @@
               <BoxPlot
                 :stats="silvanopolis.levelStats"
                 unit="%"
-                label="Box Plot · Water Level Distribution (24h)"
+                :label="`${t('spc.box_plot')} · ${t('spc.water_level')} ${t('spc.distribution_24h')}`"
               />
             </div>
           </div>
@@ -144,7 +144,7 @@
           <!-- SPC panel -->
           <div class="spc-panel">
             <button class="spc-toggle" @click="statsOpenSilFlow = !statsOpenSilFlow">
-              <span class="spc-toggle__icon">▶ Statistical model used</span>
+              <span class="spc-toggle__icon">▶ {{ t('spc.model_used') }}</span>
               <span class="spc-chevron" :class="{ open: statsOpenSilFlow }">▾</span>
             </button>
             <div v-show="statsOpenSilFlow" class="spc-body">
@@ -161,7 +161,7 @@
                     <BoxPlot
                       :stats="silvanopolis.flowStats[s.name] ?? null"
                       unit=" m³/h"
-                      :label="`${s.name} Distribution`"
+                      :label="`${s.name} ${t('spc.distribution_24h')}`"
                     />
                   </div>
                 </template>
@@ -180,7 +180,7 @@
           />
           <div class="spc-panel">
             <button class="spc-toggle" @click="statsOpenSilProd24h = !statsOpenSilProd24h">
-              <span class="spc-toggle__icon">▶ Statistical model used</span>
+              <span class="spc-toggle__icon">▶ {{ t('spc.model_used') }}</span>
               <span class="spc-chevron" :class="{ open: statsOpenSilProd24h }">▾</span>
             </button>
             <div v-show="statsOpenSilProd24h" class="spc-body">
@@ -190,7 +190,7 @@
                     <BoxPlot
                       :stats="st"
                       unit=" m³/h"
-                      :label="`${ptp} · 24h Production`"
+                      :label="`${ptp} · ${t('spc.production_24h')}`"
                     />
                   </div>
                 </template>
@@ -208,7 +208,7 @@
           />
           <div class="spc-panel">
             <button class="spc-toggle" @click="statsOpenSilProdDay = !statsOpenSilProdDay">
-              <span class="spc-toggle__icon">▶ Statistical model used</span>
+              <span class="spc-toggle__icon">▶ {{ t('spc.model_used') }}</span>
               <span class="spc-chevron" :class="{ open: statsOpenSilProdDay }">▾</span>
             </button>
             <div v-show="statsOpenSilProdDay" class="spc-body">
@@ -218,7 +218,7 @@
                     <BoxPlot
                       :stats="st"
                       unit=" m³"
-                      :label="`${ptp} · Daily Production`"
+                      :label="`${ptp} · ${t('spc.production_daily')}`"
                     />
                   </div>
                 </template>
@@ -258,7 +258,7 @@
           <!-- SPC panel -->
           <div class="spc-panel">
             <button class="spc-toggle" @click="statsOpenMirLevel = !statsOpenMirLevel">
-              <span class="spc-toggle__icon">▶ Statistical model used</span>
+              <span class="spc-toggle__icon">▶ {{ t('spc.model_used') }}</span>
               <span class="spc-chevron" :class="{ open: statsOpenMirLevel }">▾</span>
             </button>
             <div v-show="statsOpenMirLevel" class="spc-body">
@@ -273,7 +273,7 @@
               <BoxPlot
                 :stats="miranorte.levelStats"
                 unit="%"
-                label="Box Plot · Water Level Distribution (24h)"
+                :label="`${t('spc.box_plot')} · ${t('spc.water_level')} ${t('spc.distribution_24h')}`"
               />
             </div>
           </div>
@@ -378,7 +378,7 @@ onUnmounted(() => {
   margin: 0 1.75rem 8px;
   padding: 28px 32px;
   background: linear-gradient(135deg, #111620 0%, #0e1520 100%);
-  border: 1px solid #1e2a3a;
+  border: 1px solid #2a3d52;
   border-radius: 12px;
 }
 .context-banner__grid {
@@ -425,7 +425,7 @@ onUnmounted(() => {
 }
 .context-banner__card {
   background: #141922;
-  border: 1px solid #1e2a3a;
+  border: 1px solid #2a3d52;
   border-radius: 10px;
   padding: 16px 18px;
   transition: border-color .2s, transform .2s;
@@ -461,7 +461,7 @@ onUnmounted(() => {
   justify-content: space-between;
   padding: 0.85rem 1.75rem;
   background: #13161c;
-  border-bottom: 1px solid #1f2330;
+  border-bottom: 1px solid #2a3040;
   box-shadow: 0 2px 16px rgba(0,0,0,0.35);
   margin-bottom: 20px;
   position: sticky;
@@ -582,7 +582,7 @@ onUnmounted(() => {
 /* ── Chart cards ── */
 .chart-card {
   background: #13161c;
-  border: 1px solid #1e2230;
+  border: 1px solid #2a3040;
   border-radius: 10px;
   padding: 1.1rem;
   height: 100%;
@@ -593,8 +593,9 @@ onUnmounted(() => {
 }
 .chart-card--center {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
 }
 .chart-card--map {
   display: flex;
@@ -707,7 +708,7 @@ onUnmounted(() => {
 
 .spc-flow-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: 1fr;
   gap: 16px;
 }
 

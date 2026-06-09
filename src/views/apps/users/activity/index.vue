@@ -68,6 +68,33 @@
         </BCol>
       </BRow>
 
+      <!-- ═══ CUSTOM CONFIRM MODAL ═══ -->
+      <Teleport to="body">
+        <Transition name="modal-fade">
+          <div v-if="confirmModal.visible" class="modal-backdrop" @click.self="confirmModal.visible = false">
+            <div class="modal-box" :class="`modal-box--${confirmModal.variant}`">
+              <div class="modal-icon">
+                <Icon :icon="confirmModal.variant === 'danger' ? 'tabler:trash' : 'tabler:user-off'" width="22" />
+              </div>
+              <div class="modal-content">
+                <div class="modal-title">{{ confirmModal.title }}</div>
+                <div class="modal-email">{{ confirmModal.email }}</div>
+                <div class="modal-warning">{{ confirmModal.warning }}</div>
+              </div>
+              <div class="modal-actions">
+                <button class="modal-btn modal-btn--cancel" @click="confirmModal.visible = false">
+                  <Icon icon="tabler:x" width="14" /> {{ t('activity.cancel') }}
+                </button>
+                <button class="modal-btn" :class="`modal-btn--${confirmModal.variant}`" @click="confirmModal.onConfirm(); confirmModal.visible = false">
+                  <Icon :icon="confirmModal.variant === 'danger' ? 'tabler:trash' : 'tabler:user-off'" width="14" />
+                  {{ confirmModal.confirmLabel }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </Transition>
+      </Teleport>
+
       <!-- ═══ COGNITO USERS PANEL — admin only ═══ -->
       <BCard v-if="isAdmin" no-body class="mb-3">
         <div class="cog-header" @click="cognitoOpen = !cognitoOpen">
@@ -76,12 +103,17 @@
             <span class="fw-semibold fs-sm">{{ t('activity.cognito_title') }}</span>
             <span v-if="cognitoUsers.length" class="cog-badge">{{ cognitoUsers.length }}</span>
           </div>
-          <div class="d-flex align-items-center gap-2">
+          <div class="d-flex align-items-center gap-2" @click.stop>
             <span v-if="cognitoLoading" class="text-muted fs-xs d-flex align-items-center gap-1">
               <Icon icon="tabler:loader-2" width="13" class="spin" /> {{ t('activity.loading_cognito') }}
             </span>
-            <span v-if="cognitoError" class="text-danger fs-xs">{{ cognitoError }}</span>
-            <Icon :icon="cognitoOpen ? 'tabler:chevron-up' : 'tabler:chevron-down'" width="16" class="text-muted" />
+            <span v-if="cognitoError && !cognitoLoading" class="text-danger fs-xs d-flex align-items-center gap-1">
+              <Icon icon="tabler:alert-circle" width="13" /> {{ t('activity.error_load_users') }}
+            </span>
+            <button v-if="!cognitoLoading" class="cog-reload-btn" @click="loadCognitoUsers">
+              <Icon icon="tabler:refresh" width="13" />
+            </button>
+            <Icon :icon="cognitoOpen ? 'tabler:chevron-up' : 'tabler:chevron-down'" width="16" class="text-muted" @click="cognitoOpen = !cognitoOpen" />
           </div>
         </div>
         <div v-if="cognitoOpen" class="cog-body">
@@ -97,6 +129,8 @@
                 <th>{{ t('activity.col_modified') }}</th>
                 <th>{{ t('activity.col_sessions') }}</th>
                 <th>{{ t('activity.col_last_access') }}</th>
+                <th>{{ t('activity.col_inactivate') }}</th>
+                <th>{{ t('activity.col_delete') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -132,6 +166,27 @@
                 </td>
                 <td class="cog-date">
                   {{ sessionsByUser(u.email)[0]?.enteredAt ? fmtTime(sessionsByUser(u.email)[0].enteredAt) : '—' }}
+                </td>
+                <td>
+                  <button
+                    class="cog-action-btn"
+                    :class="u.enabled ? 'cog-action-btn--warn' : 'cog-action-btn--ok'"
+                    :disabled="cognitoActionBusy[u.username]"
+                    @click="toggleUserEnabled(u)"
+                  >
+                    <Icon :icon="cognitoActionBusy[u.username] ? 'tabler:loader-2' : u.enabled ? 'tabler:user-off' : 'tabler:user-check'" width="13"
+                      :class="cognitoActionBusy[u.username] ? 'spin' : ''" />
+                  </button>
+                </td>
+                <td>
+                  <button
+                    class="cog-action-btn cog-action-btn--danger"
+                    :disabled="cognitoActionBusy[u.username]"
+                    @click="removeUser(u)"
+                  >
+                    <Icon :icon="cognitoActionBusy[u.username] ? 'tabler:loader-2' : 'tabler:trash'" width="13"
+                      :class="cognitoActionBusy[u.username] ? 'spin' : ''" />
+                  </button>
                 </td>
               </tr>
             </tbody>
@@ -333,8 +388,28 @@
 
       <!-- ═══ ALL SESSIONS VIEW ═══ -->
       <template v-else>
+        <!-- Pagination bar -->
+        <div v-if="totalPages > 1" class="pager">
+          <span class="pager-info">
+            {{ (currentPage - 1) * PAGE_SIZE + 1 }}–{{ Math.min(currentPage * PAGE_SIZE, filteredSessions.length) }}
+            {{ t('activity.of') }} {{ filteredSessions.length }}
+          </span>
+          <div class="pager-controls">
+            <button class="pager-btn" :disabled="currentPage === 1" @click="currentPage = 1"><Icon icon="tabler:chevrons-left" width="14" /></button>
+            <button class="pager-btn" :disabled="currentPage === 1" @click="currentPage--"><Icon icon="tabler:chevron-left" width="14" /></button>
+            <button
+              v-for="p in pageNumbers" :key="p"
+              class="pager-btn" :class="{ 'pager-btn--active': p === currentPage, 'pager-btn--ellipsis': p === -1 }"
+              :disabled="p === -1"
+              @click="p !== -1 && (currentPage = p)"
+            >{{ p === -1 ? '…' : p }}</button>
+            <button class="pager-btn" :disabled="currentPage === totalPages" @click="currentPage++"><Icon icon="tabler:chevron-right" width="14" /></button>
+            <button class="pager-btn" :disabled="currentPage === totalPages" @click="currentPage = totalPages"><Icon icon="tabler:chevrons-right" width="14" /></button>
+          </div>
+        </div>
+
         <BRow class="g-3">
-          <BCol v-for="s in filteredSessions" :key="s.id" xl="6">
+          <BCol v-for="s in pagedSessions" :key="s.id" xl="6">
             <div class="session-card" :class="{ 'session-card--open': expandedId === s.id }">
               <div class="session-header" @click="toggle(s.id)">
                 <div class="session-header-left">
@@ -460,7 +535,7 @@ const auth = useAuthStore()
 const isAdmin = computed(() => auth.user?.isAdmin === true)
 const { getSessions, clear } = useSessionTracker()
 const { loadAllSessions, uploadSession } = useS3Activity()
-const { listUsers } = useCognitoUsers()
+const { listUsers, disableUser, enableUser, deleteUser } = useCognitoUsers()
 
 // ── Cognito panel ────────────────────────────────────────────────────────────
 const cognitoOpen    = ref(false)
@@ -468,8 +543,7 @@ const cognitoUsers   = ref<CognitoUser[]>([])
 const cognitoLoading = ref(false)
 const cognitoError   = ref('')
 
-watch(cognitoOpen, async (open) => {
-  if (!open || cognitoUsers.value.length) return   // already loaded
+async function loadCognitoUsers() {
   cognitoLoading.value = true
   cognitoError.value   = ''
   try {
@@ -479,7 +553,75 @@ watch(cognitoOpen, async (open) => {
   } finally {
     cognitoLoading.value = false
   }
+}
+
+watch(cognitoOpen, (open) => { if (open) loadCognitoUsers() })
+
+const cognitoActionBusy = ref<Record<string, boolean>>({})
+
+// ── Custom confirm modal ─────────────────────────────────────────────────────
+const confirmModal = ref({
+  visible: false, variant: 'danger' as 'danger' | 'warn',
+  title: '', email: '', warning: '', confirmLabel: '',
+  onConfirm: () => {},
 })
+
+function showConfirm(opts: Omit<typeof confirmModal.value, 'visible'>) {
+  confirmModal.value = { visible: true, ...opts }
+}
+
+async function doToggle(u: CognitoUser) {
+  cognitoActionBusy.value = { ...cognitoActionBusy.value, [u.username]: true }
+  try {
+    if (u.enabled) await disableUser(u.username)
+    else           await enableUser(u.username)
+    // optimistic flip then background reload
+    cognitoUsers.value = cognitoUsers.value.map(x =>
+      x.username === u.username ? { ...x, enabled: !x.enabled } : x
+    )
+    loadCognitoUsers()
+  } catch (e: any) {
+    cognitoError.value = e?.message ?? 'Error'
+  } finally {
+    const busy = { ...cognitoActionBusy.value }; delete busy[u.username]
+    cognitoActionBusy.value = busy
+  }
+}
+
+async function doDelete(u: CognitoUser) {
+  cognitoActionBusy.value = { ...cognitoActionBusy.value, [u.username]: true }
+  try {
+    await deleteUser(u.username)
+    cognitoUsers.value = cognitoUsers.value.filter(x => x.username !== u.username)
+    loadCognitoUsers()
+  } catch (e: any) {
+    cognitoError.value = e?.message ?? 'Error'
+    const busy = { ...cognitoActionBusy.value }; delete busy[u.username]
+    cognitoActionBusy.value = busy
+  }
+}
+
+function toggleUserEnabled(u: CognitoUser) {
+  showConfirm({
+    variant: 'warn',
+    title: u.enabled ? t('activity.action_inactivate') : t('activity.action_activate'),
+    email: u.email,
+    warning: u.enabled ? t('activity.inactivate_warning') : t('activity.activate_warning'),
+    confirmLabel: u.enabled ? t('activity.action_inactivate') : t('activity.action_activate'),
+    onConfirm: () => doToggle(u),
+  })
+}
+
+function removeUser(u: CognitoUser) {
+  showConfirm({
+    variant: 'danger',
+    title: t('activity.action_delete'),
+    email: u.email,
+    warning: t('activity.delete_warning'),
+    confirmLabel: t('activity.action_delete'),
+    onConfirm: () => doDelete(u),
+  })
+}
 
 const sessions     = ref<PageSession[]>(getSessions())
 const expandedId   = ref<string | null>(null)
@@ -556,6 +698,32 @@ function sessionsByUser(user: string) {
 const filteredSessions = computed(() =>
   selectedUser.value === 'Todos' ? sessions.value : sessionsByUser(selectedUser.value)
 )
+
+// ── Pagination (Todos view only) ─────────────────────────────────────────────
+const PAGE_SIZE   = 10
+const currentPage = ref(1)
+
+// Reset page when data or user filter changes
+watch([filteredSessions, selectedUser], () => { currentPage.value = 1 })
+
+const totalPages = computed(() => Math.ceil(filteredSessions.value.length / PAGE_SIZE))
+
+const pagedSessions = computed(() => {
+  const start = (currentPage.value - 1) * PAGE_SIZE
+  return filteredSessions.value.slice(start, start + PAGE_SIZE)
+})
+
+const pageNumbers = computed(() => {
+  const total = totalPages.value
+  const cur   = currentPage.value
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1)
+  const pages: number[] = [1]
+  if (cur > 3)              pages.push(-1)
+  for (let p = Math.max(2, cur - 1); p <= Math.min(total - 1, cur + 1); p++) pages.push(p)
+  if (cur < total - 2)      pages.push(-1)
+  pages.push(total)
+  return pages
+})
 
 // ── Global stats (Todos) ────────────────────────────────────────────────────
 const onlineNow = computed(() =>
@@ -693,6 +861,15 @@ function fmtFull(iso: string) {
 .cog-email { font-weight: 500; }
 .cog-date  { color: var(--bs-secondary-color); font-size: 0.75rem; }
 .cog-sessions { font-weight: 700; color: #0d6efd; }
+.cog-reload-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 26px; height: 26px; border-radius: 6px;
+  background: var(--bs-tertiary-bg, #f3f4f6);
+  border: 1px solid var(--bs-border-color, #dee2e6);
+  color: var(--bs-secondary-color); cursor: pointer;
+  transition: background 0.15s;
+}
+.cog-reload-btn:hover { background: var(--bs-secondary-bg, #e9ecef); }
 
 .cog-status {
   display: inline-flex; align-items: center; gap: 4px;
@@ -708,6 +885,21 @@ function fmtFull(iso: string) {
 }
 .cog-bool--yes { background: #d1fae5; color: #065f46; }
 .cog-bool--no  { background: #fee2e2; color: #991b1b; }
+
+.cog-action-btn {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 0.72rem; font-weight: 600; padding: 3px 10px;
+  border-radius: 6px; border: 1px solid transparent;
+  cursor: pointer; transition: opacity 0.15s, background 0.15s;
+  white-space: nowrap;
+}
+.cog-action-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.cog-action-btn--warn   { background: #fef3c7; color: #92400e; border-color: #fcd34d; }
+.cog-action-btn--warn:not(:disabled):hover   { background: #fde68a; }
+.cog-action-btn--ok     { background: #d1fae5; color: #065f46; border-color: #6ee7b7; }
+.cog-action-btn--ok:not(:disabled):hover     { background: #a7f3d0; }
+.cog-action-btn--danger { background: #fee2e2; color: #991b1b; border-color: #fca5a5; }
+.cog-action-btn--danger:not(:disabled):hover { background: #fecaca; }
 
 .stat-icon--teal { background: #e0faf6 !important; color: #26b8a5 !important; }
 .online-pulse {
@@ -895,9 +1087,103 @@ code.geo-val { font-family: monospace; font-size: 0.75rem; color: #0d6efd; }
 .click-el   { flex: 1; color: #374151; font-size: 0.68rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .click-text { font-style: italic; color: var(--bs-secondary-color); font-size: 0.68rem; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
+/* ── Pagination ──────────────────────────────────────────────────────────── */
+.pager {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 8px;
+  padding: 8px 4px 12px;
+}
+.pager-info {
+  font-size: 0.75rem; color: var(--bs-secondary-color);
+}
+.pager-controls { display: flex; align-items: center; gap: 4px; }
+.pager-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 32px; height: 32px; padding: 0 6px;
+  border-radius: 8px; border: 1px solid var(--bs-border-color, #dee2e6);
+  background: var(--bs-card-bg, #fff); color: var(--bs-body-color);
+  font-size: 0.78rem; font-weight: 500; cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+.pager-btn:hover:not(:disabled):not(.pager-btn--active) {
+  background: var(--bs-tertiary-bg, #f3f4f6);
+}
+.pager-btn:disabled { opacity: 0.35; cursor: default; }
+.pager-btn--active {
+  background: var(--bs-primary, #0d6efd); color: #fff;
+  border-color: var(--bs-primary, #0d6efd); font-weight: 700;
+}
+.pager-btn--ellipsis { border-color: transparent; background: none; cursor: default; }
+
 /* ── Empty state ─────────────────────────────────────────────────────────── */
 .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 60px 0; color: var(--bs-secondary-color); text-align: center; }
 .empty-icon { opacity: 0.3; }
 
 @keyframes pulse { 0%,100% { box-shadow: 0 0 0 3px rgba(13,110,253,0.25); } 50% { box-shadow: 0 0 0 6px rgba(13,110,253,0.1); } }
+
+/* ── Custom confirm modal ────────────────────────────────────────────────── */
+.modal-backdrop {
+  position: fixed; inset: 0; z-index: 9999;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(3px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px;
+}
+
+.modal-box {
+  background: var(--bs-card-bg, #fff);
+  border-radius: 16px;
+  padding: 28px 28px 24px;
+  max-width: 400px; width: 100%;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+  display: flex; flex-direction: column; gap: 16px;
+  border-top: 4px solid transparent;
+}
+.modal-box--danger { border-top-color: #e84040; }
+.modal-box--warn   { border-top-color: #f58b06; }
+
+.modal-icon {
+  width: 48px; height: 48px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.modal-box--danger .modal-icon { background: #fee2e2; color: #e84040; }
+.modal-box--warn   .modal-icon { background: #fef3c7; color: #f58b06; }
+
+.modal-content { display: flex; flex-direction: column; gap: 4px; }
+.modal-title   { font-size: 1rem; font-weight: 700; color: var(--bs-body-color); }
+.modal-email   { font-size: 0.85rem; font-weight: 600; color: #0d6efd; word-break: break-all; }
+.modal-warning { font-size: 0.78rem; color: var(--bs-secondary-color); margin-top: 4px; line-height: 1.5; }
+
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; padding-top: 4px; }
+
+.modal-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 0.82rem; font-weight: 600; padding: 8px 18px;
+  border-radius: 8px; border: 1px solid transparent;
+  cursor: pointer; transition: opacity 0.15s, background 0.15s;
+}
+.modal-btn--cancel {
+  background: var(--bs-tertiary-bg, #f3f4f6);
+  color: var(--bs-secondary-color);
+  border-color: var(--bs-border-color, #dee2e6);
+}
+.modal-btn--cancel:hover { opacity: 0.75; }
+.modal-btn--danger {
+  background: #e84040; color: #fff; border-color: #e84040;
+}
+.modal-btn--danger:hover { background: #c73232; }
+.modal-btn--warn {
+  background: #f58b06; color: #fff; border-color: #f58b06;
+}
+.modal-btn--warn:hover { background: #d47a05; }
+
+/* Transition */
+.modal-fade-enter-active, .modal-fade-leave-active { transition: opacity 0.18s ease; }
+.modal-fade-enter-from, .modal-fade-leave-to { opacity: 0; }
+.modal-fade-enter-active .modal-box { animation: modal-pop 0.18s ease; }
+@keyframes modal-pop {
+  from { transform: scale(0.94) translateY(8px); opacity: 0; }
+  to   { transform: scale(1)    translateY(0);   opacity: 1; }
+}
 </style>

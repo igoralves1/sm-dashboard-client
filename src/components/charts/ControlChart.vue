@@ -15,7 +15,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
+import { useI18n } from 'vue-i18n'
 import * as d3 from 'd3'
 import { zScore, pValue, sigmaZone, ZONE_COLORS, type SensorStats } from '@/composables/useStatistics'
 
@@ -30,13 +31,16 @@ const props = defineProps<{
   yDomain?: [number, number]
 }>()
 
+const { t } = useI18n()
 const containerRef = ref<HTMLDivElement | null>(null)
 const tooltipRef   = ref<HTMLDivElement | null>(null)
 let ro: ResizeObserver
+let io: IntersectionObserver
 
 function draw() {
   if (!containerRef.value || !props.data.length) return
   const el = containerRef.value
+  if (el.clientWidth <= 0) return   // not laid out yet — IntersectionObserver will retry
   d3.select(el).select('svg').remove()
 
   const margin = { top: 18, right: 24, bottom: 36, left: 56 }
@@ -176,7 +180,7 @@ function draw() {
     .attr('y', margin.top + H + margin.bottom - 2)
     .attr('text-anchor', 'middle')
     .attr('fill', '#555').attr('font-size', '9px')
-    .text('Hora do dia')
+    .text(t('spc.hora_do_dia'))
 
   // ── Tooltip overlay ───────────────────────────────────────────────────────
   const bisect = d3.bisector((d: DataPoint) => d.time).left
@@ -238,12 +242,18 @@ function draw() {
     })
 }
 
-onMounted(() => {
+onMounted(async () => {
+  await nextTick()
   draw()
   ro = new ResizeObserver(draw)
   if (containerRef.value) ro.observe(containerRef.value)
+  // Re-draw when panel becomes visible — use rAF so browser layout is complete first
+  io = new IntersectionObserver(entries => {
+    if (entries[0].isIntersecting) requestAnimationFrame(draw)
+  }, { threshold: 0.01 })
+  if (containerRef.value) io.observe(containerRef.value)
 })
-onUnmounted(() => ro?.disconnect())
+onUnmounted(() => { ro?.disconnect(); io?.disconnect() })
 watch(() => [props.data, props.stats], draw, { deep: true })
 </script>
 

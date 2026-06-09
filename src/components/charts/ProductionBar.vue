@@ -4,7 +4,12 @@
     <div class="chart-header">
       <div class="chart-main-title">{{ title ?? t('monitoring.production_title_fallback') }}</div>
       <div class="chart-legend">
-        <span v-for="key in ptpKeys" :key="key" class="legend-item">
+        <span
+          v-for="key in ptpKeys" :key="key"
+          class="legend-item"
+          :class="{ 'legend-item--off': !activeSeries.has(key) }"
+          @click="toggleSeries(key)"
+        >
           <span class="legend-dot" :style="{ background: colorOf(key) }"></span>
           <span class="legend-text">{{ key }}</span>
         </span>
@@ -14,7 +19,7 @@
     <div style="position:relative">
       <div ref="tooltipRef" class="chart-tooltip" style="display:none">
         <div class="tt-label"></div>
-        <div v-for="key in ptpKeys" :key="key" class="tt-row">
+        <div v-for="key in ptpKeys" v-show="activeSeries.has(key)" :key="key" class="tt-row">
           <span class="tt-dot" :style="{ background: colorOf(key) }"></span>
           <span class="tt-series">{{ key }}</span>
           <span class="tt-value" :data-key="key">—</span>
@@ -97,7 +102,20 @@ const tooltipRef   = ref<HTMLDivElement | null>(null)
 const notesRef     = ref<HTMLDivElement | null>(null)
 const mathRef      = ref<HTMLDivElement | null>(null)
 const showModel    = ref(false)
+const activeSeries = ref<Set<string>>(new Set())
 let resizeObserver: ResizeObserver
+
+function toggleSeries(key: string) {
+  const s = new Set(activeSeries.value)
+  if (s.has(key)) {
+    if (s.size === 1) return   // keep at least one visible
+    s.delete(key)
+  } else {
+    s.add(key)
+  }
+  activeSeries.value = s
+  draw()
+}
 
 // Typeset MathJax whenever the model section opens
 watch(showModel, async (open) => {
@@ -118,6 +136,15 @@ const ptpKeys = computed(() =>
   props.data.length ? Object.keys(props.data[0]).filter(k => k !== props.xField && k !== 'time') : []
 )
 
+// Initialise activeSeries whenever ptpKeys changes (e.g. first data load)
+watch(ptpKeys, (keys) => {
+  if (!keys.length) return
+  // Add any new keys not yet tracked; don't reset existing toggles
+  const s = new Set(activeSeries.value)
+  keys.forEach(k => s.add(k))
+  activeSeries.value = s
+}, { immediate: true })
+
 // Statistical anomaly detection — runs after every data update
 const computedAlerts = computed<Anomaly[]>(() => {
   if (!props.data.length || !ptpKeys.value.length) return []
@@ -135,7 +162,8 @@ function draw() {
   const el = containerRef.value
   d3.select(el).select('svg').remove()
 
-  const keys = ptpKeys.value
+  const keys = ptpKeys.value.filter(k => activeSeries.value.has(k))
+  if (!keys.length) return
   // Keep natural query order — current hour arrives last and stays at the right
   const sortedData = props.data
   const margin = { top: 10, right: 10, bottom: 36, left: 62 }
@@ -292,6 +320,11 @@ watch(locale, draw)
   margin-bottom: 0.6rem;
   padding-bottom: 0.5rem;
   border-bottom: 1px solid #252525;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #0d1018;
+  padding-top: 2px;
 }
 
 .chart-main-title {
@@ -303,7 +336,15 @@ watch(locale, draw)
 
 .chart-legend { display: flex; flex-wrap: wrap; gap: 1rem; }
 
-.legend-item { display: flex; align-items: center; gap: 5px; }
+.legend-item {
+  display: flex; align-items: center; gap: 5px;
+  cursor: pointer;
+  user-select: none;
+  transition: opacity 0.15s;
+}
+.legend-item:hover { opacity: 0.75; }
+.legend-item--off { opacity: 0.28; }
+.legend-item--off .legend-dot { filter: grayscale(0.8); }
 
 .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 

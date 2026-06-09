@@ -186,6 +186,11 @@ watch(locale, draw)
   margin-bottom: 0.6rem;
   padding-bottom: 0.5rem;
   border-bottom: 1px solid #252525;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #0d1018;
+  padding-top: 2px;
 }
 
 .chart-main-title {

@@ -123,7 +123,7 @@ onUnmounted(() => { stopPolling() })
 
 const recentAlerts = computed(() => alerts.value.slice(0, 8))
 const count24h = computed(() => alerts24h.value.length)
-const { t }    = useI18n()
+const { t, locale } = useI18n()
 
 function severityLabel(s: string) {
   if (s === 'critical') return t('dashboard.severity_critical')
@@ -143,40 +143,47 @@ function severityBg(s: string) {
   return '#f0fff4'
 }
 
+function localeCode() {
+  const l = locale.value
+  if (l === 'pt') return 'pt-BR'
+  if (l === 'es') return 'es-ES'
+  if (l === 'fr') return 'fr-FR'
+  return 'en-US'
+}
+
 function fmtTime(iso: string) {
   const d = new Date(iso)
   const now = new Date()
-  const diffMs = now.getTime() - d.getTime()
-  const diffMin = Math.floor(diffMs / 60000)
-  if (diffMin < 1)  return 'agora'
-  if (diffMin < 60) return `${diffMin}min atrás`
+  const diffMin = Math.floor((now.getTime() - d.getTime()) / 60000)
+  if (diffMin < 1)  return t('dashboard.now')
+  if (diffMin < 60) return t('dashboard.min_ago', { m: diffMin })
   const diffH = Math.floor(diffMin / 60)
-  if (diffH < 24)   return `${diffH}h atrás`
-  return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
+  if (diffH < 24)   return t('dashboard.hours_ago', { h: diffH })
+  return d.toLocaleDateString(localeCode(), { day: '2-digit', month: '2-digit' })
 }
 
 function fmtDateFull(iso: string) {
-  return new Date(iso).toLocaleString('pt-BR', {
+  return new Date(iso).toLocaleString(localeCode(), {
     day: '2-digit', month: '2-digit', year: 'numeric',
     hour: '2-digit', minute: '2-digit', second: '2-digit',
   })
 }
 
 function sourceLabel(s: string) {
-  if (s === 'dashboard-sm-24h') return 'Produção 24h · Silvanópolis'
-  if (s === 'dashboard-sm-5d')  return 'Produção 5 dias · Silvanópolis'
+  if (s === 'dashboard-sm-24h') return t('dashboard.source_24h')
+  if (s === 'dashboard-sm-5d')  return t('dashboard.source_5d')
   return s
 }
 
-function typeLabel(t: string) {
-  if (t === 'pump_off')     return 'Bomba desligada'
-  if (t === 'outlier_low')  return 'Queda anômala'
-  if (t === 'outlier_high') return 'Pico anômalo'
-  return t
+function typeLabel(type: string) {
+  if (type === 'pump_off')     return t('dashboard.type_pump_off')
+  if (type === 'outlier_low')  return t('dashboard.type_outlier_low')
+  if (type === 'outlier_high') return t('dashboard.type_outlier_high')
+  return type
 }
 
 function buildReportHtml(list: StoredAlert[]): string {
-  const generatedAt = new Date().toLocaleString('pt-BR', {
+  const generatedAt = new Date().toLocaleString(localeCode(), {
     day: '2-digit', month: 'long', year: 'numeric',
     hour: '2-digit', minute: '2-digit',
   })
@@ -195,9 +202,9 @@ function buildReportHtml(list: StoredAlert[]): string {
       <div class="alarm-body">
         <div class="alarm-detail">${a.detail}</div>
         <div class="alarm-meta">
-          <span><b>Fonte:</b> ${sourceLabel(a.source)}</span>
-          <span><b>Horas afetadas:</b> ${a.hours.join('h, ')}h</span>
-          <span><b>Prob. operação normal:</b> ${a.pValuePct < 0.01 ? '< 0.01%' : a.pValuePct.toFixed(2) + '%'}</span>
+          <span><b>${t('dashboard.report_source')}:</b> ${sourceLabel(a.source)}</span>
+          <span><b>${t('dashboard.report_hours')}:</b> ${a.hours.join('h, ')}h</span>
+          <span><b>${t('dashboard.report_prob')}:</b> ${a.pValuePct < 0.01 ? '< 0.01%' : a.pValuePct.toFixed(2) + '%'}</span>
         </div>
       </div>
     </div>
@@ -208,10 +215,10 @@ function buildReportHtml(list: StoredAlert[]): string {
   const infoCount = list.filter(a => a.severity === 'info').length
 
   return `<!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="${locale.value}">
 <head>
 <meta charset="UTF-8"/>
-<title>Relatório de Alarmes — prana</title>
+<title>${t('dashboard.report_title')} — prana</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -340,41 +347,41 @@ function buildReportHtml(list: StoredAlert[]): string {
     <div class="report-logo">
       <div>
         <div class="report-logo-svg">${pranaLogoRaw}</div>
-        <div class="report-logo-sub">Monitoramento AIIoT em tempo real · Projeto HF</div>
+        <div class="report-logo-sub">${t('dashboard.report_subtitle')}</div>
       </div>
     </div>
     <div class="report-meta">
-      <strong>Relatório de Alarmes e Anomalias</strong>
-      Gerado em: ${generatedAt}<br/>
-      Projeto HF · Silvanópolis &amp; Miranorte
+      <strong>${t('dashboard.report_title')}</strong>
+      ${t('dashboard.report_generated')}: ${generatedAt}<br/>
+      ${t('dashboard.report_project')}
     </div>
   </div>
 
   <div class="summary-bar">
     <div class="summary-card total">
-      <div class="sc-label">Total de Alarmes</div>
+      <div class="sc-label">${t('dashboard.report_total')}</div>
       <div class="sc-val">${list.length}</div>
     </div>
     <div class="summary-card crit">
-      <div class="sc-label">Críticos</div>
+      <div class="sc-label">${t('dashboard.severity_critical')}</div>
       <div class="sc-val">${critCount}</div>
     </div>
     <div class="summary-card warn">
-      <div class="sc-label">Atenção</div>
+      <div class="sc-label">${t('dashboard.severity_warning')}</div>
       <div class="sc-val">${warnCount}</div>
     </div>
     <div class="summary-card info">
-      <div class="sc-label">Informativos</div>
+      <div class="sc-label">${t('dashboard.severity_info')}</div>
       <div class="sc-val">${infoCount}</div>
     </div>
   </div>
 
-  <div class="section-title">Detalhamento dos Alarmes</div>
-  ${list.length ? rows : '<p style="color:#9ca3af;text-align:center;padding:32px 0;">Nenhum alarme registrado.</p>'}
+  <div class="section-title">${t('dashboard.report_detail')}</div>
+  ${list.length ? rows : `<p style="color:#9ca3af;text-align:center;padding:32px 0;">${t('dashboard.report_no_alarms')}</p>`}
 
   <div class="report-footer">
-    <span>prana · Monitoramento AIIoT em tempo real · Projeto HF</span>
-    <span>Documento gerado automaticamente — ${generatedAt}</span>
+    <span>prana · ${t('dashboard.report_subtitle')}</span>
+    <span>${t('dashboard.report_auto_generated')} — ${generatedAt}</span>
   </div>
 
   <script>window.onload = () => { window.print(); }<\/script>

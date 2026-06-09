@@ -61,6 +61,148 @@ This system is domain-agnostic. The same architecture and visualization layer ca
 
 ---
 
+## Feature Gallery
+
+> Screenshots from a live deployment monitoring water supply systems in Silvanópolis and Miranorte, State of Tocantins, Brazil.
+
+---
+
+### 🔐 Login — prana AIIoT Platform
+
+![Login page](docs/screenshots/login-page.webp)
+
+Secure sign-in page with AWS Cognito authentication. Supports forced password change on first login, silent token refresh every 30 minutes, and locale-aware interface (EN / PT / ES / FR). The hero panel highlights the platform's three monitoring domains: Energy, Water, and Telemetry.
+
+---
+
+### 🗺️ Full Dashboard — Real-Time Overview
+
+![Full dashboard overview](docs/screenshots/dashboard-overview-full.webp)
+
+Bird's-eye view of the complete monitoring dashboard. All sections are visible simultaneously: the Silvanópolis reservoir gauge, level time series, site map, pump flow chart, hourly and daily production bars — all auto-refreshing every 5 minutes.
+
+---
+
+### 🧭 Dashboard Header — Branding, Countdown & Export
+
+![Dashboard header](docs/screenshots/dashboard-header.webp)
+
+Top bar with the prana logo, live "Updated at" timestamp, a D3-animated countdown arc (210 s remaining), and an **Export JSON** button that downloads a full timestamped snapshot of all chart data. The info panel below the header summarises the system's Smart City 4.0 capabilities.
+
+---
+
+### 💧 Silvanópolis Section — Tank · Level Series · Map
+
+![Silvanópolis row](docs/screenshots/dashboard-row1-silvanopolis.webp)
+
+The primary monitoring row for Silvanópolis: an animated **liquid fill gauge** showing 60.89% reservoir level (orange = Alert 50–80%), a **24-hour level time series** with colour-coded threshold bands, and an **OpenStreetMap widget** pinning the RAP01 sensor site.
+
+---
+
+### 📈 Water Level Time Series + Control Chart
+
+![Level time series with control chart](docs/screenshots/level-timeseries-control.png)
+
+Expandable **Statistical Model** panel beneath the time series. The control chart overlays ±1σ, ±2σ and UCL/LCL bands; individual readings are shown as dots coloured by threshold zone. The chart transitions seamlessly from red (critical) to orange (alert) as the reservoir fills overnight.
+
+---
+
+### 📦 Control Chart + Box Plot — Water Level Distribution
+
+![Control chart and boxplot](docs/screenshots/control-chart-level-boxplot.png)
+
+Side-by-side view: the 24-hour **control chart** (top) paired with a horizontal **box plot** showing the statistical distribution of level readings. Labels for Q1, Q3, ±1σ, Min, Max, and UCL/LCL use a greedy multi-row stagger algorithm to prevent overlap on compressed axes.
+
+---
+
+### 📊 Production Bar Chart — 5 Days with Anomaly Alert
+
+![Production 5 days with anomaly](docs/screenshots/production-5days-anomaly.png)
+
+Daily production grouped by pump (PTP_01–PTP_07) for the last 5 days. An automatic anomaly detection alert fires beneath the chart when PTP_07 records near-zero flow (≤ 9.08 m³/h) for 8 consecutive hours — **p = 0.053%** probability of this occurring under normal operating conditions.
+
+---
+
+### 🎛️ Legend Toggle — Isolate Individual Pumps
+
+![Production bar all series](docs/screenshots/production-bar-multiple.png)
+
+Clicking a legend item toggles its series on or off. The D3 `scaleBand` automatically recalculates bar widths so the remaining bars expand to fill the full group width — no empty gaps.
+
+---
+
+### 🔍 Legend Toggle — Single Series Focus
+
+![Production bar single series](docs/screenshots/production-bar-filtered.png)
+
+With only PTP_07 selected, the chart renders a clean single-series view. Inactive legend items are dimmed to 28% opacity. Clicking again re-enables the series instantly.
+
+---
+
+### 📐 Box Plot — Daily Production with Interpretation Panel
+
+![BoxPlot daily PTP_01](docs/screenshots/boxplot-daily-ptp01.png)
+
+Horizontal box plot for PTP_01 daily production (m³). The **Interpretation** panel below the chart provides automated plain-language analysis: process status (in/out of control), outlier count, skewness direction, and coefficient of variation — formatted for non-technical operators.
+
+---
+
+### 🔬 Box Plot — Interactive Tooltip
+
+![BoxPlot with tooltip](docs/screenshots/boxplot-tooltip.png)
+
+Hover tooltip shows exact values for the nearest statistical marker. Stats strip below the axis displays LCL, Min, Q1, μ, Median, Q3, Max, UCL, Σ, IQR, N, and outlier count at one extra decimal place to distinguish closely-spaced values.
+
+---
+
+### 🧩 Box Plots — Multiple Sensors Side by Side
+
+![BoxPlot side by side](docs/screenshots/boxplot-side-by-side.png)
+
+Multiple box plots rendered simultaneously for different pumps. Each plot has a fully independent axis scale using a **piecewise broken-axis** technique — wide outlier gaps are compressed without distorting the main IQR region.
+
+---
+
+### 🧮 Statistical Model — Formulas Reference
+
+![Statistical model formulas](docs/screenshots/statistical-model-formulas.png)
+
+Expandable **Statistical Model Used** panel visible to operators and technical teams. Documents the three detection stages: (1) pump-off threshold τ = 0.05 · max(xᵢ), (2) IQR Tukey fence L⁻/L⁺ with a 30% relative deviation guard, and (3) two-tailed p-value from the normal CDF — all rendered with MathJax-style equations.
+
+---
+
+### 👥 User Activity — Cognito Users & Session Grid
+
+![User activity page](docs/screenshots/user-activity-full.webp)
+
+Admin-only panel listing all Cognito users with status, password state, creation/modification timestamps, session counts, and last access time. Inline **Deactivate** and **Delete** actions update the Cognito User Pool directly from the browser using Identity Pool credentials. Below, a paginated 10-per-page session grid shows every page visit across all users.
+
+---
+
+### 🕵️ Session Detail — Device, Location & Click Trail
+
+![Session detail](docs/screenshots/session-detail.webp)
+
+Expanding a session row reveals: device type, browser, OS, geo-resolved IP address (city + country + coordinates), a timeline with entry/exit timestamps, a mouse trail with 55 heat-map samples, and a full click log with element selectors and timestamps — useful for diagnosing UX issues or auditing access patterns.
+
+---
+
+### 🏙️ Main Overview Dashboard — Smart City Summary
+
+![Main dashboard overview](docs/screenshots/main-dashboard-overview.webp)
+
+The executive summary dashboard aggregates data across all monitored cities. Stat cards show active sensors (2,847), open alerts (38), water consumption, energy usage, and connected cities (14). The **Alerts & Events History** panel lists real-time IoT anomalies with severity tags. **Water Stations** donut shows per-city fill levels (Silvanópolis 97%, Miranorte 33%).
+
+---
+
+### 👤 Sidebar — User Profile & Navigation
+
+![Sidebar user profile](docs/screenshots/sidebar-user.png)
+
+Collapsible sidebar with the prana logo, logged-in user avatar and role, and a minimal navigation menu restricted to the dashboards the user's Cognito group has access to. Role-based visibility is enforced server-side — no client-side route hiding.
+
+---
+
 ## Tech Stack
 
 | Layer | Technology |
@@ -784,6 +926,10 @@ The `alle` branch is a customization requested by **Prana** to adapt the project
 - [Observable — Resource Center](https://observablehq.com/resource-center) — Tutorials, guides, and learning resources
 - [Qualium Systems — Showcase](https://www.qualium-systems.com/showcase/) — Vue.js and frontend showcase examples
 - [Piktochart — Big Data Visualization](https://piktochart.com/blog/big-data-visualization/) — Best practices and examples for visualizing large datasets
+- [ScienceDirect — Sigma Approach](https://www.sciencedirect.com/topics/computer-science/sigma-approach#chapters-articles) — Academic articles on Six Sigma methodology in computer science
+- [Six Sigma Study Guide — Control Phase](https://sixsigmastudyguide.com/control-phase/) — DMAIC Control phase theory and implementation guide
+- [Data Syndrome — Box Plot in D3.js](https://blog.datasyndrome.com/a-simple-box-plot-in-d3-dot-js-44e7083c9a9e) — Box plot implementation reference using D3.js
+- [Deming Institute — Beginner's Guide to Control Charts](https://deming.org/a-beginners-guide-to-control-charts/) — Foundational concepts of SPC control charts
 
 ---
-Last updated: 2026-06-08
+Last updated: 2026-06-09
