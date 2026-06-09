@@ -376,42 +376,115 @@ Keys: `dashboard.water_unit`, `dashboard.energy_unit`.
 
 ## Security
 
-This is an open-source project with a public GitHub repository. The frontend code is fully visible by design. However, the backend infrastructure is protected by multiple layers of automated guardrails.
+This is an open-source project with a public GitHub repository. The frontend code is fully visible by design. However, the backend infrastructure is protected by multiple layers of automated guardrails — **no human intervention is required for any of them to fire**.
+
+---
 
 ### ⚠️ Notice to anyone attempting to misuse this system
 
-If you extract temporary AWS credentials from the browser and attempt to abuse them programmatically, the following automated response chain will trigger:
+If you extract temporary AWS credentials from the browser and attempt to abuse them programmatically, two independent automated response chains will trigger — one based on **query rate** (fires in under 2 minutes) and one based on **cumulative cost** (fires at $5).
+
+#### Full automated defense architecture
 
 ```
-Abnormal Timestream spend detected
+╔══════════════════════════════════════════════════════════════════════════╗
+║                    PRANA — SECURITY ARCHITECTURE                         ║
+╚══════════════════════════════════════════════════════════════════════════╝
+
+  Browser (attacker extracts STS credentials from DevTools)
   │
-  ├─ 80% threshold → Alert email sent to the administrator
-  │
-  └─ 100% threshold ($5) → Two simultaneous automated actions:
+  └─ Runs programmatic SELECT loop against Timestream
        │
-       ├─ IAM Emergency Deny
-       │    └─ Deny policy attached to the Cognito authenticated role
-       │         └─ All Timestream queries → AccessDenied immediately
-       │              (applies to all credentials already issued — no grace period)
+       ├─────────────────────────────────────────────────────────────────────
+       │  LAYER 1 — Real-time query rate detection (fires in ~2 minutes)
+       ├─────────────────────────────────────────────────────────────────────
        │
-       └─ SNS → Lambda (automatic, no human intervention required)
-            ├─ Enumerates all active Cognito pool users
-            ├─ AdminUserGlobalSignOut → all active tokens invalidated instantly
-            └─ AdminDisableUser → all accounts locked, new logins blocked
-                 └─ Re-authentication is impossible until manually reviewed
+       │  Every Timestream API call
+       │    → logged in AWS CloudTrail (real-time, permanent record)
+       │    → streamed to CloudWatch Logs (/prana/cloudtrail)
+       │    → CloudWatch Metric Filter counts Query calls per 5-min window
+       │
+       │  Normal app usage  → ~6 queries / 5 min
+       │  Attack at 1 req/s → 300 queries / 5 min  ← ALARM THRESHOLD: 50
+       │
+       │  Threshold breached (50 queries in any 5-min window)
+       │    → CloudWatch Alarm fires
+       │    → SNS topic: <SNS_TOPIC>
+       │    ├─ Email alert → administrator
+       │    └─ Lambda: <LAMBDA_NAME> (automatic, no human needed)
+       │         ├─ Lists all Cognito pool users
+       │         ├─ AdminUserGlobalSignOut → all tokens invalidated instantly
+       │         └─ AdminDisableUser → login blocked for all non-admin users
+       │
+       │  Time from attack start to lockdown: ~1–2 minutes
+       │  Max cost incurred before lockdown:  ~$0.03
+       │
+       ├─────────────────────────────────────────────────────────────────────
+       │  LAYER 2 — Cost budget kill switch (fires at $5 spend)
+       ├─────────────────────────────────────────────────────────────────────
+       │
+       │  AWS Budget monitors Timestream spend in real time
+       │
+       │  Spend reaches $4 (80%)
+       │    → Email alert → administrator
+       │
+       │  Spend reaches $5 (100%) — two simultaneous automated actions:
+       │    ├─ Budget Action (IAM)
+       │    │    └─ Attaches Deny policy to Cognito authenticated role
+       │    │         └─ timestream:* → AccessDenied on ALL credentials
+       │    │              (applies to already-issued STS tokens immediately)
+       │    │
+       │    └─ SNS → Lambda: <LAMBDA_NAME>
+       │         ├─ AdminUserGlobalSignOut → all active tokens invalidated
+       │         └─ AdminDisableUser → re-authentication impossible
+       │
+       └─────────────────────────────────────────────────────────────────────
+         ADMINISTRATOR ACCOUNT
+       ─────────────────────────────────────────────────────────────────────
+         Excluded from all lockdown actions.
+         Retains full access at all times.
+         Every lockdown event is logged in CloudWatch with full audit trail.
+       ─────────────────────────────────────────────────────────────────────
 ```
 
-**What this means in practice:**
+---
 
-- Credentials extracted from the browser are valid for ≤ 1 hour (AWS STS limit)
-- Any programmatic SELECT loop that drives spend past $5 triggers a full pool lockdown
-- No human needs to be online — AWS Budget Actions and Lambda execute automatically
-- The administrator account is excluded from the lockdown and retains full access
-- Every lockdown event is logged in CloudWatch and triggers an email alert
+#### What credentials extracted from the browser can actually access
 
-The IAM role available to authenticated users is scoped to read-only access on exactly 3 specific Timestream table ARNs. There is no write access, no S3 delete access, no Cognito admin access, and no access to any other AWS service.
+| Permission | Scope | What it means |
+|---|---|---|
+| `timestream:Select` | 3 specific table ARNs only | Read sensor data already shown on the dashboard |
+| `timestream:DescribeEndpoints` | `*` (AWS SDK requirement) | Resolve regional endpoint — no data access |
+| `s3:PutObject` / `s3:GetObject` | `<S3_BUCKET>/*` only | Read/write session logs — no other bucket |
+| `s3:ListBucket` | `<S3_BUCKET>` only | List session log filenames |
+| Everything else | — | **AccessDenied** |
 
-Attempting to abuse this system is not worth the effort.
+There is no write access to Timestream. No S3 delete. No Cognito admin. No IAM. No access to any other AWS service or any other S3 bucket in the account.
+
+---
+
+#### Cost of the defense infrastructure
+
+This security stack runs 24/7 for **~$0.61/month**:
+
+| Component | Monthly cost | Purpose |
+|---|---|---|
+| AWS CloudTrail trail | **$0.00** | First trail per region is free |
+| CloudWatch Logs ingestion | **$0.48** | ~935MB/month of CloudTrail events at $0.50/GB |
+| CloudWatch Logs storage (30-day retention) | **$0.03** | $0.03/GB/month |
+| CloudWatch Metric Filter | **$0.00** | Always free |
+| CloudWatch Custom Metric | **$0.00** | First 10 metrics free |
+| CloudWatch Alarm | **$0.10** | $0.10/alarm/month |
+| SNS notifications | **$0.00** | First 1M/month free |
+| Lambda (lockdown function) | **$0.00** | First 1M invocations/month free |
+| AWS Budget + Budget Action | **$0.00** | First 2 budgets free |
+| **Total** | **$0.61/month** | Full automated defense stack |
+
+The maximum possible damage a credential-abuse attack can cause before automated lockdown fires is approximately **$0.03** — the cost of ~300 Timestream queries at minimum scan size in a 2-minute detection window.
+
+---
+
+**Attempting to abuse this system is not worth the effort.**
 
 ---
 
