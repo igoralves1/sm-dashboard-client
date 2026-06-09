@@ -553,7 +553,7 @@ Spend reaches $5 (100%) → Two simultaneous automated actions:
 | Administrator account | Explicitly skipped by Lambda (`admin` Cognito group check) |
 | Other Cognito pools in the account | Lambda scoped to pool ID `<USER_POOL_ID>` only |
 
-The lockdown is surgically scoped to browser users of this web application. Nothing else in the AWS account is interrupted.
+The lockdown is surgically scoped to credentials issued by the `<IDENTITY_POOL_NAME>` Identity Pool — whether used from a browser, AWS CLI, Python script, or any other SDK. Nothing else in the AWS account is interrupted.
 
 ---
 
