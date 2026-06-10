@@ -39,7 +39,7 @@ The platform currently operates as a full **real-time monitoring and statistical
 - Real-time alarms feed with severity classification and 20-page auto-generated PDF reports
 - AWS Cognito authentication, role-based access, user activity auditing
 - Fully serverless — browser queries AWS Timestream directly, zero backend
-- Bilingual (EN/PT), fully responsive, automated CI/CD to GitHub Pages
+- Four languages (EN / PT / ES / FR), fully responsive, automated CI/CD to GitHub Pages
 
 ### 🔭 Vision (roadmap — not yet implemented)
 
@@ -519,7 +519,7 @@ Control  → System continuously monitors; 3σ limits auto-updated each cycle
 
 ## Internationalization (i18n)
 
-The application is fully bilingual — **English (EN)** and **Portuguese (PT)** — powered by [vue-i18n v9](https://vue-i18n.intlify.dev/) in Composition API mode.
+The application supports four languages — **English (EN)**, **Portuguese (PT)**, **Spanish (ES)**, and **French (FR)** — powered by [vue-i18n v9](https://vue-i18n.intlify.dev/) in Composition API mode.
 
 ### How locale is detected and stored
 
@@ -530,7 +530,7 @@ The application is fully bilingual — **English (EN)** and **Portuguese (PT)** 
       └─ Anywhere else → EN
       Result cached in sessionStorage['prana_geo_v1']
 
-2. User manually switches flag (EN ↔ PT)
+2. User manually switches flag (EN / PT / ES / FR)
    └─ Choice saved to localStorage['prana_locale_v1']
       Persists across browser sessions
 
@@ -552,10 +552,12 @@ useLocale() composable
 ```
 src/locales/
 ├── en.json   ← English (default)
-└── pt.json   ← Portuguese
+├── pt.json   ← Portuguese
+├── es.json   ← Spanish
+└── fr.json   ← French
 ```
 
-Both files share identical key structure. Sections:
+All four files share identical key structure. Sections:
 
 | Section | Covers |
 |---|---|
@@ -571,7 +573,7 @@ Both files share identical key structure. Sections:
 
 ### Adding a new translatable string
 
-1. Add the key to **both** `en.json` and `pt.json`:
+1. Add the key to **all four** locale files (`en.json`, `pt.json`, `es.json`, `fr.json`):
 ```json
 // en.json
 "my_section": {
@@ -640,10 +642,12 @@ const statCards = computed(() => getStatCards(t))
 
 The locale also controls the measurement unit system:
 
-| Locale | Water unit | Energy unit | Currency |
-|---|---|---|---|
-| `en` | `gal` | `kWh` | `US$` |
-| `pt` | `m³` | `kWh` | `R$` |
+| Locale | Water unit | Energy unit |
+|---|---|---|
+| `en` | `gal` | `kWh` |
+| `pt` | `m³` | `kWh` |
+| `es` | `gal` | `kWh` |
+| `fr` | `gal` | `kWh` |
 
 Keys: `dashboard.water_unit`, `dashboard.energy_unit`.
 
