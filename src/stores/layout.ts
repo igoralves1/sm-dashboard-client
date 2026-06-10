@@ -19,11 +19,11 @@ const INIT_STATE: LayoutType = {
   orientation: 'vertical',
   sidenav: {
     size: 'default',
-    color: 'dark',
+    color: 'simemap',
     user: true,
   },
   topBar: {
-    color: 'light',
+    color: 'simemap',
   },
   position: 'fixed',
   width: 'fluid',

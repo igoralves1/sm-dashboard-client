@@ -67,6 +67,24 @@
 
 
 
+    // SIMEMAP Sidebar — solid navy matching login hero
+    html[data-menu-color="simemap"] {
+        --#{$prefix}sidenav-bg:                     #303287;
+        --#{$prefix}sidenav-border-color:           transparent;
+        --#{$prefix}sidenav-item-color:             rgba(255,255,255,0.7);
+        --#{$prefix}sidenav-item-hover-color:       #ffffff;
+        --#{$prefix}sidenav-item-hover-bg:          rgba(255,255,255,0.12);
+        --#{$prefix}sidenav-item-active-color:      #ffffff;
+        --#{$prefix}sidenav-item-active-bg:         rgba(0,158,224,0.32);
+
+        .menu-title {
+            color: rgba(255,255,255,0.4) !important;
+            letter-spacing: 1.2px;
+        }
+        .sidenav-user-info .sidenav-user-name { color: #fff !important; }
+        .sidenav-user-info .sidenav-user-designation { color: rgba(255,255,255,0.55) !important; }
+    }
+
     // Dark Mode
     html[data-bs-theme="dark"][data-menu-color="dark"],
     html[data-bs-theme="dark"][data-menu-color="gray"],
@@ -107,6 +125,15 @@
         --#{$prefix}topbar-search-border:           #2d2e3c;
     }
 
+
+    // SIMEMAP Topbar — white with navy accents
+    html[data-topbar-color="simemap"] {
+        --#{$prefix}topbar-bg:                      #ffffff;
+        --#{$prefix}topbar-item-color:                #{$gray-700};
+        --#{$prefix}topbar-item-hover-color:        #102a83;
+        --#{$prefix}topbar-search-bg:                 transparent;
+        --#{$prefix}topbar-search-border:           #e7e9eb;
+    }
 
     // Gradient Topbar
     html[data-topbar-color="gradient"] {
