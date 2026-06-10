@@ -39,8 +39,8 @@ Source of truth for colors: `src/assets/scss/_variables.scss`.
 
 | Role | Variable | Hex |
 |---|---|---|
-| Primary | `$primary` (= `$teal`) | `#1ab394` |
-| Secondary | `$secondary` (= `$blue`) | `#1c84c6` |
+| Primary | `$primary` (SIMEMAP wordmark navy) | `#102a83` |
+| Secondary | `$secondary` (SIMEMAP icon cyan) | `#009ee0` |
 | Success | `$success` (= `$green`) | `#0acf97` |
 | Info | `$info` (= `$cyan`) | `#23c6c8` |
 | Warning | `$warning` (= `$yellow`) | `#f8ac59` |
