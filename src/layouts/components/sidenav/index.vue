@@ -38,9 +38,9 @@ import UserProfile from '@/layouts/components/sidenav/components/UserProfile.vue
 import AppMenu from '@/layouts/components/sidenav/components/AppMenu.vue'
 import { useLayout } from '@/stores/layout.ts'
 
-import logo from '@/assets/images/pranalogototal.svg'
-import logoSm from '@/assets/images/pranalogototal.svg'
-import logoDark from '@/assets/images/pranalogototal.svg'
+import logo from '@/assets/images/logo.png'
+import logoSm from '@/assets/images/logo-sm.png'
+import logoDark from '@/assets/images/logo-black.png'
 
 const { layout, setSideNavSize, toggleMobileMenu } = useLayout()
 

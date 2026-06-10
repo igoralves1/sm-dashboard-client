@@ -139,7 +139,7 @@
     "tag_report": "Informe",
     "tag_connectivity": "Conectividad",
     "user_system": "Sistema AIIoT",
-    "user_prana_team": "Equipo prana",
+    "user_simemap_team": "Equipo SIMEMAP",
     "user_network_monitor": "Monitor de red"
   },
   "megamenu": {
@@ -309,7 +309,7 @@
     "production_daily_sil": "Producción últimos 5 días m³ · PTPs · Silvanópolis",
     "tank_title_mir": "% de llenado del nivel de agua · RAP01 · Miranorte",
     "level_title_mir": "% de llenado del nivel de agua · RAP01 · Miranorte",
-    "footer_text": "prana · AIIoT · Monitoreo en tiempo real",
+    "footer_text": "SIMEMAP · AIIoT · Monitoreo en tiempo real",
     "level_critical": "Crítico < 50%",
     "level_alert": "Alerta 50–80%",
     "level_normal": "Normal > 80%",

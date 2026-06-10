@@ -19,11 +19,11 @@ const INIT_STATE: LayoutType = {
   orientation: 'vertical',
   sidenav: {
     size: 'default',
-    color: 'prana',
+    color: 'dark',
     user: true,
   },
   topBar: {
-    color: 'prana',
+    color: 'light',
   },
   position: 'fixed',
   width: 'fluid',

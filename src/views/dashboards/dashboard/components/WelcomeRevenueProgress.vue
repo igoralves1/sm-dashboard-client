@@ -111,7 +111,7 @@ import StackedAreaChart from './StackedAreaChart.vue'
 import DonutChart from './DonutChart.vue'
 import { useAlertStore } from '@/composables/useAlertStore'
 import type { StoredAlert } from '@/composables/useAlertStore'
-import pranaLogoRaw from '/pranalogototal.svg?raw'
+import reportLogoRaw from '@/assets/images/logo.png'
 
 const { alerts, alerts24h, initFromS3, startPolling, stopPolling } = useAlertStore()
 
@@ -218,7 +218,7 @@ function buildReportHtml(list: StoredAlert[]): string {
 <html lang="${locale.value}">
 <head>
 <meta charset="UTF-8"/>
-<title>${t('dashboard.report_title')} — prana</title>
+<title>${t('dashboard.report_title')} — SIMEMAP</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -346,7 +346,7 @@ function buildReportHtml(list: StoredAlert[]): string {
   <div class="report-header">
     <div class="report-logo">
       <div>
-        <div class="report-logo-svg">${pranaLogoRaw}</div>
+        <div class="report-logo-svg"><img src="${reportLogoRaw}" height="40" /></div>
         <div class="report-logo-sub">${t('dashboard.report_subtitle')}</div>
       </div>
     </div>
@@ -380,7 +380,7 @@ function buildReportHtml(list: StoredAlert[]): string {
   ${list.length ? rows : `<p style="color:#9ca3af;text-align:center;padding:32px 0;">${t('dashboard.report_no_alarms')}</p>`}
 
   <div class="report-footer">
-    <span>prana · ${t('dashboard.report_subtitle')}</span>
+    <span>SIMEMAP · ${t('dashboard.report_subtitle')}</span>
     <span>${t('dashboard.report_auto_generated')} — ${generatedAt}</span>
   </div>
 

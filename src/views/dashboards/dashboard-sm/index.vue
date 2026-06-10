@@ -4,7 +4,7 @@
     <!-- ═══ TOP HEADER BAR ═══ -->
     <div class="top-bar">
       <div class="top-bar__left">
-        <img src="@/assets/images/pranalogototal.svg" alt="prana" class="top-bar__logo" />
+        <img src="@/assets/images/logo.png" alt="SIMEMAP" class="top-bar__logo" />
         <div class="top-bar__divider"></div>
         <div class="top-bar__meta">
           <span class="top-bar__meta-label">{{ t('monitoring.iot_realtime') }}</span>
@@ -493,7 +493,7 @@ onUnmounted(() => {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1.2px;
-  color: #d6aa01;
+  color: #1ab394;
   opacity: 0.85;
 }
 .top-bar__meta-status {
@@ -509,7 +509,7 @@ onUnmounted(() => {
 }
 .status-dot.ok      { background: #37872d; box-shadow: 0 0 5px #37872d; }
 .status-dot.error   { background: #e84040; box-shadow: 0 0 5px #e84040; }
-.status-dot.loading { background: #d6aa01; animation: rl-blink 1s ease-in-out infinite; }
+.status-dot.loading { background: #1ab394; animation: rl-blink 1s ease-in-out infinite; }
 .status-text {
   font-size: 0.75rem;
   color: #7a8099;
@@ -557,7 +557,7 @@ onUnmounted(() => {
 }
 .section-header__icon {
   font-size: 0.9rem;
-  color: #d6aa01;
+  color: #1ab394;
   line-height: 1;
 }
 .section-header__title {

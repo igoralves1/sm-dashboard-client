@@ -6,8 +6,8 @@ import { ref, watch } from 'vue'
 
 export type Locale = 'en' | 'pt' | 'es' | 'fr'
 
-const STORAGE_KEY = 'prana_locale_v1'
-const GEO_CACHE   = 'prana_geo_v1'   // shared with session tracker
+const STORAGE_KEY = 'simemap_locale_v1'
+const GEO_CACHE   = 'simemap_geo_v1'   // shared with session tracker
 
 const _locale = ref<Locale>(_loadSaved())
 

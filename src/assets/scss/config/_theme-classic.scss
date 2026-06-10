@@ -64,75 +64,8 @@
         --#{$prefix}sidenav-item-active-bg:         #1e3447;
     }
 
-    // Prana Sidebar — green gradient matching login page
-    html[data-menu-color="prana"] {
-        --#{$prefix}sidenav-bg:                       #{linear-gradient(180deg, #017b56 0%, #2a7a1a 55%, #4a8c10 100%)};
-        --#{$prefix}sidenav-border-color:             transparent;
-        --#{$prefix}sidenav-item-color:             rgba(255,255,255,0.68);
-        --#{$prefix}sidenav-item-hover-color:       #ffffff;
-        --#{$prefix}sidenav-item-hover-bg:          rgba(255,255,255,0.12);
-        --#{$prefix}sidenav-item-active-color:      #ffffff;
-        --#{$prefix}sidenav-item-active-bg:         rgba(214,170,1,0.28);
 
-        // Active item: gold left border accent
-        .sidenav-item.active > .sidenav-link,
-        .sidenav-item .sidenav-link.active {
-            border-left: 3px solid #d6aa01;
-            padding-left: calc(var(--ins-sidenav-item-padding-x) + 7px);
-            background: rgba(214,170,1,0.22) !important;
-            color: #ffffff !important;
-        }
 
-        // Section titles
-        .menu-title {
-            color: rgba(255,255,255,0.35) !important;
-            letter-spacing: 1.2px;
-        }
-
-        // User profile area
-        .sidenav-user-info .sidenav-user-name { color: #fff !important; }
-        .sidenav-user-info .sidenav-user-designation { color: rgba(255,255,255,0.5) !important; }
-    }
-
-    // Prana — orange-gold gradient buttons (matching login CTA)
-    html[data-menu-color="prana"],
-    html[data-topbar-color="prana"] {
-        .btn-primary {
-            background: linear-gradient(135deg, #e24a19 0%, #d6aa01 100%) !important;
-            border-color: transparent !important;
-            color: #fff !important;
-            box-shadow: 0 2px 8px rgba(226,74,25,0.3) !important;
-        }
-        .btn-primary:hover:not(:disabled) {
-            opacity: 0.9;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(226,74,25,0.4) !important;
-        }
-    }
-
-    // Prana sidebar — force all nav links to full white, fix dimmed items
-    html[data-menu-color="prana"] {
-        .sidenav-menu .sidenav-link {
-            color: rgba(255,255,255,0.68) !important;
-        }
-        .sidenav-menu .sidenav-link:hover,
-        .sidenav-menu .side-nav-link:hover {
-            color: #ffffff !important;
-        }
-
-        // Disabled items: same weak white, slightly more transparent
-        .sidenav-menu .sidenav-link.disabled,
-        .sidenav-menu .side-nav-link.disabled {
-            opacity: 0.55 !important;
-            color: rgba(255,255,255,0.68) !important;
-        }
-
-        // Section titles
-        .menu-title {
-            color: rgba(255,255,255,0.45) !important;
-            letter-spacing: 1.2px;
-        }
-    }
 
     // Dark Mode
     html[data-bs-theme="dark"][data-menu-color="dark"],
@@ -174,14 +107,6 @@
         --#{$prefix}topbar-search-border:           #2d2e3c;
     }
 
-    // Prana Topbar — white with prana green accents
-    html[data-topbar-color="prana"] {
-        --#{$prefix}topbar-bg:                      #ffffff;
-        --#{$prefix}topbar-item-color:              #{$gray-700};
-        --#{$prefix}topbar-item-hover-color:        #017b56;
-        --#{$prefix}topbar-search-bg:               transparent;
-        --#{$prefix}topbar-search-border:           #e7e9eb;
-    }
 
     // Gradient Topbar
     html[data-topbar-color="gradient"] {

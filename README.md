@@ -1,7 +1,7 @@
 # AIoT Intelligent Asset Management Platform
 
 <p align="center">
-  <img src="https://igoralves1.github.io/sm-dashboard-client/pranalogototal.svg" width="200" alt="prana" />
+  <img src="branding/simemap/logos/logo.png" width="200" alt="SIMEMAP" />
 </p>
 
 <p align="center">
@@ -91,11 +91,11 @@ This system is domain-agnostic. The same architecture and visualization layer ca
 
 ## Feature Gallery
 
-> Screenshots from a live deployment monitoring water supply systems in Silvanópolis and Miranorte, State of Tocantins, Brazil. This deployment is branded **prana** — the first client customization of the platform (the `prana` branch). The core software is brand-agnostic.
+> Screenshots from a live deployment monitoring water supply systems in Silvanópolis and Miranorte, State of Tocantins, Brazil. This branch (`simemap`) carries the **SIMEMAP** branding. The core software is brand-agnostic.
 
 ---
 
-### 🔐 Login — prana AIIoT Platform
+### 🔐 Login — AIIoT Platform
 
 ![Login page](screenshots/login-page.webp)
 
@@ -115,7 +115,7 @@ Bird's-eye view of the complete monitoring dashboard. All sections are visible s
 
 ![Dashboard header](screenshots/dashboard-header.webp)
 
-Top bar with the prana logo, live "Updated at" timestamp, a D3-animated countdown arc (210 s remaining), and an **Export JSON** button that downloads a full timestamped snapshot of all chart data. The info panel below the header summarises the system's Smart City 4.0 capabilities.
+Top bar with the app logo, live "Updated at" timestamp, a D3-animated countdown arc (210 s remaining), and an **Export JSON** button that downloads a full timestamped snapshot of all chart data. The info panel below the header summarises the system's Smart City 4.0 capabilities.
 
 ---
 
@@ -235,7 +235,7 @@ The **Alerts & Events History** widget surfaces anomalies as they occur — 101 
 
 ![Alarms report PDF](screenshots/alarms-report-pdf.webp)
 
-One click on **View report** generates a print-ready **Alarms & Anomalies Report** in the browser — 20 pages, exportable as PDF. The report includes a summary header (Total: 200, Critical: 105, Warning: 95), the prana logo, project metadata, and a numbered alarm log with sensor ID, type, description, source, affected hours, and statistical probability for each event. Fully i18n-aware: renders in the user's selected language.
+One click on **View report** generates a print-ready **Alarms & Anomalies Report** in the browser — 20 pages, exportable as PDF. The report includes a summary header (Total: 200, Critical: 105, Warning: 95), the app logo, project metadata, and a numbered alarm log with sensor ID, type, description, source, affected hours, and statistical probability for each event. Fully i18n-aware: renders in the user's selected language.
 
 ---
 
@@ -243,7 +243,7 @@ One click on **View report** generates a print-ready **Alarms & Anomalies Report
 
 ![Sidebar user profile](screenshots/sidebar-user.png)
 
-Collapsible sidebar with the prana logo, logged-in user avatar and role, and a minimal navigation menu restricted to the dashboards the user's Cognito group has access to. Role-based visibility is enforced server-side — no client-side route hiding.
+Collapsible sidebar with the app logo, logged-in user avatar and role, and a minimal navigation menu restricted to the dashboards the user's Cognito group has access to. Role-based visibility is enforced server-side — no client-side route hiding.
 
 ---
 
@@ -532,10 +532,10 @@ The application supports four languages — **English (EN)**, **Portuguese (PT)*
    └─ Calls ipapi.co to detect country by IP
       ├─ Brazil (BR) → PT
       └─ Anywhere else → EN
-      Result cached in sessionStorage['prana_geo_v1']
+      Result cached in sessionStorage['simemap_geo_v1']
 
 2. User manually switches flag (EN / PT / ES / FR)
-   └─ Choice saved to localStorage['prana_locale_v1']
+   └─ Choice saved to localStorage['simemap_locale_v1']
       Persists across browser sessions
 
 3. On every page load
@@ -959,7 +959,7 @@ This entire security stack runs permanently for **$0.61/month**:
 This is an open source project licensed under the **Apache 2.0 License**, developed by **Dr. Igor Lemos Alves**.
 Free to be used, modified, and distributed by anyone — for commercial or non-commercial purposes.
 
-The `prana` branch is a customization requested by **Prana** — the first client of this platform — to adapt the project to its specific needs (branding, Portuguese copy, client-specific dashboards). The core software itself is brand-agnostic.
+The `simemap` branch carries the SIMEMAP branding. The core software itself is brand-agnostic.
 
 ---
 

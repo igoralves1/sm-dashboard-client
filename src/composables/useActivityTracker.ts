@@ -1,6 +1,6 @@
 import { ref, computed } from 'vue'
 
-const STORAGE_KEY = 'prana_activity_v1'
+const STORAGE_KEY = 'simemap_activity_v1'
 const MAX_EVENTS  = 500
 
 export type ActivityEventType = 'login' | 'logout' | 'page_view'

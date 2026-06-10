@@ -120,7 +120,7 @@ export function getTimelineEvents(t: (k: string) => string): TimelineEvent[] {
       id: 4, icon: 'tabler:building-community', iconColor: 'info',
       title: t('data.ev4_title'), time: t('data.ev4_time'), description: t('data.ev4_desc'),
       tag: t('data.tag_expansion'), tagVariant: 'info',
-      userName: t('data.user_prana_team'), userImage: user10, userLink: '/pages/profile', hasDivider: true,
+      userName: t('data.user_simemap_team'), userImage: user10, userLink: '/pages/profile', hasDivider: true,
     },
     {
       id: 5, icon: 'tabler:chart-bar', iconColor: 'primary',

@@ -26,7 +26,7 @@
       <div class="sm-auth__left-content">
         <div class="sm-auth__logo">
           <RouterLink to="/">
-            <img :src="pranLogo" alt="prana" style="height:200px" />
+            <img :src="pranLogo" alt="SIMEMAP" style="height:200px" />
           </RouterLink>
         </div>
 
@@ -134,7 +134,7 @@
         </p>
 
         <div class="sm-auth__footer">
-          © {{ currentYear }} prana. All rights reserved.
+          © {{ currentYear }} SIMEMAP. All rights reserved.
         </div>
       </div>
     </div>
@@ -146,7 +146,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { Icon } from '@iconify/vue'
 import { currentYear } from '@/helpers'
-import pranLogo from '@/assets/images/pranafinal_300px.svg'
+import pranLogo from '@/assets/images/logo.png'
 import { useAuthStore } from '@/stores/auth.ts'
 import { useI18n } from 'vue-i18n'
 
@@ -188,7 +188,7 @@ async function handleSubmit() {
 .sm-auth__left {
   position: relative;
   width: 55%;
-  background: linear-gradient(145deg, #017b56 0%, #2a7a1a 45%, #4a8c10 100%);
+  background: linear-gradient(145deg, #1ab394 0%, #1c84c6 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -257,7 +257,7 @@ async function handleSubmit() {
   height: 44px;
   border-radius: 10px;
   background: rgba(226,74,25,0.25);
-  color: #e24a19;
+  color: #1ab394;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -272,7 +272,7 @@ async function handleSubmit() {
 
 .sm-feature__icon--tele {
   background: rgba(214,170,1,0.2);
-  color: #d6aa01;
+  color: #1ab394;
 }
 
 .sm-feature__title {
@@ -301,7 +301,7 @@ async function handleSubmit() {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #d6aa01;
+  background: #1ab394;
   box-shadow: 0 0 0 0 rgba(214,170,1,0.6);
   animation: pulse-dot 2s infinite;
   flex-shrink: 0;
@@ -335,7 +335,7 @@ async function handleSubmit() {
 .sm-auth__form-header h2 {
   font-size: 1.75rem;
   font-weight: 700;
-  color: #017b56;
+  color: #1ab394;
   margin-bottom: 6px;
 }
 
@@ -380,7 +380,7 @@ async function handleSubmit() {
 }
 
 .sm-input:focus {
-  border-color: #e24a19 !important;
+  border-color: #1ab394 !important;
   box-shadow: 0 0 0 3px rgba(226,74,25,0.12) !important;
 }
 
@@ -409,7 +409,7 @@ async function handleSubmit() {
 /* Primary button */
 .sm-btn-primary {
   height: 48px;
-  background: linear-gradient(135deg, #e24a19 0%, #d6aa01 100%) !important;
+  background: linear-gradient(135deg, #1c84c6 0%, #1ab394 100%) !important;
   border: none !important;
   border-radius: 10px !important;
   font-weight: 600 !important;
@@ -448,7 +448,7 @@ async function handleSubmit() {
 }
 
 .sm-auth__register a {
-  color: #017b56;
+  color: #1ab394;
   font-weight: 600;
   text-decoration: none;
 }

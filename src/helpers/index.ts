@@ -7,12 +7,12 @@ export const currency: CurrencyType = '$'
 export const currentYear = new Date().getFullYear()
 
 export const appFavicon = favicon
-export const appName = 'prana'
-export const appTitle = 'prana - Admin Dashboard'
+export const appName = 'SIMEMAP'
+export const appTitle = 'SIMEMAP - Admin Dashboard'
 export const appDescription: string =
-  'prana admin dashboard.'
+  'SIMEMAP admin dashboard.'
 
-export const author: string = 'prana'
+export const author: string = 'SIMEMAP'
 export const authorWebsite: string = ''
 export const authorContact: string = ''
 

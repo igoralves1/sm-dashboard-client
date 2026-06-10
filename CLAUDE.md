@@ -51,8 +51,8 @@ Proceed? (or type corrections before I start)
 
 | Key | Value |
 |---|---|
-| App name | SM Dashboard Client (rebranded → **prana**) |
-| Project | HidroForte / prana — real-time IoT water monitoring |
+| App name | SM Dashboard Client (**SIMEMAP** branding on this branch) |
+| Project | HidroForte / SIMEMAP — real-time IoT water monitoring |
 | Stack | Vue 3 + TypeScript + Vite + D3.js v7 |
 | Auth | AWS Cognito User Pool |
 | Data | AWS Timestream (direct browser queries, no backend) |
@@ -102,7 +102,7 @@ src/stores/auth.ts                ← Cognito auth (Pinia). login/logout/refresh
 ### Dashboard
 ```
 src/views/dashboards/dashboard-sm/index.vue   ← MAIN dashboard (Silvanópolis + Miranorte)
-src/views/auth/auth-1/sign-in/index.vue       ← Login page → redirects to /dashboard (prana branded, Portuguese copy)
+src/views/auth/auth-1/sign-in/index.vue       ← Login page → redirects to /dashboard (SIMEMAP branded, Portuguese copy)
 src/views/auth/auth-1/set-new-password/index.vue  ← First-login password change
 src/layouts/components/data.ts                ← Sidebar menu (only Dashboard v.2 + HidroForte SM)
 ```
@@ -415,29 +415,13 @@ Toggle script: `~/scripts/mcp-toggle.sh`
 
 ## 14. RECENT CHANGES (session 2026-06-06)
 
-### Branding: SIMEMAP → prana (branch `prana`)
+### Branding: SIMEMAP (branch `simemap`)
 
-The app was rebranded from **SIMEMAP / HidroForte** to **prana**. All UI references updated.
-
-**Key changes:**
-- Logo replaced with prana logo (`pranalogototal.svg`) — fully vectorized (icon + text as paths) to fix font rendering on GitHub Pages
-- Brand color gold: `#d6aa01` — used for status dot and logo text
-- App name in sidebar/topbar → `prana`
-- `HidroForte` → `HF` in UI labels
-
-**Login page (`src/views/auth/auth-1/sign-in/index.vue`) — current state:**
-- Logo: `pranalogototal.svg`, `height: 200px`
-- Water icon: `#90d2ec` (light blue-white)
-- Status dot: `#d6aa01` (gold, matches prana logo text)
-- Hero `<h1>`: `"Monitoramento Inteligente através do AIIoT"`
-- Hero `<p>`: `"Transforme dados de energia, água e telemetria em decisões precisas — IA e IoT unidos para construir cidades mais eficientes e sustentáveis."`
-- Feature pills context: AIIoT smart cities (Portuguese)
-
-**Logo SVG assets:**
-```
-src/assets/images/pranalogototal.svg   ← primary logo (icon + text paths, 200px on login)
-public/pranalogototal.svg              ← public copy (keep in sync)
-```
-ViewBox computed from actual path bounds — do not change arbitrarily or clipping will occur.
+This branch merges all `prana` features but keeps **SIMEMAP** branding:
+- Logos: `src/assets/images/logo.png`, `logo-sm.png`, `logo-black.png`, `favicon.ico`
+- Brand asset snapshot + full color scheme: `branding/simemap/` (see COLORS.md)
+- Theme colors: primary teal `#1ab394`, secondary blue `#1c84c6`
+- Storage keys prefixed `simemap_*` (locale, geo, sessions, alerts, activity)
+- All prana logos/SVGs deleted; prana theme blocks removed from `_theme-classic.scss`
 
 **Auto-refresh:** currently set to **300 seconds (5 min)** — `REFRESH_SECS = 300` in `useTimestreamDashboard.ts`

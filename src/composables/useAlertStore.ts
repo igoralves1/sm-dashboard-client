@@ -2,7 +2,7 @@ import { ref, computed } from 'vue'
 import { useS3Activity } from './useS3Activity'
 import type { Anomaly } from './useAnomalyDetection'
 
-const STORAGE_KEY   = 'prana_alerts_v1'
+const STORAGE_KEY   = 'simemap_alerts_v1'
 const MAX_ALERTS    = 200
 const POLL_INTERVAL = 15_000   // 15 seconds
 
