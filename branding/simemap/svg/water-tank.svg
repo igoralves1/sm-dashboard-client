@@ -1,0 +1,254 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 460" width="500" height="460">
+  <defs>
+    <!-- White body shading: left dark, center bright, right dark -->
+    <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#b8b8b0"/>
+      <stop offset="12%"  stop-color="#d8d8d0"/>
+      <stop offset="35%"  stop-color="#f0efea"/>
+      <stop offset="55%"  stop-color="#eeeee8"/>
+      <stop offset="78%"  stop-color="#d0cfc8"/>
+      <stop offset="100%" stop-color="#a8a8a0"/>
+    </linearGradient>
+
+    <!-- Top surface (flat concrete) -->
+    <radialGradient id="topGrad" cx="42%" cy="38%" r="62%">
+      <stop offset="0%"   stop-color="#e8e6df"/>
+      <stop offset="50%"  stop-color="#d8d6cf"/>
+      <stop offset="100%" stop-color="#c0bfb8"/>
+    </radialGradient>
+
+    <!-- Top ellipse rim -->
+    <linearGradient id="rimGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#a8a8a0"/>
+      <stop offset="50%"  stop-color="#d0d0c8"/>
+      <stop offset="100%" stop-color="#989890"/>
+    </linearGradient>
+
+    <!-- Gold railing -->
+    <linearGradient id="goldH" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#8a6a00"/>
+      <stop offset="20%"  stop-color="#c89010"/>
+      <stop offset="50%"  stop-color="#e8b828"/>
+      <stop offset="80%"  stop-color="#c08010"/>
+      <stop offset="100%" stop-color="#7a5a00"/>
+    </linearGradient>
+    <linearGradient id="goldV" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#e8b828"/>
+      <stop offset="100%" stop-color="#9a7010"/>
+    </linearGradient>
+
+    <!-- Ground/base -->
+    <radialGradient id="groundGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#c8c8c8"/>
+      <stop offset="60%"  stop-color="#909090"/>
+      <stop offset="100%" stop-color="#606060"/>
+    </radialGradient>
+
+    <!-- Base wall bottom -->
+    <linearGradient id="baseGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#707070"/>
+      <stop offset="40%"  stop-color="#a0a0a0"/>
+      <stop offset="100%" stop-color="#606060"/>
+    </linearGradient>
+
+    <!-- Water pipe blue -->
+    <linearGradient id="pipeGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#5ab0e0"/>
+      <stop offset="50%"  stop-color="#3888c0"/>
+      <stop offset="100%" stop-color="#206090"/>
+    </linearGradient>
+    <!-- Water fill clip (tank body shape) -->
+    <clipPath id="tankBodyClip">
+      <path d="M62,106 L62,372 Q62,400 252,400 Q442,400 442,372 L442,106 Z"/>
+    </clipPath>
+
+    <!-- Water body: rich deep ocean blue sides, vivid center -->
+    <linearGradient id="waterFillGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#082a4a"/>
+      <stop offset="12%"  stop-color="#0e4878"/>
+      <stop offset="30%"  stop-color="#1a72b8"/>
+      <stop offset="50%"  stop-color="#2896e0"/>
+      <stop offset="68%"  stop-color="#1878c0"/>
+      <stop offset="86%"  stop-color="#0c3e6a"/>
+      <stop offset="100%" stop-color="#061828"/>
+    </linearGradient>
+
+    <!-- Water depth gradient: bright surface → deep dark bottom -->
+    <linearGradient id="waterDepthGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#60c8f0" stop-opacity="0.0"/>
+      <stop offset="20%"  stop-color="#1a70b0" stop-opacity="0.3"/>
+      <stop offset="60%"  stop-color="#0c3a70" stop-opacity="0.65"/>
+      <stop offset="100%" stop-color="#040e20" stop-opacity="0.92"/>
+    </linearGradient>
+
+    <!-- Water surface: bright cyan shimmer -->
+    <radialGradient id="waterSurfaceGrad" cx="35%" cy="38%" r="65%">
+      <stop offset="0%"   stop-color="#c8f0ff"/>
+      <stop offset="18%"  stop-color="#78d0f0"/>
+      <stop offset="42%"  stop-color="#38a8e0"/>
+      <stop offset="70%"  stop-color="#1878c0"/>
+      <stop offset="100%" stop-color="#083060"/>
+    </radialGradient>
+
+    <!-- Caustic light patches (shimmer on surface) -->
+    <radialGradient id="causticGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#d0f0ff" stop-opacity="0.55"/>
+      <stop offset="50%"  stop-color="#88d0f0" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="white"   stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <style>
+    /* ── Wave kinematic animations ── */
+    .waveA {
+      animation: waveA 4s ease-in-out infinite;
+    }
+    .waveB {
+      animation: waveB 3s ease-in-out infinite;
+    }
+    .waveC {
+      animation: waveC 2.2s ease-in-out infinite;
+    }
+    .surface {
+      animation: surfaceBob 3.5s ease-in-out infinite;
+    }
+    .streak {
+      animation: streakShift 4s ease-in-out infinite;
+    }
+    .caustic1 {
+      animation: causticA 3.2s ease-in-out infinite;
+    }
+    .caustic2 {
+      animation: causticB 2.8s ease-in-out infinite 0.6s;
+    }
+    .caustic3 {
+      animation: causticC 3.8s ease-in-out infinite 1.2s;
+    }
+
+    @keyframes waveA {
+      0%,100% { d: path("M62,239 Q140,228 252,239 Q364,250 442,239 L442,260 Q364,271 252,260 Q140,249 62,260 Z"); }
+      50%      { d: path("M62,239 Q140,250 252,239 Q364,228 442,239 L442,260 Q364,249 252,260 Q140,271 62,260 Z"); }
+    }
+    @keyframes waveB {
+      0%,100% { d: path("M62,239 Q180,232 252,239 Q324,246 442,239 L442,255 Q324,262 252,255 Q180,248 62,255 Z"); }
+      50%      { d: path("M62,239 Q180,246 252,239 Q324,232 442,239 L442,255 Q324,248 252,255 Q180,262 62,255 Z"); }
+    }
+    @keyframes waveC {
+      0%,100% { d: path("M62,239 Q120,235 252,239 Q384,243 442,239 L442,248 Q384,252 252,248 Q120,244 62,248 Z"); }
+      50%      { d: path("M62,239 Q120,243 252,239 Q384,235 442,239 L442,248 Q384,244 252,248 Q120,252 62,248 Z"); }
+    }
+    @keyframes surfaceBob {
+      0%,100% { transform: translateY(0px); }
+      50%      { transform: translateY(-3px); }
+    }
+    @keyframes streakShift {
+      0%,100% { transform: translateX(0px); opacity: 0.12; }
+      50%      { transform: translateX(18px); opacity: 0.22; }
+    }
+    @keyframes causticA {
+      0%,100% { transform: translate(0,0) scale(1);   opacity: 0.6; }
+      33%      { transform: translate(12px,-4px) scale(1.15); opacity: 0.9; }
+      66%      { transform: translate(-8px,2px) scale(0.9);  opacity: 0.5; }
+    }
+    @keyframes causticB {
+      0%,100% { transform: translate(0,0) scale(1);   opacity: 0.5; }
+      40%      { transform: translate(-10px,-3px) scale(1.2); opacity: 0.85; }
+      80%      { transform: translate(6px,4px) scale(0.85);  opacity: 0.4; }
+    }
+    @keyframes causticC {
+      0%,100% { transform: translate(0,0) scale(1);   opacity: 0.55; }
+      50%      { transform: translate(8px,-6px) scale(1.3);  opacity: 0.95; }
+    }
+  </style>
+
+  <!-- ── GROUND ── -->
+  <ellipse cx="252" cy="398" rx="210" ry="44" fill="url(#groundGrad)" opacity="0.7"/>
+
+  <!-- ── DROP SHADOW ── -->
+  <ellipse cx="252" cy="392" rx="198" ry="30" fill="#000" opacity="0.18"/>
+
+  <!-- ── BODY CYLINDER ── -->
+  <!-- Cylindrical body: flat sides + ellipse bottom curve -->
+  <path d="M60,106 L60,372 Q60,400 252,400 Q444,400 444,372 L444,106 Z" fill="url(#bodyGrad)"/>
+  <!-- Bottom ellipse cap -->
+  <ellipse cx="252" cy="372" rx="192" ry="28" fill="url(#bodyGrad)"/>
+
+  <!-- ── WATER FILL (50%) ── -->
+  <!-- Water base body -->
+  <rect x="62" y="239" width="380" height="161" fill="url(#waterFillGrad)" clip-path="url(#tankBodyClip)" opacity="0.92"/>
+  <!-- Water depth darkening -->
+  <rect x="62" y="239" width="380" height="161" fill="url(#waterDepthGrad)" clip-path="url(#tankBodyClip)"/>
+
+  <!-- Animated wave 1 (dark, slow) -->
+  <path class="waveA" clip-path="url(#tankBodyClip)"
+    d="M62,239 Q140,228 252,239 Q364,250 442,239 L442,260 Q364,271 252,260 Q140,249 62,260 Z"
+    fill="#1a6aa0" opacity="0.55"/>
+
+  <!-- Animated wave 2 (lighter, faster offset) -->
+  <path class="waveB" clip-path="url(#tankBodyClip)"
+    d="M62,239 Q180,232 252,239 Q324,246 442,239 L442,255 Q324,262 252,255 Q180,248 62,255 Z"
+    fill="#3a9ad4" opacity="0.40"/>
+
+  <!-- Animated wave 3 (bright crest) -->
+  <path class="waveC" clip-path="url(#tankBodyClip)"
+    d="M62,239 Q120,235 252,239 Q384,243 442,239 L442,248 Q384,252 252,248 Q120,244 62,248 Z"
+    fill="#70c8f0" opacity="0.25"/>
+
+  <!-- Animated caustic light patches on surface -->
+  <ellipse class="caustic1" cx="180" cy="238" rx="55" ry="8" fill="url(#causticGrad)"/>
+  <ellipse class="caustic2" cx="320" cy="240" rx="38" ry="6" fill="url(#causticGrad)"/>
+  <ellipse class="caustic3" cx="252" cy="236" rx="28" ry="5" fill="url(#causticGrad)"/>
+
+  <!-- Water surface main ellipse -->
+  <ellipse class="surface" cx="252" cy="239" rx="190" ry="26" fill="url(#waterSurfaceGrad)" opacity="0.88"/>
+
+  <!-- Surface highlight streak -->
+  <ellipse class="streak" cx="200" cy="237" rx="70" ry="6" fill="white" opacity="0.12"/>
+
+  <!-- Subtle body reflection -->
+  <ellipse cx="148" cy="312" rx="38" ry="64" fill="white" opacity="0.035" clip-path="url(#tankBodyClip)"/>
+
+
+
+  <!-- ── TOP SURFACE (flat concrete) ── -->
+  <ellipse cx="252" cy="106" rx="192" ry="30" fill="url(#topGrad)"/>
+
+  <!-- Top surface texture lines (subtle radial) -->
+  <g stroke="#c0bfb8" stroke-width="0.6" opacity="0.4" fill="none">
+    <ellipse cx="252" cy="106" rx="160" ry="24"/>
+    <ellipse cx="252" cy="106" rx="120" ry="18"/>
+    <ellipse cx="252" cy="106" rx="80"  ry="12"/>
+    <ellipse cx="252" cy="106" rx="40"  ry="6"/>
+  </g>
+
+
+  <!-- ── TOP RIM ── -->
+  <ellipse cx="252" cy="106" rx="192" ry="30" fill="none" stroke="url(#rimGrad)" stroke-width="3"/>
+
+  <!-- ── GOLD PERIMETER RAILING ── -->
+  <!-- Outer rail ring -->
+  <ellipse cx="252" cy="92"  rx="200" ry="32" fill="none" stroke="url(#goldH)" stroke-width="5.5"/>
+  <!-- Inner rail ring -->
+  <ellipse cx="252" cy="88"  rx="186" ry="27" fill="none" stroke="#d4a020"    stroke-width="3"   opacity="0.6"/>
+
+  <!-- Railing vertical posts -->
+  <g stroke="url(#goldV)" stroke-width="3.5" stroke-linecap="round">
+    <!-- Back posts (shorter, above top) -->
+    <line x1="152" y1="72"  x2="152" y2="108"/>
+    <line x1="190" y1="63"  x2="190" y2="106"/>
+    <line x1="252" y1="60"  x2="252" y2="106"/>
+    <line x1="314" y1="63"  x2="314" y2="106"/>
+    <line x1="352" y1="72"  x2="352" y2="108"/>
+    <!-- Front posts (taller, extend down side) -->
+    <line x1="90"  y1="86"  x2="90"  y2="116"/>
+    <line x1="118" y1="76"  x2="118" y2="112"/>
+    <line x1="386" y1="76"  x2="386" y2="112"/>
+    <line x1="414" y1="86"  x2="414" y2="116"/>
+  </g>
+
+  <!-- Top highlight on rail -->
+  <ellipse cx="252" cy="90" rx="200" ry="32" fill="none" stroke="#f8e080" stroke-width="1" opacity="0.3"/>
+
+  <!-- ── LIGHT SPECULAR on body ── -->
+  <rect x="150" y="120" width="60" height="230" fill="white" opacity="0.04" rx="30"/>
+</svg>
