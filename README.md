@@ -115,7 +115,7 @@ Bird's-eye view of the complete monitoring dashboard. All sections are visible s
 
 ![Dashboard header](screenshots/dashboard-header.webp)
 
-Top bar with the app logo, live "Updated at" timestamp, a D3-animated countdown arc (210 s remaining), and an **Export JSON** button that downloads a full timestamped snapshot of all chart data. The info panel below the header summarises the system's Smart City 4.0 capabilities.
+Top bar with the SIMEMAP logo, live "Updated at" timestamp, a D3-animated countdown arc (210 s remaining), and an **Export JSON** button that downloads a full timestamped snapshot of all chart data. The info panel below the header summarises the system's Smart City 4.0 capabilities.
 
 ---
 
@@ -235,7 +235,7 @@ The **Alerts & Events History** widget surfaces anomalies as they occur — 101 
 
 ![Alarms report PDF](screenshots/alarms-report-pdf.webp)
 
-One click on **View report** generates a print-ready **Alarms & Anomalies Report** in the browser — 20 pages, exportable as PDF. The report includes a summary header (Total: 200, Critical: 105, Warning: 95), the app logo, project metadata, and a numbered alarm log with sensor ID, type, description, source, affected hours, and statistical probability for each event. Fully i18n-aware: renders in the user's selected language.
+One click on **View report** generates a print-ready **Alarms & Anomalies Report** in the browser — 20 pages, exportable as PDF. The report includes a summary header (Total: 200, Critical: 105, Warning: 95), the SIMEMAP logo, project metadata, and a numbered alarm log with sensor ID, type, description, source, affected hours, and statistical probability for each event. Fully i18n-aware: renders in the user's selected language.
 
 ---
 
@@ -243,7 +243,7 @@ One click on **View report** generates a print-ready **Alarms & Anomalies Report
 
 ![Sidebar user profile](screenshots/sidebar-user.png)
 
-Collapsible sidebar with the app logo, logged-in user avatar and role, and a minimal navigation menu restricted to the dashboards the user's Cognito group has access to. Role-based visibility is enforced server-side — no client-side route hiding.
+Collapsible sidebar with the SIMEMAP logo, logged-in user avatar and role, and a minimal navigation menu restricted to the dashboards the user's Cognito group has access to. Role-based visibility is enforced server-side — no client-side route hiding.
 
 ---
 
