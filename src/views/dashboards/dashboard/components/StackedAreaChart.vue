@@ -1,0 +1,415 @@
+<template>
+  <div class="sac-wrapper">
+    <!-- Header -->
+    <div class="sac-header">
+      <div>
+        <h4 class="card-title mb-1">{{ t('dashboard.energy_chart_title') }}</h4>
+        <p class="text-muted fs-xs mb-0">{{ monthName }} {{ year }} · {{ t('dashboard.energy_until') }} {{ today }}</p>
+      </div>
+      <div class="sac-legend">
+        <span class="sac-legend__item"><span class="sac-legend__dot sac-legend__dot--energia"></span>{{ t('dashboard.kwh_legend') }}</span>
+        <span class="sac-legend__item"><span class="sac-legend__dot sac-legend__dot--sensores"></span>{{ t('dashboard.sensors_legend') }}</span>
+      </div>
+    </div>
+
+    <!-- Chart -->
+    <div ref="container" class="sac-chart"></div>
+
+    <!-- Stats row -->
+    <div class="sac-stats">
+      <div class="sac-stat">
+        <span class="sac-stat__label">{{ t('dashboard.accumulated') }}</span>
+        <span class="sac-stat__value">{{ currencySymbol }} {{ accumulatedCost }}</span>
+        <span class="sac-stat__badge sac-stat__badge--up">↑ 8.3%</span>
+      </div>
+      <div class="sac-stat">
+        <span class="sac-stat__label">{{ t('dashboard.forecast') }}</span>
+        <span class="sac-stat__value">{{ currencySymbol }} {{ projectedCost }}</span>
+        <span class="sac-stat__badge sac-stat__badge--neutral">{{ t('dashboard.ai_estimate') }}</span>
+      </div>
+      <div class="sac-stat">
+        <span class="sac-stat__label">{{ t('dashboard.peak_day') }}</span>
+        <span class="sac-stat__value">{{ peakDay }}</span>
+        <span class="sac-stat__badge sac-stat__badge--down">↓ 4.1%</span>
+      </div>
+      <div class="sac-stat">
+        <span class="sac-stat__label">{{ t('dashboard.energy_efficiency') }}</span>
+        <span class="sac-stat__value">94.7%</span>
+        <span class="sac-stat__badge sac-stat__badge--up">↑ meta</span>
+      </div>
+      <div class="sac-stat">
+        <span class="sac-stat__label">{{ t('dashboard.demand_alert') }}</span>
+        <span class="sac-stat__value">{{ t('dashboard.low_risk') }}</span>
+        <span class="sac-stat__badge sac-stat__badge--neutral">IA</span>
+      </div>
+    </div>
+
+    <!-- Collapsible model explanation -->
+    <details class="sac-model" @toggle="onToggle">
+      <summary class="sac-model__summary">{{ t('dashboard.stat_model') }}</summary>
+      <div ref="modelBody" class="sac-model__body">
+        <p>{{ t('dashboard.stat_model_intro') }}</p>
+
+        <h6>{{ t('dashboard.stat_model_h1') }}</h6>
+        <p>{{ t('dashboard.stat_model_p1') }}</p>
+        <div class="sac-formula">\[ x \leq \tau, \qquad \tau = 0{,}05 \cdot \max(x_i) \]</div>
+
+        <h6>{{ t('dashboard.stat_model_h2') }}</h6>
+        <p>{{ t('dashboard.stat_model_p2') }}</p>
+        <div class="sac-formula">\[ L^{-} = Q_1 - 1{,}5 \cdot \text{IQR}, \qquad L^{+} = Q_3 + 1{,}5 \cdot \text{IQR}, \qquad \text{IQR} = Q_3 - Q_1 \]</div>
+        <p>{{ t('dashboard.stat_model_p2b') }}</p>
+        <div class="sac-formula">\[ \frac{|x - \tilde{x}|}{\tilde{x}} > 0{,}30 \]</div>
+
+        <h6>{{ t('dashboard.stat_model_h3') }}</h6>
+        <p>{{ t('dashboard.stat_model_p3') }}</p>
+        <div class="sac-formula">\[ z = \frac{x - \mu}{\sigma} \]</div>
+        <p>{{ t('dashboard.stat_model_p4') }}</p>
+        <div class="sac-formula">\[ p = 2\left(1 - \Phi(|z|)\right), \qquad \Phi(z) = \frac{1}{2}\!\left[1 + \operatorname{erf}\!\left(\frac{z}{\sqrt{2}}\right)\right] \]</div>
+        <p v-html="t('dashboard.stat_model_p5')"></p>
+      </div>
+    </details>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import * as d3 from 'd3'
+import { useI18n } from 'vue-i18n'
+
+const { t, locale } = useI18n()
+
+const container = ref<HTMLDivElement | null>(null)
+const modelBody = ref<HTMLElement | null>(null)
+let resizeObserver: ResizeObserver | null = null
+
+function loadMathJax() {
+  if ((window as any).MathJax) return
+  const script = document.createElement('script')
+  script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js'
+  script.async = true
+  script.id = 'mathjax-script'
+  ;(window as any).MathJax = {
+    tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] },
+    options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] },
+  }
+  document.head.appendChild(script)
+}
+
+function onToggle(e: Event) {
+  const details = e.target as HTMLDetailsElement
+  if (!details.open) return
+  if ((window as any).MathJax?.typesetPromise && modelBody.value) {
+    (window as any).MathJax.typesetPromise([modelBody.value])
+  } else {
+    loadMathJax()
+    // typeset after MathJax loads
+    const check = setInterval(() => {
+      if ((window as any).MathJax?.typesetPromise && modelBody.value) {
+        clearInterval(check)
+        ;(window as any).MathJax.typesetPromise([modelBody.value])
+      }
+    }, 200)
+  }
+}
+
+// ── Date context ──────────────────────────────────────────
+const now = new Date()
+const today = now.getDate()
+const year = now.getFullYear()
+const daysInMonth = new Date(year, now.getMonth() + 1, 0).getDate()
+const monthName = computed(() =>
+  now.toLocaleString(locale.value === 'pt' ? 'pt-BR' : 'en-US', { month: 'long' })
+    .replace(/^\w/, c => c.toUpperCase())
+)
+
+// ── Generate fake data: one entry per day up to today ─────
+function generateData() {
+  return Array.from({ length: today }, (_, i) => {
+    const d = i + 1
+    const base = 45 + d * 80 + Math.sin(d * 0.7) * 120
+    const noise = (Math.random() - 0.5) * 60
+    const energia = Math.round(Math.max(30, base + noise))
+    const sensores = Math.round(energia * 0.22 + Math.random() * 20)
+    return { day: d, label: `Dia ${d}`, energia, sensores }
+  })
+}
+
+const rawData = generateData()
+
+// ── Stats ─────────────────────────────────────────────────
+const ratePerKwh = 0.87  // fake rate per kWh
+const currencySymbol = computed(() => locale.value === 'pt' ? 'R$' : 'US$')
+const numLocale     = computed(() => locale.value === 'pt' ? 'pt-BR' : 'en-US')
+const fmtCurrency   = (val: number) =>
+  val.toLocaleString(numLocale.value, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+
+const accumulatedCost = computed(() => {
+  const total = rawData.reduce((s, d) => s + d.energia, 0)
+  return fmtCurrency(total * ratePerKwh)
+})
+const projectedCost = computed(() => {
+  const avg = rawData.reduce((s, d) => s + d.energia, 0) / rawData.length
+  return fmtCurrency(avg * daysInMonth * ratePerKwh)
+})
+const peakDay = computed(() => {
+  const peak = rawData.reduce((a, b) => a.energia > b.energia ? a : b)
+  const dayLabel = locale.value === 'pt' ? `Dia ${peak.day}` : `Day ${peak.day}`
+  return `${dayLabel} — ${peak.energia} kWh`
+})
+
+// ── Colors ────────────────────────────────────────────────
+const colors = {
+  energia: 'var(--bs-primary)',
+  sensores: 'var(--bs-secondary)',
+}
+
+// ── Draw ─────────────────────────────────────────────────
+function draw(el: HTMLDivElement) {
+  el.innerHTML = ''
+  const { width } = el.getBoundingClientRect()
+  if (width === 0) return
+
+  const height = 220
+  const mt = 12, mr = 16, mb = 28, ml = 52
+
+  type Row = typeof rawData[0]
+  const keys: (keyof Row)[] = ['sensores', 'energia']
+
+  const stack = d3.stack<Row>()
+    .keys(keys as string[])
+    .order(d3.stackOrderNone)
+    .offset(d3.stackOffsetNone)
+
+  const series = stack(rawData)
+
+  // Show every other day label if > 15 days
+  const tickEvery = daysInMonth > 20 ? 5 : daysInMonth > 10 ? 2 : 1
+
+  const x = d3.scaleLinear()
+    .domain([1, daysInMonth])
+    .range([ml, width - mr])
+
+  const y = d3.scaleLinear()
+    .domain([0, d3.max(series, s => d3.max(s, d => d[1])) ?? 0])
+    .nice()
+    .range([height - mb, mt])
+
+  const areaFn = d3.area<[number, number, unknown]>()
+    .x((_, i) => x(rawData[i].day))
+    .y0(d => y(d[0]))
+    .y1(d => y(d[1]))
+    .curve(d3.curveCatmullRom.alpha(0.5))
+
+  const lineFn = d3.line<[number, number, unknown]>()
+    .x((_, i) => x(rawData[i].day))
+    .y(d => y(d[1]))
+    .curve(d3.curveCatmullRom.alpha(0.5))
+
+  const svg = d3.select(el).append('svg')
+    .attr('width', width).attr('height', height)
+    .style('overflow', 'visible')
+
+  const defs = svg.append('defs')
+  keys.forEach(key => {
+    const grad = defs.append('linearGradient')
+      .attr('id', `sac-grad-${key}`)
+      .attr('x1', '0').attr('y1', '0').attr('x2', '0').attr('y2', '1')
+    grad.append('stop').attr('offset', '0%').attr('stop-color', colors[key as keyof typeof colors]).attr('stop-opacity', 0.45)
+    grad.append('stop').attr('offset', '100%').attr('stop-color', colors[key as keyof typeof colors]).attr('stop-opacity', 0.04)
+  })
+
+  // Grid
+  svg.append('g').attr('transform', `translate(${ml},0)`)
+    .call(d3.axisLeft(y).ticks(4).tickSize(-(width - ml - mr)).tickFormat(() => ''))
+    .call(g => g.select('.domain').remove())
+    .call(g => g.selectAll('line').attr('stroke', '#676b891f').attr('stroke-dasharray', '4,3'))
+
+  // "Today" vertical line
+  svg.append('line')
+    .attr('x1', x(today)).attr('x2', x(today))
+    .attr('y1', mt).attr('y2', height - mb)
+    .attr('stroke', 'var(--bs-primary)').attr('stroke-width', 1.5)
+    .attr('stroke-dasharray', '4,3').attr('opacity', 0.5)
+
+  svg.append('text')
+    .attr('x', x(today) + 4).attr('y', mt + 10)
+    .attr('fill', 'var(--bs-primary)').style('font-size', '10px')
+    .text(locale.value === 'pt' ? 'hoje' : 'today')
+
+  // Areas + lines
+  series.forEach(s => {
+    svg.append('path').datum(s as unknown as [number, number, unknown][])
+      .attr('fill', `url(#sac-grad-${s.key})`).attr('d', areaFn)
+    svg.append('path').datum(s as unknown as [number, number, unknown][])
+      .attr('fill', 'none')
+      .attr('stroke', colors[s.key as keyof typeof colors])
+      .attr('stroke-width', 2).attr('d', lineFn)
+  })
+
+  // X axis — days
+  svg.append('g').attr('transform', `translate(0,${height - mb})`)
+    .call(d3.axisBottom(x)
+      .tickValues(Array.from({ length: daysInMonth }, (_, i) => i + 1).filter(d => d % tickEvery === 0 || d === 1 || d === today))
+      .tickFormat(d => `${d}`)
+    )
+    .call(g => g.select('.domain').remove())
+    .call(g => g.selectAll('line').remove())
+    .call(g => g.selectAll('text').attr('fill', 'var(--bs-secondary-color)').style('font-size', '11px'))
+
+  // Y axis — R$
+  svg.append('g').attr('transform', `translate(${ml},0)`)
+    .call(d3.axisLeft(y).ticks(4).tickFormat(d => `${currencySymbol.value}${d}`))
+    .call(g => g.select('.domain').remove())
+    .call(g => g.selectAll('line').remove())
+    .call(g => g.selectAll('text').attr('fill', 'var(--bs-secondary-color)').style('font-size', '11px'))
+
+  // Tooltip
+  const tooltip = d3.select(el).append('div').attr('class', 'sac-tooltip')
+  svg.append('rect')
+    .attr('x', ml).attr('y', mt)
+    .attr('width', width - ml - mr).attr('height', height - mt - mb)
+    .attr('fill', 'transparent')
+    .on('mousemove', function (event) {
+      const [mx] = d3.pointer(event)
+      const dayVal = Math.max(1, Math.min(today, Math.round(x.invert(mx))))
+      const d = rawData[dayVal - 1]
+      if (!d) return
+      const cx = x(d.day)
+      const total = d.energia + d.sensores
+      tooltip.style('display', 'block')
+        .style('left', `${Math.min(cx + 8, width - 160)}px`)
+        .style('top', `${y(total) - 8}px`)
+        .html(`
+          <div class="sac-tooltip__day">${locale.value === 'pt' ? 'Dia' : 'Day'} ${d.day}</div>
+          <div class="sac-tooltip__row"><span style="color:${colors.energia}">●</span> ${locale.value === 'pt' ? 'Consumo' : 'Usage'}: <b>${d.energia} kWh</b> · ${currencySymbol.value} ${(d.energia * ratePerKwh).toFixed(2)}</div>
+          <div class="sac-tooltip__row"><span style="color:${colors.sensores}">●</span> ${locale.value === 'pt' ? 'Sensores' : 'Sensors'}: <b>${d.sensores}</b></div>
+        `)
+    })
+    .on('mouseleave', () => tooltip.style('display', 'none'))
+}
+
+onMounted(() => {
+  if (!container.value) return
+  draw(container.value)
+  resizeObserver = new ResizeObserver(() => { if (container.value) draw(container.value) })
+  resizeObserver.observe(container.value)
+})
+onUnmounted(() => resizeObserver?.disconnect())
+
+// Redraw D3 chart when locale switches (Y-axis currency, labels)
+watch(locale, () => { if (container.value) draw(container.value) })
+</script>
+
+<style scoped>
+.sac-wrapper { width: 100%; }
+
+.sac-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.sac-legend { display: flex; gap: 12px; align-items: center; }
+.sac-legend__item { display: flex; align-items: center; gap: 5px; font-size: 0.72rem; color: var(--bs-secondary-color); }
+.sac-legend__dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.sac-legend__dot--energia { background: var(--bs-primary); }
+.sac-legend__dot--sensores { background: var(--bs-secondary); }
+
+.sac-chart { position: relative; width: 100%; min-height: 220px; }
+
+/* Stats strip */
+.sac-stats {
+  display: flex;
+  gap: 0;
+  border-top: 1px solid var(--bs-border-color);
+  margin-top: 12px;
+}
+.sac-stat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 12px;
+  border-right: 1px solid var(--bs-border-color);
+}
+.sac-stat:last-child { border-right: none; }
+.sac-stat__label { font-size: 0.68rem; color: var(--bs-secondary-color); text-transform: uppercase; letter-spacing: 0.4px; }
+.sac-stat__value { font-size: 0.88rem; font-weight: 600; color: var(--bs-body-color); }
+.sac-stat__badge {
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 10px;
+  width: fit-content;
+}
+.sac-stat__badge--up { background: rgba(55,135,45,0.12); color: #37872d; }
+.sac-stat__badge--down { background: rgba(232,64,64,0.1); color: #e84040; }
+.sac-stat__badge--neutral { background: rgba(var(--bs-secondary-rgb), 0.12); color: var(--bs-secondary-color); }
+
+/* Collapsible model */
+.sac-model {
+  margin-top: 8px;
+  border-top: 1px solid var(--bs-border-color);
+}
+.sac-model__summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 8px 0;
+  font-size: 0.78rem;
+  color: var(--bs-secondary-color);
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.sac-model__summary::-webkit-details-marker { display: none; }
+.sac-model__summary::before {
+  content: '▶';
+  font-size: 0.6rem;
+  transition: transform 0.2s;
+  display: inline-block;
+}
+details[open] .sac-model__summary::before { transform: rotate(90deg); }
+
+.sac-model__body {
+  background: var(--bs-tertiary-bg, #f8f9fa);
+  border: 1px solid var(--bs-border-color);
+  border-radius: 6px;
+  padding: 16px 20px;
+  font-size: 0.82rem;
+  line-height: 1.65;
+  color: var(--bs-body-color);
+  margin-bottom: 8px;
+}
+.sac-model__body h6 {
+  font-weight: 700;
+  margin: 14px 0 4px;
+  font-size: 0.82rem;
+}
+.sac-model__body p { margin: 0 0 6px; }
+.sac-formula {
+  text-align: center;
+  padding: 6px 0;
+  overflow-x: auto;
+}
+</style>
+
+<style>
+.sac-tooltip {
+  display: none;
+  position: absolute;
+  background: var(--bs-secondary-bg);
+  border: 1px solid var(--bs-border-color);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: var(--bs-light-text-emphasis);
+  pointer-events: none;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(76,76,92,0.15);
+  z-index: 10;
+}
+.sac-tooltip__day { font-weight: 600; margin-bottom: 4px; }
+.sac-tooltip__row { margin-top: 2px; }
+</style>

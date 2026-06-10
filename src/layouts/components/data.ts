@@ -6,53 +6,20 @@ type UserDropdownItemType = {
   url?: string
   isDivider?: boolean
   isHeader?: boolean
+  isLogout?: boolean
   class?: string
 }
 
 export const userDropdownItems: UserDropdownItemType[] = [
-  {
-    label: 'Welcome back!',
-    isHeader: true,
-  },
-  {
-    label: 'Profile',
-    icon: 'tabler:user-circle',
-    url: '#',
-  },
-  {
-    label: 'Notifications',
-    icon: 'tabler:bell-ringing',
-    url: '#',
-  },
-  {
-    label: 'Balance: $985.25',
-    icon: 'tabler:credit-card',
-    url: '#',
-  },
-  {
-    label: 'Account Settings',
-    icon: 'tabler:settings-2',
-    url: '#',
-  },
-  {
-    label: 'Support Center',
-    icon: 'tabler:headphones',
-    url: '#',
-  },
-  {
-    isDivider: true,
-  },
-  {
-    label: 'Lock Screen',
-    icon: 'tabler:lock',
-    url: '/auth-1/lock-screen',
-  },
-  {
-    label: 'Log Out',
-    icon: 'tabler:logout-2',
-    url: '#',
-    class: 'text-danger fw-semibold',
-  },
+  { label: 'nav.welcome_back', isHeader: true },
+  { label: 'nav.my_profile',           icon: 'tabler:user-circle', url: '#' },
+  { label: 'nav.sensor_notifications', icon: 'tabler:bell-ringing', url: '#' },
+  { label: 'nav.my_building',          icon: 'tabler:building', url: '#' },
+  { label: 'nav.account_settings',     icon: 'tabler:settings-2', url: '#' },
+  { label: 'nav.support',              icon: 'tabler:headphones', url: '#' },
+  { isDivider: true },
+  { label: 'nav.lock_screen',          icon: 'tabler:lock', url: '/auth-1/lock-screen' },
+  { label: 'nav.logout',               icon: 'tabler:logout-2', url: '#', class: 'text-danger fw-semibold', isLogout: true },
 ]
 
 export const menuItems: MenuItemType[] = [
@@ -61,10 +28,9 @@ export const menuItems: MenuItemType[] = [
         key: 'dashboards',
         label: 'Dashboards',
         icon: 'tabler:layout-dashboard',
-        badge: { variant: 'success', text: '2' },
+        badge: { variant: 'success', text: '1' },
         children: [
-            { key: 'dashboard-v2', label: 'Dashboard v.2', url: '/dashboard2' },
-            { key: 'dashboard-sm', label: 'HidroForte SM', url: '/dashboard-sm' },
+            { key: 'dashboard-sm', label: 'HF - Água', url: '/dashboard-sm' },
         ],
     },
     { key: 'landing', label: 'Landing Page', icon: 'tabler:stack-front', url: '/landing' },
@@ -126,12 +92,13 @@ export const menuItems: MenuItemType[] = [
     },
     {
         key: 'users',
-        label: 'Users',
+        label: 'Usuários',
         icon: 'tabler:users',
         children: [
-            { key: 'contacts', label: 'Contacts', url: '/users/contacts' },
-            { key: 'roles', label: 'Roles', url: '/users/roles' },
-            { key: 'permissions', label: 'Permissions', url: '/users/permissions' },
+            { key: 'contacts', label: 'Contatos', url: '/users/contacts' },
+            { key: 'roles', label: 'Funções', url: '/users/roles' },
+            { key: 'permissions', label: 'Permissões', url: '/users/permissions' },
+            { key: 'user-activity', label: 'Atividade', url: '/users/activity' },
         ],
     },
     {

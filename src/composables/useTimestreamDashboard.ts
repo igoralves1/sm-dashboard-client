@@ -5,12 +5,26 @@ import { CognitoIdentityClient } from '@aws-sdk/client-cognito-identity'
 import { useAuthStore } from '@/stores/auth'
 import { appendSnapshot } from './useDashboardLogger'
 import { checkRateLimit } from './useRateLimiter'
+import { computeStats, type SensorStats } from './useStatistics'
+import { saveBoxPlotRecord } from './useBoxPlotStorage'
 
 // ── AWS Config (values injected via environment variables) ───────────────────
-const REGION           = import.meta.env.VITE_AWS_REGION        as string
-const IDENTITY_POOL_ID = import.meta.env.VITE_IDENTITY_POOL_ID  as string
-const USER_POOL_ID     = import.meta.env.VITE_USER_POOL_ID      as string
-const DB               = import.meta.env.VITE_TIMESTREAM_DB     as string
+const REGION           = import.meta.env.VITE_AWS_REGION              as string
+const IDENTITY_POOL_ID = import.meta.env.VITE_IDENTITY_POOL_ID        as string
+const USER_POOL_ID     = import.meta.env.VITE_USER_POOL_ID            as string
+const DB               = import.meta.env.VITE_TIMESTREAM_DB           as string
+const TABLE_RT         = import.meta.env.VITE_TIMESTREAM_TABLE_RT     as string
+const TABLE_HOURLY     = import.meta.env.VITE_TIMESTREAM_TABLE_HOURLY as string
+const TABLE_DAILY      = import.meta.env.VITE_TIMESTREAM_TABLE_DAILY  as string
+
+// ── Sensor IDs (end_id values in Timestream) ─────────────────────────────────
+const SENSOR_RAP_SIL = import.meta.env.VITE_SENSOR_RAP_SIL as string
+const SENSOR_PTP_01  = import.meta.env.VITE_SENSOR_PTP_01  as string
+const SENSOR_PTP_02  = import.meta.env.VITE_SENSOR_PTP_02  as string
+const SENSOR_PTP_03  = import.meta.env.VITE_SENSOR_PTP_03  as string
+const SENSOR_PTP_04  = import.meta.env.VITE_SENSOR_PTP_04  as string
+const SENSOR_RAP_MIR = import.meta.env.VITE_SENSOR_RAP_MIR as string
+const SENSOR_PTP_07  = import.meta.env.VITE_SENSOR_PTP_07  as string
 
 let client: TimestreamQueryClient | null = null
 let lastIdToken = ''
@@ -78,27 +92,30 @@ function productionExpr(alias: string, pre: string, post: string) {
   END AS ${alias}`
 }
 
-// PTP calibration formulas
-const PTP_FORMULAS: Record<string, { pre: string; post: string }> = {
-  smca4vh: { pre: '(measure_value::double)*2/1000',           post: 'measure_value::double/(12.0*1000)' },       // PTP_01
-  smc9pg7: { pre: '(measure_value::double)*2*12/(108*1000)',   post: 'measure_value::double/(108.0*1000)' },      // PTP_02
-  smc25ku: { pre: 'measure_value::double/1000',                post: 'measure_value::double/(2*12.0*1000)' },     // PTP_03
-  smc0qvb: { pre: 'measure_value::double/1000',                post: 'measure_value::double/(2*12.0*1000)' },     // PTP_04
-  smccsl0: { pre: '(measure_value::double)*2/1000',            post: 'measure_value::double/(12.0*1000)' },       // PTP_07
-}
+// PTP calibration formulas (keyed by sensor env var, resolved at runtime)
+const PTP_FORMULAS = () => ({
+  [SENSOR_PTP_01]: { pre: '(measure_value::double)*2/1000',           post: 'measure_value::double/(12.0*1000)' },
+  [SENSOR_PTP_02]: { pre: '(measure_value::double)*2*12/(108*1000)',   post: 'measure_value::double/(108.0*1000)' },
+  [SENSOR_PTP_03]: { pre: 'measure_value::double/1000',                post: 'measure_value::double/(2*12.0*1000)' },
+  [SENSOR_PTP_04]: { pre: 'measure_value::double/1000',                post: 'measure_value::double/(2*12.0*1000)' },
+  [SENSOR_PTP_07]: { pre: '(measure_value::double)*2/1000',            post: 'measure_value::double/(12.0*1000)' },
+})
 
-const PTP_NAMES: Record<string, string> = {
-  smca4vh: 'PTP_01', smc9pg7: 'PTP_02', smc25ku: 'PTP_03',
-  smc0qvb: 'PTP_04', smccsl0: 'PTP_07',
-}
+const PTP_NAMES = () => ({
+  [SENSOR_PTP_01]: 'PTP_01',
+  [SENSOR_PTP_02]: 'PTP_02',
+  [SENSOR_PTP_03]: 'PTP_03',
+  [SENSOR_PTP_04]: 'PTP_04',
+  [SENSOR_PTP_07]: 'PTP_07',
+})
 
-const FLOW_FORMULAS: Record<string, string> = {
-  smca4vh: 'cast(flux as double)*60/(12*1000)',      // PTP_01
-  smc9pg7: 'cast(flux as double)*60/(108*1000)',     // PTP_02
-  smc25ku: 'cast(flux as double)*60/(2*12*1000)',    // PTP_03
-  smc0qvb: 'cast(flux as double)*60/(2*12*1000)',    // PTP_04
-  smccsl0: 'cast(flux as double)*60/(12*1000)',      // PTP_07
-}
+const FLOW_FORMULAS = () => ({
+  [SENSOR_PTP_01]: 'cast(flux as double)*60/(12*1000)',
+  [SENSOR_PTP_02]: 'cast(flux as double)*60/(108*1000)',
+  [SENSOR_PTP_03]: 'cast(flux as double)*60/(2*12*1000)',
+  [SENSOR_PTP_04]: 'cast(flux as double)*60/(2*12*1000)',
+  [SENSOR_PTP_07]: 'cast(flux as double)*60/(12*1000)',
+})
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 export interface DataPoint { time: Date; value: number }
@@ -110,6 +127,22 @@ export interface LocationData {
   flowSeries: FlowSeries[]
   production24h: Record<string, any>[]
   productionDaily: Record<string, any>[]
+  levelStats:          SensorStats | null
+  flowStats:           Record<string, SensorStats | null>   // keyed by PTP name
+  production24hStats:  Record<string, SensorStats | null>   // keyed by PTP name
+  productionDailyStats: Record<string, SensorStats | null>  // keyed by PTP name
+}
+
+/** Extract per-PTP stats from merged production rows */
+function productionStats(rows: Record<string, any>[]): Record<string, SensorStats | null> {
+  if (!rows.length) return {}
+  const ptpKeys = Object.keys(rows[0]).filter(k => k.startsWith('PTP'))
+  const result: Record<string, SensorStats | null> = {}
+  ptpKeys.forEach(k => {
+    const vals = rows.map(r => parseFloat(r[k] ?? '0')).filter(v => isFinite(v) && v > 0)
+    result[k] = computeStats(vals)
+  })
+  return result
 }
 
 // ── Fetch functions ───────────────────────────────────────────────────────────
@@ -117,7 +150,7 @@ export interface LocationData {
 async function fetchLevel(endId: string, expr: string): Promise<DataPoint[]> {
   const rows = await query(`
     SELECT ${expr} AS water_level, time
-    FROM "${DB}"."<TABLE_RT>"
+    FROM "${DB}"."${TABLE_RT}"
     WHERE time >= ago(24h)
     AND end_id = '${endId}'
     ORDER BY time ASC
@@ -128,7 +161,7 @@ async function fetchLevel(endId: string, expr: string): Promise<DataPoint[]> {
 async function fetchCurrentLevel(endId: string, expr: string): Promise<number> {
   const rows = await query(`
     SELECT ${expr} AS water_level
-    FROM "${DB}"."<TABLE_RT>"
+    FROM "${DB}"."${TABLE_RT}"
     WHERE end_id = '${endId}'
     ORDER BY time DESC LIMIT 1
   `)
@@ -136,10 +169,10 @@ async function fetchCurrentLevel(endId: string, expr: string): Promise<number> {
 }
 
 async function fetchFlow(endId: string, ptpName: string): Promise<FlowSeries> {
-  const formula = FLOW_FORMULAS[endId] ?? 'cast(flux as double)*60/(12*1000)'
+  const formula = FLOW_FORMULAS()[endId] ?? 'cast(flux as double)*60/(12*1000)'
   const rows = await query(`
     SELECT ${formula} AS value, time
-    FROM "${DB}"."<TABLE_RT>"
+    FROM "${DB}"."${TABLE_RT}"
     WHERE time >= ago(24h)
     AND end_id = '${endId}'
     ORDER BY time ASC
@@ -151,13 +184,13 @@ async function fetchFlow(endId: string, ptpName: string): Promise<FlowSeries> {
 }
 
 async function fetchProduction24h(): Promise<Record<string, any>[]> {
-  const ptps = Object.entries(PTP_NAMES)
+  const ptps = Object.entries(PTP_NAMES())
   const queries = ptps.map(async ([endId, name]) => {
-    const { pre, post } = PTP_FORMULAS[endId]
+    const { pre, post } = PTP_FORMULAS()[endId]
     const rows = await query(`
       SELECT "hour", time,
         ${productionExpr(name, pre, post)}
-      FROM "${DB}"."<TABLE_HOURLY>"
+      FROM "${DB}"."${TABLE_HOURLY}"
       WHERE "time" >= AGO(1d)
       AND end_id = '${endId}'
       AND measure_name = 'L_acc'
@@ -176,13 +209,13 @@ async function fetchProduction24h(): Promise<Record<string, any>[]> {
 }
 
 async function fetchProductionDaily(): Promise<Record<string, any>[]> {
-  const ptps = Object.entries(PTP_NAMES)
+  const ptps = Object.entries(PTP_NAMES())
   const queries = ptps.map(async ([endId, name]) => {
-    const { pre, post } = PTP_FORMULAS[endId]
+    const { pre, post } = PTP_FORMULAS()[endId]
     const rows = await query(`
       SELECT day, time,
         ${productionExpr(name, pre, post)}
-      FROM "${DB}"."<TABLE_DAILY>"
+      FROM "${DB}"."${TABLE_DAILY}"
       WHERE "time" >= AGO(7d)
       AND end_id = '${endId}'
       AND measure_name = 'L_acc'
@@ -203,10 +236,12 @@ async function fetchProductionDaily(): Promise<Record<string, any>[]> {
 // ── Main composable ───────────────────────────────────────────────────────────
 export function useTimestreamDashboard() {
   const silvanopolis = ref<LocationData>({
-    level: 0, levelSeries: [], flowSeries: [], production24h: [], productionDaily: []
+    level: 0, levelSeries: [], flowSeries: [], production24h: [], productionDaily: [],
+    levelStats: null, flowStats: {}, production24hStats: {}, productionDailyStats: {}
   })
   const miranorte = ref<LocationData>({
-    level: 0, levelSeries: [], flowSeries: [], production24h: [], productionDaily: []
+    level: 0, levelSeries: [], flowSeries: [], production24h: [], productionDaily: [],
+    levelStats: null, flowStats: {}, production24hStats: {}, productionDailyStats: {}
   })
   const loading = ref(false)
   const error         = ref<string | null>(null)
@@ -222,14 +257,26 @@ export function useTimestreamDashboard() {
         silLevel, silSeries, mirLevel, mirSeries,
         flowResults, prod24h, prodDaily
       ] = await Promise.all([
-        fetchCurrentLevel('smc01ow', silvanopolisLevelExpr),
-        fetchLevel('smc01ow', silvanopolisLevelExpr),
-        fetchCurrentLevel('smcait1', miranorteLevelExpr),
-        fetchLevel('smcait1', miranorteLevelExpr),
-        Promise.all(Object.entries(PTP_NAMES).map(([id, name]) => fetchFlow(id, name))),
+        fetchCurrentLevel(SENSOR_RAP_SIL, silvanopolisLevelExpr),
+        fetchLevel(SENSOR_RAP_SIL, silvanopolisLevelExpr),
+        fetchCurrentLevel(SENSOR_RAP_MIR, miranorteLevelExpr),
+        fetchLevel(SENSOR_RAP_MIR, miranorteLevelExpr),
+        Promise.all(Object.entries(PTP_NAMES()).map(([id, name]) => fetchFlow(id, name))),
         fetchProduction24h(),
         fetchProductionDaily(),
       ])
+
+      // ── Compute stats ────────────────────────────────────────────────────
+      const silLevelStats = computeStats(silSeries.map(d => d.value))
+      const mirLevelStats = computeStats(mirSeries.map(d => d.value))
+
+      const flowStatsMap: Record<string, SensorStats | null> = {}
+      flowResults.forEach(s => {
+        flowStatsMap[s.name] = computeStats(s.values.map(d => d.value))
+      })
+
+      const prod24hStats   = productionStats(prod24h)
+      const prodDailyStats = productionStats(prodDaily)
 
       silvanopolis.value = {
         level: silLevel,
@@ -237,16 +284,32 @@ export function useTimestreamDashboard() {
         flowSeries: flowResults,
         production24h: prod24h,
         productionDaily: prodDaily,
+        levelStats: silLevelStats,
+        flowStats: flowStatsMap,
+        production24hStats:   prod24hStats,
+        productionDailyStats: prodDailyStats,
       }
       miranorte.value = {
         level: mirLevel,
         levelSeries: mirSeries,
-        flowSeries: flowResults, // TODO: separate Miranorte PTPs
+        flowSeries: flowResults,
         production24h: prod24h,
         productionDaily: prodDaily,
+        levelStats: mirLevelStats,
+        flowStats: flowStatsMap,
+        production24hStats:   prod24hStats,
+        productionDailyStats: prodDailyStats,
       }
       lastUpdated.value = new Date().toLocaleTimeString()
       appendSnapshot(silvanopolis.value, miranorte.value)
+
+      // ── Persist boxplot stats to S3 (fire-and-forget) ───────────────────
+      if (silLevelStats) saveBoxPlotRecord(SENSOR_RAP_SIL, 'RAP_Silvanopolis', silLevelStats).catch(() => {})
+      if (mirLevelStats) saveBoxPlotRecord(SENSOR_RAP_MIR, 'RAP_Miranorte',    mirLevelStats).catch(() => {})
+      flowResults.forEach(s => {
+        const st = flowStatsMap[s.name]
+        if (st) saveBoxPlotRecord(s.name, s.name, st).catch(() => {})
+      })
     } catch (e: any) {
       const msg = e.message ?? ''
       if (msg.startsWith('RATE_LIMIT_EXCEEDED:')) {

@@ -8,7 +8,7 @@
       menu-class="dropdown-menu-xxl p-0"
     >
       <template #button-content>
-        Boom Boom! 😍
+        prana AIIoT
         <Icon icon="tabler:chevron-down" class="ms-1" />
       </template>
 
@@ -17,7 +17,7 @@
           <BCol cols="12">
             <div class="p-3 text-center bg-light bg-opacity-50">
               <h4 class="mb-0 fs-lg fw-semibold">
-                Welcome to <span class="text-primary">SIMEMAP+</span> Admin Theme.
+                {{ t('megamenu.welcome_pre') }} <span class="text-primary">prana AIIoT</span> {{ t('megamenu.welcome_post') }}
               </h4>
             </div>
           </BCol>
@@ -25,10 +25,10 @@
         <BRow class="g-0">
           <BCol v-for="(item, idx) in megaMenuItems" :key="idx" md="4">
             <div class="p-3">
-              <h5 class="mb-2 fw-semibold fs-sm dropdown-header">{{ item.title }}</h5>
+              <h5 class="mb-2 fw-semibold fs-sm dropdown-header">{{ t(item.titleKey) }}</h5>
               <ul class="list-unstyled megamenu-list">
                 <li v-for="link in item.links" :key="link.url">
-                  <RouterLink :to="link.url" class="dropdown-item">{{ link.label }}</RouterLink>
+                  <RouterLink :to="link.url" class="dropdown-item">{{ t(link.labelKey) }}</RouterLink>
                 </li>
               </ul>
             </div>
@@ -42,50 +42,50 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
 import simplebar from 'simplebar-vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 type MegaMenuType = {
-  title: string
-  links: {
-    label: string
-    url: string
-  }[]
+  titleKey: string
+  links: { labelKey: string; url: string }[]
 }
 
 const megaMenuItems: MegaMenuType[] = [
   {
-    title: 'Dashboard & Analytics',
+    titleKey: 'megamenu.dashboard_analytics',
     links: [
-      { label: 'Sales Dashboard', url: '#;' },
-      { label: 'Marketing Dashboard', url: '#;' },
-      { label: 'Finance Overview', url: '#;' },
-      { label: 'User Analytics', url: '#;' },
-      { label: 'Traffic Insights', url: '#;' },
-      { label: 'Performance Metrics', url: '#;' },
-      { label: 'Conversion Tracking', url: '#;' },
+      { labelKey: 'megamenu.sales_dashboard', url: '#;' },
+      { labelKey: 'megamenu.marketing_dashboard', url: '#;' },
+      { labelKey: 'megamenu.finance_overview', url: '#;' },
+      { labelKey: 'megamenu.user_analytics', url: '#;' },
+      { labelKey: 'megamenu.traffic_insights', url: '#;' },
+      { labelKey: 'megamenu.performance_metrics', url: '#;' },
+      { labelKey: 'megamenu.conversion_tracking', url: '#;' },
     ],
   },
   {
-    title: 'Project Management',
+    titleKey: 'megamenu.project_management',
     links: [
-      { label: 'Task Overview', url: '#;' },
-      { label: 'Kanban Board', url: '#;' },
-      { label: 'Gantt Chart', url: '#;' },
-      { label: 'Team Collaboration', url: '#;' },
-      { label: 'Project Milestones', url: '#;' },
-      { label: 'Workflow Automation', url: '#;' },
-      { label: 'Timesheets & Reports', url: '#;' },
+      { labelKey: 'megamenu.task_overview', url: '#;' },
+      { labelKey: 'megamenu.kanban_board', url: '#;' },
+      { labelKey: 'megamenu.gantt_chart', url: '#;' },
+      { labelKey: 'megamenu.team_collaboration', url: '#;' },
+      { labelKey: 'megamenu.project_milestones', url: '#;' },
+      { labelKey: 'megamenu.workflow_automation', url: '#;' },
+      { labelKey: 'megamenu.timesheets_reports', url: '#;' },
     ],
   },
   {
-    title: 'User Management',
+    titleKey: 'megamenu.user_management',
     links: [
-      { label: 'User Profiles', url: '#;' },
-      { label: 'Access Control', url: '#;' },
-      { label: 'Role Permissions', url: '#;' },
-      { label: 'Activity Logs', url: '#;' },
-      { label: 'Security Settings', url: '#;' },
-      { label: 'User Groups', url: '#;' },
-      { label: 'Authentication & Login', url: '#;' },
+      { labelKey: 'megamenu.user_profiles', url: '#;' },
+      { labelKey: 'megamenu.access_control', url: '#;' },
+      { labelKey: 'megamenu.role_permissions', url: '#;' },
+      { labelKey: 'megamenu.activity_logs', url: '#;' },
+      { labelKey: 'megamenu.security_settings', url: '#;' },
+      { labelKey: 'megamenu.user_groups', url: '#;' },
+      { labelKey: 'megamenu.authentication_login', url: '#;' },
     ],
   },
 ]

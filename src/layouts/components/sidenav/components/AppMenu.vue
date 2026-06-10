@@ -1,7 +1,7 @@
 <template>
   <ul class="side-nav">
     <template v-for="(item, idx) in menuItems">
-      <li v-if="item.isTitle" :key="item.key" class="side-nav-title">{{ item.label }}</li>
+      <li v-if="item.isTitle" :key="item.key" class="side-nav-title">{{ tTitle(item.label) }}</li>
       <template v-else>
         <MenuItemWithChildren
           v-if="item.children"
@@ -22,6 +22,22 @@ import MenuItem from '@/layouts/components/sidenav/components/MenuItem.vue'
 import { menuItems } from '@/layouts/components/data'
 import { scrollToElement } from '@/helpers/layout'
 import { onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
+
+const TITLE_MAP: Record<string, string> = {
+  'MENU': 'nav.section_menu',
+  'APPS': 'nav.section_apps',
+  'CUSTOM PAGES': 'nav.section_custom_pages',
+  'LAYOUTS': 'nav.section_layouts',
+  'COMPONENTS': 'nav.section_components',
+  'MENU ITEMS': 'nav.section_menu_items',
+}
+function tTitle(label: string | undefined) {
+  if (!label) return ''
+  return TITLE_MAP[label] ? t(TITLE_MAP[label]) : label
+}
 
 const openMenuKey = ref<string | null>(null)
 

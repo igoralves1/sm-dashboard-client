@@ -1,5 +1,5 @@
 <template>
-    <UICard title="Quarterly Reports" body-class="p-0" is-collapsable is-reloadable is-closeable>
+    <UICard :title="t('dashboard.quarterly_reports')" body-class="p-0" is-collapsable is-reloadable is-closeable>
         <div class="table-responsive">
             <table  class="table table-hover table-custom table-nowrap table-centered mb-0">
                 <thead class="bg-light bg-opacity-25 thead-sm">
@@ -38,11 +38,16 @@
 
 <script setup lang="ts">
 import UICard from '@/components/UICard.vue';
-import { getPieEchartOptions, quarterlyReports } from './data';
+import { getPieEchartOptions, getQuarterlyReports } from './data';
 import { PieChart } from 'echarts/charts';
 import { GridComponent, TooltipComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import CustomEChart from '@/components/CustomEChart.vue';
+import { useI18n } from 'vue-i18n';
+import { computed } from 'vue';
+
+const { t } = useI18n()
+const quarterlyReports = computed(() => getQuarterlyReports(t))
 
 
 </script>

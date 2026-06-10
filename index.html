@@ -7,15 +7,17 @@
       (function() {
         var p = new URLSearchParams(window.location.search).get('p');
         if (p) {
-          var url = window.location.pathname + decodeURIComponent(p) + window.location.hash;
+          var decoded = decodeURIComponent(p).replace(/^\//, '');
+          var base = window.location.pathname.replace(/\/$/, '');
+          var url = base + '/' + decoded + window.location.hash;
           window.history.replaceState(null, '', url);
         }
       })();
     </script>
     <meta charset="UTF-8">
-    <link rel="icon" href="/src/assets/images/favicon.ico">
+    <link rel="icon" type="image/svg+xml" href="/sm-dashboard-client/prana-favicon.svg">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>INSPINIA - Responsive Bootstrap 5 Admin Dashboard</title>
+    <title>prana AIIoT — Gestão de Condomínios</title>
     <script>
       window.MathJax = {
         tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },

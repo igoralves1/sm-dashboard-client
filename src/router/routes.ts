@@ -72,7 +72,7 @@ export const allRoutes = [
         path: '/dashboard-sm',
         name: 'dashboard-sm',
         meta: {
-            title: 'HidroForte SM',
+            title: 'HF SM',
         },
         component: () => import('@/views/dashboards/dashboard-sm/index.vue'),
     },
@@ -214,6 +214,12 @@ export const allRoutes = [
                     title: 'Permissions',
                 },
                 component: () => import('@/views/apps/users/permissions/index.vue'),
+            },
+            {
+                path: 'activity',
+                name: 'user-activity',
+                meta: { title: 'Atividade de Usuários' },
+                component: () => import('@/views/apps/users/activity/index.vue'),
             },
         ]
     },

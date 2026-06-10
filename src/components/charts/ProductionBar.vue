@@ -2,9 +2,14 @@
   <div class="bar-wrapper">
     <!-- Header: title + legend -->
     <div class="chart-header">
-      <div class="chart-main-title">{{ title ?? 'Produção · PTPs · Silvanópolis' }}</div>
+      <div class="chart-main-title">{{ title ?? t('monitoring.production_title_fallback') }}</div>
       <div class="chart-legend">
-        <span v-for="key in ptpKeys" :key="key" class="legend-item">
+        <span
+          v-for="key in ptpKeys" :key="key"
+          class="legend-item"
+          :class="{ 'legend-item--off': !activeSeries.has(key) }"
+          @click="toggleSeries(key)"
+        >
           <span class="legend-dot" :style="{ background: colorOf(key) }"></span>
           <span class="legend-text">{{ key }}</span>
         </span>
@@ -14,7 +19,7 @@
     <div style="position:relative">
       <div ref="tooltipRef" class="chart-tooltip" style="display:none">
         <div class="tt-label"></div>
-        <div v-for="key in ptpKeys" :key="key" class="tt-row">
+        <div v-for="key in ptpKeys" v-show="activeSeries.has(key)" :key="key" class="tt-row">
           <span class="tt-dot" :style="{ background: colorOf(key) }"></span>
           <span class="tt-series">{{ key }}</span>
           <span class="tt-value" :data-key="key">—</span>
@@ -35,7 +40,7 @@
           <span class="alert-text">
             {{ anomaly.detail }}
             <span :class="['alert-prob', `alert-prob--${anomaly.severity}`]">
-              Prob. em operação normal: {{ fmtP(anomaly.pValuePct / 100) }}
+              {{ t('monitoring.prob_normal_op') }} {{ fmtP(anomaly.pValuePct / 100) }}
             </span>
           </span>
         </div>
@@ -45,53 +50,31 @@
     <!-- Statistical model explanation (collapsible) -->
     <div v-if="computedAlerts.length" class="model-section">
       <button class="model-toggle" @click="showModel = !showModel">
-        {{ showModel ? '▾' : '▸' }} Modelo estatístico utilizado
+        {{ showModel ? '▾' : '▸' }} {{ t('dashboard.stat_model') }}
       </button>
       <div v-if="showModel" ref="mathRef" class="model-body">
-        <p class="model-intro">
-          Os diagnósticos acima são gerados por dois estágios complementares.
-          Para cada PTP, os parâmetros são calculados <em>independentemente</em>
-          usando apenas os valores daquela série.
-        </p>
+        <p class="model-intro">{{ t('monitoring.stat_intro_bar') }}</p>
 
-        <p class="model-subtitle">1 — Detecção de bomba desligada</p>
-        <p class="model-text">
-          Um valor \(x\) é classificado como <em>bomba desligada</em> se:
-        </p>
+        <p class="model-subtitle">{{ t('monitoring.stat_h1_bar') }}</p>
+        <p class="model-text">{{ t('monitoring.stat_p1_bar') }}</p>
         \[ x \;\leq\; \tau, \qquad \tau = 0{,}05 \cdot \max(x_i) \]
 
-        <p class="model-subtitle">2 — Limites IQR (valores em operação)</p>
-        <p class="model-text">
-          Os quartis e a cerca de Tukey definem os limites de controle:
-        </p>
+        <p class="model-subtitle">{{ t('dashboard.stat_model_h2') }}</p>
+        <p class="model-text">{{ t('dashboard.stat_model_p2') }}</p>
         \[
           L^{-} = Q_1 - 1{,}5 \cdot \text{IQR}, \qquad
           L^{+} = Q_3 + 1{,}5 \cdot \text{IQR}, \qquad
           \text{IQR} = Q_3 - Q_1
         \]
-        <p class="model-text">
-          Guarda adicional: o desvio relativo à mediana deve superar 30%
-          para evitar falsos positivos em séries muito estáveis:
-        </p>
+        <p class="model-text">{{ t('dashboard.stat_model_p2b') }}</p>
         \[ \frac{|x - \tilde{x}|}{\tilde{x}} \;>\; 0{,}30 \]
 
-        <p class="model-subtitle">3 — P-valor (gráfico de controle)</p>
-        <p class="model-text">
-          Para cada ponto anômalo calcula-se o z-score em relação à
-          distribuição normal dos valores em operação \((\mu,\,\sigma)\):
-        </p>
+        <p class="model-subtitle">{{ t('dashboard.stat_model_h3') }}</p>
+        <p class="model-text">{{ t('dashboard.stat_model_p3') }}</p>
         \[ z = \frac{x - \mu}{\sigma} \]
-        <p class="model-text">
-          O p-valor bicaudal é obtido via função de distribuição acumulada
-          normal \(\Phi\):
-        </p>
+        <p class="model-text">{{ t('dashboard.stat_model_p4') }}</p>
         \[ p = 2\,\bigl(1 - \Phi(|z|)\bigr), \qquad \Phi(z) = \frac{1}{2}\!\left[1 + \operatorname{erf}\!\left(\frac{z}{\sqrt{2}}\right)\right] \]
-        <p class="model-text">
-          Um p-valor baixo (ex.: \(p = 0{,}3\%\)) indica que há apenas
-          \(0{,}3\%\) de probabilidade de aquele valor ocorrer em condições
-          normais de operação — não identifica a causa, apenas sinaliza que
-          o valor <strong>não é esperado</strong>.
-        </p>
+        <p class="model-text" v-html="t('dashboard.stat_model_p5')"></p>
       </div>
     </div>
   </div>
@@ -99,9 +82,13 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch, computed, nextTick } from 'vue'
+import { useI18n } from 'vue-i18n'
 import * as d3 from 'd3'
 import { detectAnomalies, fmtP, type Anomaly } from '@/composables/useAnomalyDetection'
+import { useAlertStore } from '@/composables/useAlertStore'
 
+const { t, locale } = useI18n()
+const { ingestAnomalies } = useAlertStore()
 
 const props = defineProps<{
   data: Record<string, any>[]
@@ -115,7 +102,20 @@ const tooltipRef   = ref<HTMLDivElement | null>(null)
 const notesRef     = ref<HTMLDivElement | null>(null)
 const mathRef      = ref<HTMLDivElement | null>(null)
 const showModel    = ref(false)
+const activeSeries = ref<Set<string>>(new Set())
 let resizeObserver: ResizeObserver
+
+function toggleSeries(key: string) {
+  const s = new Set(activeSeries.value)
+  if (s.has(key)) {
+    if (s.size === 1) return   // keep at least one visible
+    s.delete(key)
+  } else {
+    s.add(key)
+  }
+  activeSeries.value = s
+  draw()
+}
 
 // Typeset MathJax whenever the model section opens
 watch(showModel, async (open) => {
@@ -136,18 +136,34 @@ const ptpKeys = computed(() =>
   props.data.length ? Object.keys(props.data[0]).filter(k => k !== props.xField && k !== 'time') : []
 )
 
+// Initialise activeSeries whenever ptpKeys changes (e.g. first data load)
+watch(ptpKeys, (keys) => {
+  if (!keys.length) return
+  // Add any new keys not yet tracked; don't reset existing toggles
+  const s = new Set(activeSeries.value)
+  keys.forEach(k => s.add(k))
+  activeSeries.value = s
+}, { immediate: true })
+
 // Statistical anomaly detection — runs after every data update
 const computedAlerts = computed<Anomaly[]>(() => {
   if (!props.data.length || !ptpKeys.value.length) return []
   return detectAnomalies(props.data, props.xField, ptpKeys.value)
 })
 
+// Persist detected anomalies to the shared alert store
+watch(computedAlerts, (anomalies) => {
+  const source = props.xField === 'hour' ? 'dashboard-sm-24h' : 'dashboard-sm-5d'
+  ingestAnomalies(anomalies, source)
+}, { immediate: true })
+
 function draw() {
   if (!containerRef.value || !props.data.length) return
   const el = containerRef.value
   d3.select(el).select('svg').remove()
 
-  const keys = ptpKeys.value
+  const keys = ptpKeys.value.filter(k => activeSeries.value.has(k))
+  if (!keys.length) return
   // Keep natural query order — current hour arrives last and stays at the right
   const sortedData = props.data
   const margin = { top: 10, right: 10, bottom: 36, left: 62 }
@@ -280,7 +296,7 @@ function draw() {
     .attr('y', margin.top + H + margin.bottom - 2)
     .attr('text-anchor', 'middle')
     .attr('fill', '#666').attr('font-size', '10px')
-    .text(props.xField === 'hour' ? 'Hora do dia' : 'Dia')
+    .text(props.xField === 'hour' ? t('monitoring.hour_of_day') : t('monitoring.day_label'))
 }
 
 onMounted(() => {
@@ -290,6 +306,7 @@ onMounted(() => {
 })
 onUnmounted(() => resizeObserver?.disconnect())
 watch(() => props.data, draw, { deep: true })
+watch(locale, draw)
 </script>
 
 <style scoped>
@@ -303,6 +320,11 @@ watch(() => props.data, draw, { deep: true })
   margin-bottom: 0.6rem;
   padding-bottom: 0.5rem;
   border-bottom: 1px solid #252525;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #0d1018;
+  padding-top: 2px;
 }
 
 .chart-main-title {
@@ -314,7 +336,15 @@ watch(() => props.data, draw, { deep: true })
 
 .chart-legend { display: flex; flex-wrap: wrap; gap: 1rem; }
 
-.legend-item { display: flex; align-items: center; gap: 5px; }
+.legend-item {
+  display: flex; align-items: center; gap: 5px;
+  cursor: pointer;
+  user-select: none;
+  transition: opacity 0.15s;
+}
+.legend-item:hover { opacity: 0.75; }
+.legend-item--off { opacity: 0.28; }
+.legend-item--off .legend-dot { filter: grayscale(0.8); }
 
 .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 

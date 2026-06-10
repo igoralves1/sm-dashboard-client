@@ -1,9 +1,9 @@
 <template>
     <BCard no-body>
         <BCardHeader class="d-flex justify-content-between align-items-center">
-            <h5 class="card-title mb-0">Latest Project Updates</h5>
+            <h5 class="card-title mb-0">{{ t('dashboard.iot_updates') }}</h5>
             <BBadge variant="warning" class="fs-xxs p-1">
-                8 Notifications
+                {{ t('dashboard.notifications_count', { n: 8 }) }}
             </BBadge>
         </BCardHeader>
 
@@ -40,8 +40,13 @@
 
 <script setup lang="ts">
 import { BBadge, BCard, BCardBody, BCardHeader } from 'bootstrap-vue-next';
-import { timelineEvents } from './data';
+import { getTimelineEvents } from './data';
 import { Icon } from '@iconify/vue';
+import { useI18n } from 'vue-i18n';
+import { computed } from 'vue';
+
+const { t } = useI18n()
+const timelineEvents = computed(() => getTimelineEvents(t))
 
 
 </script>

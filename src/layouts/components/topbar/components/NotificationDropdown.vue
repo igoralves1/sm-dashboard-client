@@ -16,10 +16,10 @@
       <div class="px-3 py-2 border-bottom">
         <BRow class="align-items-center">
           <BCol>
-            <h6 class="m-0 fs-md fw-semibold">Notifications</h6>
+            <h6 class="m-0 fs-md fw-semibold">{{ t('topbar.notifications_title') }}</h6>
           </BCol>
           <BCol class="text-end">
-            <a href="#" class="badge text-bg-light badge-label py-1">14 Alerts</a>
+            <a href="#" class="badge text-bg-light badge-label py-1">{{ t('topbar.alerts_badge') }}</a>
           </BCol>
         </BRow>
       </div>
@@ -40,9 +40,9 @@
               </span>
             </span>
             <span class="flex-grow-1 text-muted">
-              <span class="fw-medium text-body">{{ notification.message }}</span>
+              <span class="fw-medium text-body">{{ t(notification.messageKey) }}</span>
               <br />
-              <span class="fs-xs">{{ notification.timestamp }}</span>
+              <span class="fs-xs">{{ t(notification.timestampKey) }}</span>
             </span>
             <BButton variant="link" type="button" class="flex-shrink-0 text-muted p-0">
               <Icon icon="tabler:xbox-x-filled" class="fs-xxl" />
@@ -54,122 +54,41 @@
       <BDropdownItem
         class="text-center text-reset text-decoration-underline link-offset-2 fw-bold notify-item border-top border-light py-2"
       >
-        View All Alerts
+        {{ t('topbar.view_all_alerts') }}
       </BDropdownItem>
     </BDropdown>
   </div>
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
 import simplebar from 'simplebar-vue'
 import { Icon } from '@iconify/vue'
+
+const { t } = useI18n()
 
 type NotificationType = {
   id: string
   icon: string
   variant: 'danger' | 'warning' | 'success' | 'primary' | 'info' | 'secondary'
-  message: string
-  timestamp: string
+  messageKey: string
+  timestampKey: string
 }
 
 const notifications: NotificationType[] = [
-  {
-    id: 'notification-1',
-    icon: 'lucide:server-crash',
-    variant: 'danger',
-    message: 'Critical alert: Server crash detected',
-    timestamp: '30 minutes ago',
-  },
-  {
-    id: 'notification-2',
-    icon: 'lucide:alert-triangle',
-    variant: 'warning',
-    message: 'High memory usage on Node A',
-    timestamp: '10 minutes ago',
-  },
-  {
-    id: 'notification-3',
-    icon: 'lucide:check-circle',
-    variant: 'success',
-    message: 'Backup completed successfully',
-    timestamp: '1 hour ago',
-  },
-  {
-    id: 'notification-4',
-    icon: 'lucide:user-plus',
-    variant: 'primary',
-    message: 'New user registration: Sarah Miles',
-    timestamp: 'Just now',
-  },
-  {
-    id: 'notification-5',
-    icon: 'lucide:bug',
-    variant: 'danger',
-    message: 'Bug reported in payment module',
-    timestamp: '20 minutes ago',
-  },
-  {
-    id: 'notification-6',
-    icon: 'lucide:message-circle',
-    variant: 'info',
-    message: 'New comment on Task #142',
-    timestamp: '15 minutes ago',
-  },
-  {
-    id: 'notification-7',
-    icon: 'lucide:battery-warning',
-    variant: 'warning',
-    message: 'Low battery on Device X',
-    timestamp: '45 minutes ago',
-  },
-  {
-    id: 'notification-8',
-    icon: 'lucide:cloud-upload',
-    variant: 'success',
-    message: 'File upload completed',
-    timestamp: '1 hour ago',
-  },
-  {
-    id: 'notification-9',
-    icon: 'lucide:calendar',
-    variant: 'primary',
-    message: 'Team meeting scheduled at 3 PM',
-    timestamp: '2 hours ago',
-  },
-  {
-    id: 'notification-10',
-    icon: 'lucide:download',
-    variant: 'secondary',
-    message: 'Report ready for download',
-    timestamp: '3 hours ago',
-  },
-  {
-    id: 'notification-11',
-    icon: 'lucide:lock',
-    variant: 'danger',
-    message: 'Multiple failed login attempts',
-    timestamp: '5 hours ago',
-  },
-  {
-    id: 'notification-12',
-    icon: 'lucide:bell-ring',
-    variant: 'info',
-    message: 'Reminder: Submit your timesheet',
-    timestamp: 'Today, 9:00 AM',
-  },
-  {
-    id: 'notification-13',
-    icon: 'lucide:database-zap',
-    variant: 'warning',
-    message: 'Database nearing capacity',
-    timestamp: 'Yesterday',
-  },
-  {
-    id: 'notification-14',
-    icon: 'lucide:check-square',
-    variant: 'success',
-    message: 'System check completed',
-    timestamp: '2 days ago',
-  },
+  { id: 'notification-1',  icon: 'lucide:server-crash',    variant: 'danger',    messageKey: 'topbar.notif_server_crash', timestampKey: 'topbar.ts_30min' },
+  { id: 'notification-2',  icon: 'lucide:alert-triangle',  variant: 'warning',   messageKey: 'topbar.notif_memory',       timestampKey: 'topbar.ts_10min' },
+  { id: 'notification-3',  icon: 'lucide:check-circle',    variant: 'success',   messageKey: 'topbar.notif_backup',       timestampKey: 'topbar.ts_1h' },
+  { id: 'notification-4',  icon: 'lucide:user-plus',       variant: 'primary',   messageKey: 'topbar.notif_new_user',     timestampKey: 'topbar.ts_just_now' },
+  { id: 'notification-5',  icon: 'lucide:bug',             variant: 'danger',    messageKey: 'topbar.notif_bug',          timestampKey: 'topbar.ts_20min' },
+  { id: 'notification-6',  icon: 'lucide:message-circle',  variant: 'info',      messageKey: 'topbar.notif_comment',      timestampKey: 'topbar.ts_15min' },
+  { id: 'notification-7',  icon: 'lucide:battery-warning', variant: 'warning',   messageKey: 'topbar.notif_battery',      timestampKey: 'topbar.ts_45min' },
+  { id: 'notification-8',  icon: 'lucide:cloud-upload',    variant: 'success',   messageKey: 'topbar.notif_upload',       timestampKey: 'topbar.ts_1h' },
+  { id: 'notification-9',  icon: 'lucide:calendar',        variant: 'primary',   messageKey: 'topbar.notif_meeting',      timestampKey: 'topbar.ts_2h' },
+  { id: 'notification-10', icon: 'lucide:download',        variant: 'secondary', messageKey: 'topbar.notif_report',       timestampKey: 'topbar.ts_3h' },
+  { id: 'notification-11', icon: 'lucide:lock',            variant: 'danger',    messageKey: 'topbar.notif_login_fail',   timestampKey: 'topbar.ts_5h' },
+  { id: 'notification-12', icon: 'lucide:bell-ring',       variant: 'info',      messageKey: 'topbar.notif_timesheet',    timestampKey: 'topbar.ts_today_9am' },
+  { id: 'notification-13', icon: 'lucide:database-zap',    variant: 'warning',   messageKey: 'topbar.notif_database',     timestampKey: 'topbar.ts_yesterday' },
+  { id: 'notification-14', icon: 'lucide:check-square',    variant: 'success',   messageKey: 'topbar.notif_system_check', timestampKey: 'topbar.ts_2days' },
 ]
 </script>

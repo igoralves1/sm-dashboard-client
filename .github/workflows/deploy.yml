@@ -3,14 +3,20 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches:
-      - main
+      - prana
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -28,14 +34,38 @@ jobs:
       - name: Build
         run: npm run build
         env:
-          VITE_AWS_REGION:        ${{ secrets.VITE_AWS_REGION }}
-          VITE_IDENTITY_POOL_ID:  ${{ secrets.VITE_IDENTITY_POOL_ID }}
-          VITE_USER_POOL_ID:      ${{ secrets.VITE_USER_POOL_ID }}
-          VITE_COGNITO_CLIENT_ID: ${{ secrets.VITE_COGNITO_CLIENT_ID }}
-          VITE_TIMESTREAM_DB:     ${{ secrets.VITE_TIMESTREAM_DB }}
+          VITE_AWS_REGION:               ${{ secrets.VITE_AWS_REGION }}
+          VITE_IDENTITY_POOL_ID:         ${{ secrets.VITE_IDENTITY_POOL_ID }}
+          VITE_USER_POOL_ID:             ${{ secrets.VITE_USER_POOL_ID }}
+          VITE_COGNITO_CLIENT_ID:        ${{ secrets.VITE_COGNITO_CLIENT_ID }}
+          VITE_TIMESTREAM_DB:            ${{ secrets.VITE_TIMESTREAM_DB }}
+          VITE_TIMESTREAM_TABLE_RT:      ${{ secrets.VITE_TIMESTREAM_TABLE_RT }}
+          VITE_TIMESTREAM_TABLE_HOURLY:  ${{ secrets.VITE_TIMESTREAM_TABLE_HOURLY }}
+          VITE_TIMESTREAM_TABLE_DAILY:   ${{ secrets.VITE_TIMESTREAM_TABLE_DAILY }}
+          VITE_S3_ACTIVITY_BUCKET:       ${{ secrets.VITE_S3_ACTIVITY_BUCKET }}
+          VITE_SENSOR_RAP_SIL:           ${{ secrets.VITE_SENSOR_RAP_SIL }}
+          VITE_SENSOR_PTP_01:            ${{ secrets.VITE_SENSOR_PTP_01 }}
+          VITE_SENSOR_PTP_02:            ${{ secrets.VITE_SENSOR_PTP_02 }}
+          VITE_SENSOR_PTP_03:            ${{ secrets.VITE_SENSOR_PTP_03 }}
+          VITE_SENSOR_PTP_04:            ${{ secrets.VITE_SENSOR_PTP_04 }}
+          VITE_SENSOR_RAP_MIR:           ${{ secrets.VITE_SENSOR_RAP_MIR }}
+          VITE_SENSOR_PTP_07:            ${{ secrets.VITE_SENSOR_PTP_07 }}
 
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
+          path: ./dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

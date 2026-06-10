@@ -6,6 +6,8 @@ import {
   AuthenticationDetails,
   CognitoUserSession,
 } from 'amazon-cognito-identity-js'
+import { useActivityTracker } from '@/composables/useActivityTracker'
+import { useSessionTracker } from '@/composables/useSessionTracker'
 
 // ── Cognito config (values injected via environment variables) ───────────────
 const USER_POOL_ID = import.meta.env.VITE_USER_POOL_ID      as string
@@ -18,7 +20,7 @@ const userPool = new CognitoUserPool({
 })
 
 export const useAuthStore = defineStore('auth', () => {
-  const user = ref<{ name: string; email: string } | null>(null)
+  const user = ref<{ name: string; email: string; isAdmin: boolean } | null>(null)
   const accessToken = ref<string | null>(null)
   const idToken = ref<string | null>(null)
   const refreshToken = ref<string | null>(null)
@@ -47,9 +49,12 @@ export const useAuthStore = defineStore('auth', () => {
     tokenExpiry.value = Date.now() + TOKEN_EXPIRY_MINUTES * 60 * 1000
 
     const payload = session.getIdToken().decodePayload()
+    const groups: string[] = payload['cognito:groups'] ?? []
+    const email: string = payload['email'] ?? ''
     user.value = {
-      name: payload['name'] ?? payload['email'] ?? 'User',
-      email: payload['email'] ?? '',
+      name: payload['name'] ?? email ?? 'User',
+      email,
+      isAdmin: groups.includes('admin'),
     }
   }
 
@@ -81,6 +86,9 @@ export const useAuthStore = defineStore('auth', () => {
         onSuccess(session) {
           setSession(session)
           loading.value = false
+          useActivityTracker().trackLogin(email)
+          // Backfill the in-progress /login session with the real email
+          useSessionTracker().updateUser(email)
           resolve('ok')
         },
         onFailure(err) {
@@ -137,6 +145,7 @@ export const useAuthStore = defineStore('auth', () => {
   // ── Logout ────────────────────────────────────────────────────────────────
   function logout() {
     const currentUser = userPool.getCurrentUser()
+    if (user.value?.email) useActivityTracker().trackLogout(user.value.email)
     currentUser?.signOut()
     clearSession()
   }

@@ -39,9 +39,14 @@ import QuarterlyReports from "./components/QuarterlyReports.vue";
 import ProjectUpdates from "./components/ProjectUpdates.vue";
 import Discussions from "./components/Discussions.vue";
 import MainLayout from "@/layouts/MainLayout.vue";
-import { statCards } from "./components/data";
+import { getStatCards } from "./components/data";
 import { usePageMeta } from "@/composables/usePageMeta";
 import ProjectPerformance from "./components/ProjectPerformance.vue";
+import { useI18n } from "vue-i18n";
+import { computed } from "vue";
+
+const { t } = useI18n()
+const statCards = computed(() => getStatCards(t))
 
 
 usePageMeta('Dashboard')

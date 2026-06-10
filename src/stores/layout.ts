@@ -19,11 +19,11 @@ const INIT_STATE: LayoutType = {
   orientation: 'vertical',
   sidenav: {
     size: 'default',
-    color: 'dark',
+    color: 'prana',
     user: true,
   },
   topBar: {
-    color: 'light',
+    color: 'prana',
   },
   position: 'fixed',
   width: 'fluid',
@@ -149,6 +149,6 @@ export const useLayout = defineStore(
     }
   },
   {
-    persist: true,
+    persist: { key: 'layout-v2' },
   },
 )
