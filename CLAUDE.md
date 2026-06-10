@@ -415,7 +415,7 @@ Toggle script: `~/scripts/mcp-toggle.sh`
 
 ## 14. RECENT CHANGES (session 2026-06-06)
 
-### Branding: SIMEMAP → prana (branch `alle`)
+### Branding: SIMEMAP → prana (branch `prana`)
 
 The app was rebranded from **SIMEMAP / HidroForte** to **prana**. All UI references updated.
 
