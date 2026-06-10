@@ -111,7 +111,7 @@ import StackedAreaChart from './StackedAreaChart.vue'
 import DonutChart from './DonutChart.vue'
 import { useAlertStore } from '@/composables/useAlertStore'
 import type { StoredAlert } from '@/composables/useAlertStore'
-import reportLogoRaw from '@/assets/images/logo.png'
+import reportLogoRaw from '@/assets/images/simemap-logo.svg?raw'
 
 const { alerts, alerts24h, initFromS3, startPolling, stopPolling } = useAlertStore()
 
@@ -346,7 +346,7 @@ function buildReportHtml(list: StoredAlert[]): string {
   <div class="report-header">
     <div class="report-logo">
       <div>
-        <div class="report-logo-svg"><img src="${reportLogoRaw}" height="40" /></div>
+        <div class="report-logo-svg" style="width:120px">${reportLogoRaw}</div>
         <div class="report-logo-sub">${t('dashboard.report_subtitle')}</div>
       </div>
     </div>

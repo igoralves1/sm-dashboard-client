@@ -146,7 +146,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { Icon } from '@iconify/vue'
 import { currentYear } from '@/helpers'
-import pranLogo from '@/assets/images/logo.png'
+import pranLogo from '@/assets/images/simemap-logo.svg'
 import { useAuthStore } from '@/stores/auth.ts'
 import { useI18n } from 'vue-i18n'
 

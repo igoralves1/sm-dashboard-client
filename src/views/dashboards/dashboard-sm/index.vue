@@ -4,7 +4,7 @@
     <!-- ═══ TOP HEADER BAR ═══ -->
     <div class="top-bar">
       <div class="top-bar__left">
-        <img src="@/assets/images/logo.png" alt="SIMEMAP" class="top-bar__logo" />
+        <img src="@/assets/images/simemap-logo.svg" alt="SIMEMAP" class="top-bar__logo" />
         <div class="top-bar__divider"></div>
         <div class="top-bar__meta">
           <span class="top-bar__meta-label">{{ t('monitoring.iot_realtime') }}</span>
