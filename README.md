@@ -1,12 +1,12 @@
-# IoT Monitoring System
+# prana — AIoT Intelligent Asset Management Platform
 
 <p align="center">
   <img src="https://igoralves1.github.io/sm-dashboard-client/pranalogototal.svg" width="200" alt="prana" />
 </p>
 
 <p align="center">
-  <strong>To be used in Water, Energy and any other smart city context.</strong><br/>
-  Real-time AIIoT dashboards powered by Vue 3 · D3.js · AWS Timestream · AWS Cognito
+  <strong>From real-time monitoring to self-healing infrastructure — Water, Energy and any smart city context.</strong><br/>
+  Real-time AIIoT dashboards powered by Vue 3 · D3.js · AWS Timestream · AWS Cognito · Open source (Apache 2.0)
 </p>
 
 <p align="center">
@@ -22,13 +22,41 @@
 
 ## Overview
 
-**IoT Monitoring System** is an open-source, browser-native single-page application for real-time monitoring of IoT infrastructure across smart city domains — water distribution networks, energy grids, environmental sensors, and beyond.
+**prana** is an open-source **AIoT Intelligent Asset Management platform** — it combines real-time IoT monitoring (SCADA-style), statistical process control, and predictive maintenance into a single browser-native application for smart city infrastructure: water distribution networks, energy grids, environmental sensors, and beyond.
 
-It was designed to turn raw sensor data into actionable intelligence: live tank levels, pump flow rates, energy consumption trends, and anomaly alerts — all visualized through interactive D3.js charts without the need for a dedicated backend server.
+It is **not a CRM** — it manages *physical assets*, not customers. Think of it as a lightweight, serverless alternative to platforms like IBM Maximo or GE APM: it turns raw sensor data into actionable intelligence — live tank levels, pump flow rates, anomaly alerts with statistical p-values, auto-generated PDF reports — all visualized through interactive D3.js charts without a dedicated backend server.
 
 Data flows directly from **AWS Timestream** to the browser using short-lived credentials issued by **AWS Cognito**, keeping the architecture serverless and cost-efficient.
 
 **Live demo:** [https://igoralves1.github.io/sm-dashboard-client/](https://igoralves1.github.io/sm-dashboard-client/)
+
+---
+
+## Where We Are Now — and Where We're Going
+
+### ✅ Today (implemented)
+
+The platform currently operates as a full **real-time monitoring and statistical alerting system**, deployed in production for water supply infrastructure in Silvanópolis and Miranorte (Tocantins, Brazil):
+
+- Live telemetry dashboards — tank gauges, level/flow time series, production bars
+- Statistical Process Control — control charts (±3σ), box plots, Six Sigma anomaly detection with p-values
+- Real-time alarms feed with severity classification and 20-page auto-generated PDF reports
+- AWS Cognito authentication, role-based access, user activity auditing
+- Fully serverless — browser queries AWS Timestream directly, zero backend
+- Bilingual (EN/PT), fully responsive, automated CI/CD to GitHub Pages
+
+### 🔭 Vision (roadmap — not yet implemented)
+
+The next evolution turns prana from a system that *detects* problems into one that *resolves* them autonomously — **prescriptive maintenance**:
+
+| Phase | Capability |
+|---|---|
+| **1. Notification & escalation** | Asset failure triggers automatic email notifications to field technicians; dedicated interaction channels for engineering, business teams, and stakeholders — each with role-appropriate views of the same incident |
+| **2. Asset lifecycle management** | Registry of physical assets (pumps, sensors, valves) with maintenance schedules, rotation plans, and wear models — replacement needs known *before* failure |
+| **3. Autonomous supply chain** | When a part is failing or due for rotation, the system contacts the supplier and requests delivery automatically — the procurement loop closes itself, with spend guardrails and full audit trail |
+| **4. Self-healing operations** | The guiding principle: *by the time a manager becomes aware of an issue, the fix is already in place.* Incident reports arrive with the resolution attached |
+
+These phases require a backend layer (event-driven workflows, email, supplier integrations) that will be built on the existing AWS foundation. Contributions and ideas are welcome — this is an open project.
 
 ---
 
@@ -925,7 +953,7 @@ This entire security stack runs permanently for **$0.61/month**:
 ## License
 
 This is an open source project licensed under the **Apache 2.0 License**, developed by **Dr. Igor Lemos Alves**.
-Free to be used by anyone.
+Free to be used, modified, and distributed by anyone — for commercial or non-commercial purposes.
 
 The `alle` branch is a customization requested by **Prana** to adapt the project to its specific needs.
 
@@ -948,4 +976,4 @@ The `alle` branch is a customization requested by **Prana** to adapt the project
 - [Deming Institute — Beginner's Guide to Control Charts](https://deming.org/a-beginners-guide-to-control-charts/) — Foundational concepts of SPC control charts
 
 ---
-Last updated: 2026-06-09
+Last updated: 2026-06-10
