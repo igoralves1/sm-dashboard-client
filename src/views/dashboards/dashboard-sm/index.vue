@@ -493,7 +493,7 @@ onUnmounted(() => {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1.2px;
-  color: #1ab394;
+  color: #102a83;
   opacity: 0.85;
 }
 .top-bar__meta-status {
@@ -509,7 +509,7 @@ onUnmounted(() => {
 }
 .status-dot.ok      { background: #37872d; box-shadow: 0 0 5px #37872d; }
 .status-dot.error   { background: #e84040; box-shadow: 0 0 5px #e84040; }
-.status-dot.loading { background: #1ab394; animation: rl-blink 1s ease-in-out infinite; }
+.status-dot.loading { background: #102a83; animation: rl-blink 1s ease-in-out infinite; }
 .status-text {
   font-size: 0.75rem;
   color: #7a8099;
@@ -557,7 +557,7 @@ onUnmounted(() => {
 }
 .section-header__icon {
   font-size: 0.9rem;
-  color: #1ab394;
+  color: #102a83;
   line-height: 1;
 }
 .section-header__title {
