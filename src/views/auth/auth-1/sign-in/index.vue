@@ -158,7 +158,7 @@ import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { Icon } from '@iconify/vue'
 import { currentYear } from '@/helpers'
-import pranLogo from '@/assets/images/simemap-logo.svg'
+import pranLogo from '@/assets/images/simemap-logo-white.svg'
 import { usePageMeta } from '@/composables/usePageMeta.ts'
 import { useAuthStore } from '@/stores/auth.ts'
 import { useI18n } from 'vue-i18n'
@@ -205,7 +205,7 @@ async function handleLogin() {
 .sm-auth__left {
   position: relative;
   width: 55%;
-  background: linear-gradient(145deg, #009ee0 0%, #303287 100%);
+  background: #303287;
   display: flex;
   align-items: center;
   justify-content: center;
