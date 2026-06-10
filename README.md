@@ -1,8 +1,4 @@
-# prana — AIoT Intelligent Asset Management Platform
-
-<p align="center">
-  <img src="https://igoralves1.github.io/sm-dashboard-client/pranalogototal.svg" width="200" alt="prana" />
-</p>
+# AIoT Intelligent Asset Management Platform
 
 <p align="center">
   <strong>From real-time monitoring to self-healing infrastructure — Water, Energy and any smart city context.</strong><br/>
@@ -22,7 +18,7 @@
 
 ## Overview
 
-**prana** is an open-source **AIoT Intelligent Asset Management platform** — it combines real-time IoT monitoring (SCADA-style), statistical process control, and predictive maintenance into a single browser-native application for smart city infrastructure: water distribution networks, energy grids, environmental sensors, and beyond.
+This is an open-source **AIoT Intelligent Asset Management platform** — it combines real-time IoT monitoring (SCADA-style), statistical process control, and predictive maintenance into a single browser-native application for smart city infrastructure: water distribution networks, energy grids, environmental sensors, and beyond.
 
 It is **not a CRM** — it manages *physical assets*, not customers. Think of it as a lightweight, serverless alternative to platforms like IBM Maximo or GE APM: it turns raw sensor data into actionable intelligence — live tank levels, pump flow rates, anomaly alerts with statistical p-values, auto-generated PDF reports — all visualized through interactive D3.js charts without a dedicated backend server.
 
@@ -47,7 +43,7 @@ The platform currently operates as a full **real-time monitoring and statistical
 
 ### 🔭 Vision (roadmap — not yet implemented)
 
-The next evolution turns prana from a system that *detects* problems into one that *resolves* them autonomously — **prescriptive maintenance**:
+The next evolution turns the platform from a system that *detects* problems into one that *resolves* them autonomously — **prescriptive maintenance**:
 
 | Phase | Capability |
 |---|---|
@@ -91,7 +87,7 @@ This system is domain-agnostic. The same architecture and visualization layer ca
 
 ## Feature Gallery
 
-> Screenshots from a live deployment monitoring water supply systems in Silvanópolis and Miranorte, State of Tocantins, Brazil.
+> Screenshots from a live deployment monitoring water supply systems in Silvanópolis and Miranorte, State of Tocantins, Brazil. This deployment is branded **prana** — the first client customization of the platform (the `prana` branch). The core software is brand-agnostic.
 
 ---
 
@@ -497,7 +493,7 @@ Where `Φ` is the standard normal CDF (approximated via the Abramowitz & Stegun 
 
 A **low p-value** (e.g. `p = 0.3%`) means the reading is highly unlikely under normal process behaviour — it is unexpected, not necessarily dangerous, but worth investigating.
 
-### Application in prana
+### Application in this platform
 
 | Sensor type | What is monitored | Alert condition |
 |---|---|---|
@@ -955,7 +951,7 @@ This entire security stack runs permanently for **$0.61/month**:
 This is an open source project licensed under the **Apache 2.0 License**, developed by **Dr. Igor Lemos Alves**.
 Free to be used, modified, and distributed by anyone — for commercial or non-commercial purposes.
 
-The `alle` branch is a customization requested by **Prana** to adapt the project to its specific needs.
+The `prana` branch is a customization requested by **Prana** — the first client of this platform — to adapt the project to its specific needs (branding, Portuguese copy, client-specific dashboards). The core software itself is brand-agnostic.
 
 ---
 
