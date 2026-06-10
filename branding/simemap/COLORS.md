@@ -9,14 +9,22 @@ Source of truth for colors: `src/assets/scss/_variables.scss`.
 
 | File | Usage |
 |---|---|
-| `logos/simemap-logo.svg` | **SIMEMAP wordmark** (teal/blue, works on light & dark) — placeholder until official artwork is provided |
+| `logos/simemap-logo.svg` | **Official SIMEMAP logo** — wordmark `#102a83` + signal-tower icon with gradient `#009ee0 → #303287`. Source: `preview-logo.html` (root). Size-agnostic (set via `width`) |
 | `logos/logo.png` | ⚠️ INSPINIA template logo (light bg) — inherited from the admin template, NOT SIMEMAP artwork |
 | `logos/logo-black.png` | ⚠️ INSPINIA template logo, dark text variant |
 | `logos/logo-white.png` | ⚠️ INSPINIA template logo, white variant |
 | `logos/logo-sm.png` | ⚠️ INSPINIA template icon (collapsed sidebar) |
 | `logos/favicon.ico` | Browser favicon (inherited from template) |
 
-> SIMEMAP never had its own logo file — the original `main` branch shipped with the INSPINIA template logos and used "SIMEMAP" as text only. `simemap-logo.svg` was created from the SIMEMAP color scheme as a stand-in.
+> The official SIMEMAP logo lives in `preview-logo.html` / `preview-logo-large.html` at the repo root (inline SVG, multiple sizes). `simemap-logo.svg` is the extracted standalone asset. The `logo*.png` files are INSPINIA template artwork still used inside the app UI.
+
+### SIMEMAP logo colors
+
+| Element | Hex |
+|---|---|
+| Wordmark text | `#102a83` |
+| Icon gradient start | `#009ee0` |
+| Icon gradient end | `#303287` |
 
 ## SVG assets
 
