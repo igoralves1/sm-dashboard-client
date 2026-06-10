@@ -24,7 +24,7 @@
 
 This is an open-source **AIoT Intelligent Asset Management platform** — it combines real-time IoT monitoring (SCADA-style), statistical process control, and predictive maintenance into a single browser-native application for smart city infrastructure: water distribution networks, energy grids, environmental sensors, and beyond.
 
-It is **not a CRM** — it manages *physical assets*, not customers. Think of it as a lightweight, serverless alternative to platforms like IBM Maximo or GE APM: it turns raw sensor data into actionable intelligence — live tank levels, pump flow rates, anomaly alerts with statistical p-values, auto-generated PDF reports — all visualized through interactive D3.js charts without a dedicated backend server.
+It is a lightweight, serverless alternative to platforms like IBM Maximo or GE APM: it turns raw sensor data into actionable intelligence — live tank levels, pump flow rates, anomaly alerts with statistical p-values, auto-generated PDF reports — all visualized through interactive D3.js charts without a dedicated backend server.
 
 Data flows directly from **AWS Timestream** to the browser using short-lived credentials issued by **AWS Cognito**, keeping the architecture serverless and cost-efficient.
 
