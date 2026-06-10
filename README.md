@@ -1,6 +1,10 @@
 # AIoT Intelligent Asset Management Platform
 
 <p align="center">
+  <img src="https://igoralves1.github.io/sm-dashboard-client/pranalogototal.svg" width="200" alt="prana" />
+</p>
+
+<p align="center">
   <strong>From real-time monitoring to self-healing infrastructure — Water, Energy and any smart city context.</strong><br/>
   Real-time AIIoT dashboards powered by Vue 3 · D3.js · AWS Timestream · AWS Cognito · Open source (Apache 2.0)
 </p>
