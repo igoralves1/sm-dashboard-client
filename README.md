@@ -1,7 +1,7 @@
 # AIoT Intelligent Asset Management Platform
 
 <p align="center">
-  <img src="branding/simemap/logos/logo.png" width="200" alt="SIMEMAP" />
+  <img src="branding/simemap/logos/simemap-logo.svg" width="280" alt="SIMEMAP" />
 </p>
 
 <p align="center">

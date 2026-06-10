@@ -9,11 +9,14 @@ Source of truth for colors: `src/assets/scss/_variables.scss`.
 
 | File | Usage |
 |---|---|
-| `logos/logo.png` | Full logo, light backgrounds (topbar/sidebar) |
-| `logos/logo-black.png` | Full logo, dark text variant |
-| `logos/logo-white.png` | Full logo, white variant for dark backgrounds |
-| `logos/logo-sm.png` | Small/collapsed sidebar icon |
-| `logos/favicon.ico` | Browser favicon |
+| `logos/simemap-logo.svg` | **SIMEMAP wordmark** (teal/blue, works on light & dark) — placeholder until official artwork is provided |
+| `logos/logo.png` | ⚠️ INSPINIA template logo (light bg) — inherited from the admin template, NOT SIMEMAP artwork |
+| `logos/logo-black.png` | ⚠️ INSPINIA template logo, dark text variant |
+| `logos/logo-white.png` | ⚠️ INSPINIA template logo, white variant |
+| `logos/logo-sm.png` | ⚠️ INSPINIA template icon (collapsed sidebar) |
+| `logos/favicon.ico` | Browser favicon (inherited from template) |
+
+> SIMEMAP never had its own logo file — the original `main` branch shipped with the INSPINIA template logos and used "SIMEMAP" as text only. `simemap-logo.svg` was created from the SIMEMAP color scheme as a stand-in.
 
 ## SVG assets
 
