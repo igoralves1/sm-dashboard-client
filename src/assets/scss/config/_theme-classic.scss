@@ -77,12 +77,51 @@
         --#{$prefix}sidenav-item-active-color:      #ffffff;
         --#{$prefix}sidenav-item-active-bg:         rgba(0,158,224,0.32);
 
+        // Active item: cyan left border accent
+        .sidenav-item.active > .sidenav-link,
+        .sidenav-item .sidenav-link.active {
+            border-left: 3px solid #009ee0;
+            padding-left: calc(var(--ins-sidenav-item-padding-x) + 7px);
+            background: rgba(0,158,224,0.22) !important;
+            color: #ffffff !important;
+        }
+
+        // Force all nav links to white
+        .sidenav-menu .sidenav-link {
+            color: rgba(255,255,255,0.68) !important;
+        }
+        .sidenav-menu .sidenav-link:hover,
+        .sidenav-menu .side-nav-link:hover {
+            color: #ffffff !important;
+        }
+        .sidenav-menu .sidenav-link.disabled,
+        .sidenav-menu .side-nav-link.disabled {
+            opacity: 0.55 !important;
+            color: rgba(255,255,255,0.68) !important;
+        }
+
         .menu-title {
             color: rgba(255,255,255,0.4) !important;
             letter-spacing: 1.2px;
         }
         .sidenav-user-info .sidenav-user-name { color: #fff !important; }
         .sidenav-user-info .sidenav-user-designation { color: rgba(255,255,255,0.55) !important; }
+    }
+
+    // SIMEMAP — blue gradient buttons
+    html[data-menu-color="simemap"],
+    html[data-topbar-color="simemap"] {
+        .btn-primary {
+            background: linear-gradient(135deg, #009ee0 0%, #303287 100%) !important;
+            border-color: transparent !important;
+            color: #fff !important;
+            box-shadow: 0 2px 8px rgba(0,158,224,0.3) !important;
+        }
+        .btn-primary:hover:not(:disabled) {
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,158,224,0.4) !important;
+        }
     }
 
     // Dark Mode

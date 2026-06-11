@@ -4,7 +4,7 @@
     <!-- ═══ TOP HEADER BAR ═══ -->
     <div class="top-bar">
       <div class="top-bar__left">
-        <img src="@/assets/images/simemap-logo.svg" alt="SIMEMAP" class="top-bar__logo" />
+        <img src="@/assets/images/simemap-logo-white.svg" alt="SIMEMAP" class="top-bar__logo" />
         <div class="top-bar__divider"></div>
         <div class="top-bar__meta">
           <span class="top-bar__meta-label">{{ t('monitoring.iot_realtime') }}</span>
@@ -460,8 +460,8 @@ onUnmounted(() => {
   align-items: center;
   justify-content: space-between;
   padding: 0.85rem 1.75rem;
-  background: #13161c;
-  border-bottom: 1px solid #2a3040;
+  background: linear-gradient(160deg, #009ee0 0%, #303287 55%, #232566 100%);
+  border-bottom: none;
   box-shadow: 0 2px 16px rgba(0,0,0,0.35);
   margin-bottom: 20px;
   position: sticky;
@@ -476,12 +476,12 @@ onUnmounted(() => {
 .top-bar__logo {
   height: 36px;
   width: auto;
-  filter: drop-shadow(0 0 6px rgba(214,170,1,0.25));
+  filter: drop-shadow(0 1px 4px rgba(0,0,0,0.3));
 }
 .top-bar__divider {
   width: 1px;
   height: 32px;
-  background: linear-gradient(to bottom, transparent, #2e3240, transparent);
+  background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.4), transparent);
 }
 .top-bar__meta {
   display: flex;
@@ -493,8 +493,7 @@ onUnmounted(() => {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1.2px;
-  color: #102a83;
-  opacity: 0.85;
+  color: rgba(255,255,255,0.9);
 }
 .top-bar__meta-status {
   display: flex;
@@ -507,12 +506,12 @@ onUnmounted(() => {
   border-radius: 50%;
   flex-shrink: 0;
 }
-.status-dot.ok      { background: #37872d; box-shadow: 0 0 5px #37872d; }
+.status-dot.ok      { background: #73bf69; box-shadow: 0 0 5px #73bf69; }
 .status-dot.error   { background: #e84040; box-shadow: 0 0 5px #e84040; }
-.status-dot.loading { background: #102a83; animation: rl-blink 1s ease-in-out infinite; }
+.status-dot.loading { background: rgba(255,255,255,0.7); animation: rl-blink 1s ease-in-out infinite; }
 .status-text {
   font-size: 0.75rem;
-  color: #7a8099;
+  color: rgba(255,255,255,0.75);
 }
 .top-bar__right {
   display: flex;
@@ -525,9 +524,9 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 0.35rem;
-  background: transparent;
-  border: 1px solid #2e3550;
-  color: #8ab4f8;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.3);
+  color: #ffffff;
   padding: 0.35rem 0.9rem;
   border-radius: 6px;
   font-size: 0.78rem;
@@ -537,9 +536,9 @@ onUnmounted(() => {
   letter-spacing: 0.3px;
 }
 .export-btn:hover {
-  background: #1a2040;
-  border-color: #4a5580;
-  color: #aecbfa;
+  background: rgba(255,255,255,0.22);
+  border-color: rgba(255,255,255,0.5);
+  color: #ffffff;
 }
 .export-icon { font-size: 0.9rem; }
 
