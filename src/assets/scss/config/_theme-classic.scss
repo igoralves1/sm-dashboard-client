@@ -69,7 +69,7 @@
 
     // SIMEMAP Sidebar — solid navy matching login hero
     html[data-menu-color="simemap"] {
-        --#{$prefix}sidenav-bg:                     #303287;
+        --#{$prefix}sidenav-bg:                     #{linear-gradient(160deg, #009ee0 0%, #303287 55%, #232566 100%)};
         --#{$prefix}sidenav-border-color:           transparent;
         --#{$prefix}sidenav-item-color:             rgba(255,255,255,0.7);
         --#{$prefix}sidenav-item-hover-color:       #ffffff;
