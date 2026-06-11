@@ -20,8 +20,8 @@
     </div>
 
     <!-- Chart area -->
-    <div ref="containerRef" class="chart-container" style="position:relative">
-      <!-- Tooltip -->
+    <div style="position:relative">
+      <div ref="containerRef" class="chart-container"></div>
       <div ref="tooltipRef" class="chart-tooltip" style="display:none">
         <div class="tt-time"></div>
         <div class="tt-row">
@@ -29,6 +29,11 @@
           <span class="tt-label">{{ t('monitoring.level_label') }}</span>
           <span class="tt-value"></span>
         </div>
+      </div>
+      <div class="zoom-controls">
+        <button class="zoom-btn" @click="zoomBy(1.6)" title="Zoom in">+</button>
+        <button class="zoom-btn" @click="zoomBy(1/1.6)" title="Zoom out">−</button>
+        <button class="zoom-btn zoom-btn--reset" @click="zoomReset" title="Reset zoom">↺</button>
       </div>
     </div>
   </div>
@@ -58,6 +63,20 @@ let resizeObserver: ResizeObserver
 
 const tc = useChartTheme(() => props.theme)
 
+// ── Zoom state (persists across redraws) ──────────────────────────────────
+let _zt   = d3.zoomIdentity
+let _zoom: d3.ZoomBehavior<SVGSVGElement, unknown> | null = null
+let _svg:  SVGSVGElement | null = null
+const _clipId = `lvl-${Math.random().toString(36).slice(2, 8)}`
+
+function zoomBy(factor: number) {
+  if (_zoom && _svg) d3.select(_svg).call(_zoom.scaleBy, factor)
+}
+function zoomReset() {
+  _zt = d3.zoomIdentity
+  if (_zoom && _svg) d3.select(_svg).call(_zoom.transform, d3.zoomIdentity)
+}
+
 const colorScale = (v: number) => {
   if (v < 50) return '#e84040'
   if (v < 80) return '#f58b06'
@@ -73,20 +92,33 @@ function draw() {
   const W = el.clientWidth - margin.left - margin.right
   const H = (props.height ?? 220) - margin.top - margin.bottom
 
-  const svg = d3.select(el).append('svg')
+  const svgEl = d3.select(el).append('svg')
     .attr('width', el.clientWidth)
     .attr('height', props.height ?? 220)
-    .style('overflow', 'visible')
+    .style('overflow', 'hidden')
 
-  const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`)
+  _svg = svgEl.node()
 
-  const x = d3.scaleTime()
+  // ClipPath — keeps zoomed data lines inside chart area
+  svgEl.append('defs').append('clipPath').attr('id', _clipId)
+    .append('rect').attr('width', W).attr('height', H + 4)
+
+  // Data group (clipped) — lines, crosshair, dot
+  const g = svgEl.append('g')
+    .attr('transform', `translate(${margin.left},${margin.top})`)
+    .attr('clip-path', `url(#${_clipId})`)
+
+  // Axes group (not clipped) — drawn on top of clipped content
+  const gAxes = svgEl.append('g').attr('transform', `translate(${margin.left},${margin.top})`)
+
+  const xBase = d3.scaleTime()
     .domain(d3.extent(props.data, d => d.time) as [Date, Date])
     .range([0, W])
 
+  const x = _zt.k !== 1 || _zt.x !== 0 ? _zt.rescaleX(xBase) : xBase
   const y = d3.scaleLinear().domain([0, 110]).range([H, 0])
 
-  // Grid
+  // Grid (in data group — clipped is fine, extends no wider than W)
   g.append('g')
     .call(d3.axisLeft(y).tickSize(-W).tickFormat(() => ''))
     .call(gr => gr.select('.domain').remove())
@@ -112,9 +144,9 @@ function draw() {
       .attr('stroke-width', 2)
   }
 
-  // Axes
+  // ── Axes (unclipped) ────────────────────────────────────────────────────
   const currentHour = new Date().getHours()
-  g.append('g').attr('transform', `translate(0,${H})`)
+  gAxes.append('g').attr('transform', `translate(0,${H})`)
     .call(d3.axisBottom(x).ticks(6).tickFormat(d => d3.timeFormat('%H:%M')(d as Date)))
     .call(gr => gr.select('.domain').attr('stroke', tc.value.axisLine))
     .call(gr => gr.selectAll('.tick line').attr('stroke', tc.value.axisLine))
@@ -124,14 +156,13 @@ function draw() {
       .attr('font-weight', d => (d as Date).getHours() === currentHour ? '700' : 'normal')
     )
 
-  g.append('g')
+  gAxes.append('g')
     .call(d3.axisLeft(y).ticks(5).tickFormat(d => `${d}%`))
     .call(gr => gr.select('.domain').attr('stroke', tc.value.axisLine))
     .call(gr => gr.selectAll('text').attr('fill', tc.value.axisText).attr('font-size', '10px'))
     .call(gr => gr.selectAll('.tick line').attr('stroke', tc.value.axisLine))
 
-  // X-axis label
-  svg.append('text')
+  svgEl.append('text')
     .attr('x', margin.left + W / 2)
     .attr('y', margin.top + H + margin.bottom - 2)
     .attr('text-anchor', 'middle')
@@ -139,23 +170,21 @@ function draw() {
     .attr('font-size', '10px')
     .text(t('monitoring.hour_of_day'))
 
-  // ── Tooltip overlay ──────────────────────────────────────────────────────
+  // ── Crosshair + tooltip overlay ─────────────────────────────────────────
   const bisect = d3.bisector((d: DataPoint) => d.time).left
 
-  // Vertical crosshair line
   const crosshair = g.append('line')
     .attr('stroke', tc.value.crosshair).attr('stroke-width', 1)
     .attr('stroke-dasharray', '3,3')
     .attr('y1', 0).attr('y2', H)
     .style('display', 'none')
 
-  // Dot on line
   const dot = g.append('circle')
     .attr('r', 4).attr('fill', '#fff').attr('stroke', '#aaa').attr('stroke-width', 1.5)
     .style('display', 'none')
 
-  // Invisible overlay for mouse events
-  g.append('rect')
+  // Overlay rect in AXES group so it sits above clipped group
+  gAxes.append('rect')
     .attr('width', W).attr('height', H)
     .attr('fill', 'transparent')
     .on('mousemove', (event: MouseEvent) => {
@@ -172,23 +201,17 @@ function draw() {
       const cy = y(d.value)
 
       crosshair.attr('x1', cx).attr('x2', cx).style('display', null)
-      dot.attr('cx', cx).attr('cy', cy)
-        .attr('fill', colorScale(d.value))
-        .style('display', null)
+      dot.attr('cx', cx).attr('cy', cy).attr('fill', colorScale(d.value)).style('display', null)
 
-      // Position tooltip
       const tt = tooltipRef.value
       tt.style.display = 'block'
       const ttW = tt.offsetWidth || 160
-      const chartW = el.clientWidth
       const absX = cx + margin.left
-      tt.style.left = (absX + ttW + 12 > chartW ? absX - ttW - 8 : absX + 12) + 'px'
+      tt.style.left = (absX + ttW + 12 > el.clientWidth ? absX - ttW - 8 : absX + 12) + 'px'
       tt.style.top = (cy + margin.top - 10) + 'px'
 
-      // Fill content
       tt.querySelector('.tt-time')!.textContent = d3.timeFormat('%Y-%m-%d %H:%M:%S')(d.time)
-      const dot2 = tt.querySelector('.tt-dot') as HTMLElement
-      dot2.style.background = colorScale(d.value)
+      ;(tt.querySelector('.tt-dot') as HTMLElement).style.background = colorScale(d.value)
       tt.querySelector('.tt-value')!.textContent = `${d.value.toFixed(1)}%`
     })
     .on('mouseleave', () => {
@@ -196,6 +219,20 @@ function draw() {
       dot.style('display', 'none')
       if (tooltipRef.value) tooltipRef.value.style.display = 'none'
     })
+
+  // ── Zoom behavior ────────────────────────────────────────────────────────
+  _zoom = d3.zoom<SVGSVGElement, unknown>()
+    .scaleExtent([1, 50])
+    .translateExtent([[0, 0], [W, H]])
+    .extent([[0, 0], [W, H]])
+    .on('zoom', (event) => {
+      _zt = event.transform
+      draw()
+      if (_svg) d3.select(_svg).property('__zoom', _zt)
+    })
+
+  svgEl.call(_zoom)
+  svgEl.property('__zoom', _zt)   // restore without triggering event
 }
 
 onMounted(() => {
@@ -308,4 +345,34 @@ watch(() => props.theme, draw)
 }
 .tt-label { color: #ccc; flex: 1; }
 .tt-value { color: #fff; font-weight: 600; }
+
+.zoom-controls {
+  position: absolute;
+  bottom: 36px;
+  right: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  opacity: 0.25;
+  transition: opacity 0.2s;
+  z-index: 5;
+}
+.zoom-controls:hover { opacity: 1; }
+.zoom-btn {
+  width: 22px; height: 22px;
+  background: rgba(128,128,128,0.15);
+  border: 1px solid rgba(128,128,128,0.3);
+  border-radius: 4px;
+  color: #aaa;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0;
+  transition: background 0.15s;
+}
+.zoom-btn:hover { background: rgba(128,128,128,0.35); color: #fff; }
+.zoom-btn--reset { font-size: 12px; }
+.chart-theme-light .zoom-btn { border-color: #c8d8e8; color: #6a7a9a; background: rgba(0,0,0,0.04); }
+.chart-theme-light .zoom-btn:hover { background: rgba(0,120,200,0.1); color: #009ee0; }
 </style>

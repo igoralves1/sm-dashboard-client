@@ -26,6 +26,11 @@
         </div>
       </div>
       <div ref="containerRef" class="chart-container"></div>
+      <div class="zoom-controls">
+        <button class="zoom-btn" @click="zoomBy(1.6)" title="Zoom in">+</button>
+        <button class="zoom-btn" @click="zoomBy(1/1.6)" title="Zoom out">−</button>
+        <button class="zoom-btn zoom-btn--reset" @click="zoomReset" title="Reset zoom">↺</button>
+      </div>
     </div>
 
     <!-- Anomaly diagnostics -->
@@ -100,6 +105,20 @@ const props = defineProps<{
 }>()
 
 const tc = useChartTheme(() => props.theme)
+
+let _zt   = d3.zoomIdentity
+let _zoom: d3.ZoomBehavior<SVGSVGElement, unknown> | null = null
+let _svg:  SVGSVGElement | null = null
+const _clipId = `bar-${Math.random().toString(36).slice(2, 8)}`
+
+function zoomBy(factor: number) {
+  if (_zoom && _svg) d3.select(_svg).call(_zoom.scaleBy, factor)
+}
+function zoomReset() {
+  _zt = d3.zoomIdentity
+  if (_zoom && _svg) d3.select(_svg).call(_zoom.transform, d3.zoomIdentity)
+}
+
 const containerRef = ref<HTMLDivElement | null>(null)
 const tooltipRef   = ref<HTMLDivElement | null>(null)
 const notesRef     = ref<HTMLDivElement | null>(null)
@@ -173,15 +192,29 @@ function draw() {
   const W = el.clientWidth - margin.left - margin.right
   const H = (props.height ?? 200) - margin.top - margin.bottom
 
-  const svg = d3.select(el).append('svg')
+  const svgEl = d3.select(el).append('svg')
     .attr('width', el.clientWidth).attr('height', props.height ?? 200)
-    .style('overflow', 'visible')
+    .style('overflow', 'hidden')
 
-  const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`)
+  _svg = svgEl.node()
 
+  svgEl.append('defs').append('clipPath').attr('id', _clipId)
+    .append('rect').attr('width', W).attr('height', H + 4)
+
+  // Data group (clipped) — bars
+  const g = svgEl.append('g')
+    .attr('transform', `translate(${margin.left},${margin.top})`)
+    .attr('clip-path', `url(#${_clipId})`)
+
+  // Axes group (unclipped)
+  const gAxes = svgEl.append('g').attr('transform', `translate(${margin.left},${margin.top})`)
+  const svg = svgEl
+
+  // Band scale with zoom: expand range by zoom factor, offset by pan
+  const fullW = W * _zt.k
   const x0 = d3.scaleBand()
     .domain(sortedData.map(d => d[props.xField]))
-    .range([0, W]).padding(0.25)
+    .range([_zt.x, _zt.x + fullW]).padding(0.25)
 
   const x1 = d3.scaleBand().domain(keys).range([0, x0.bandwidth()]).padding(0.05)
 
@@ -253,7 +286,8 @@ function draw() {
     })
   })
 
-  g.append('g').attr('transform', `translate(0,${H})`)
+  // ── Axes (unclipped) ─────────────────────────────────────────────────────
+  gAxes.append('g').attr('transform', `translate(0,${H})`)
     .call(d3.axisBottom(x0))
     .call(gr => gr.select('.domain').attr('stroke', tc.value.axisLine))
     .call(gr => gr.selectAll('.tick line').attr('stroke', tc.value.axisLine))
@@ -280,26 +314,34 @@ function draw() {
       })
     )
 
-  g.append('g')
+  gAxes.append('g')
     .call(d3.axisLeft(y).ticks(5).tickFormat(d => `${(+d).toFixed(1)}`))
     .call(gr => gr.select('.domain').attr('stroke', tc.value.axisLine))
     .call(gr => gr.selectAll('text').attr('fill', tc.value.axisText).attr('font-size', '10px'))
     .call(gr => gr.selectAll('.tick line').attr('stroke', tc.value.axisLine))
 
-  // Y-axis label
   svg.append('text')
     .attr('transform', `translate(13,${margin.top + H / 2}) rotate(-90)`)
     .attr('text-anchor', 'middle')
     .attr('fill', tc.value.axisLabel).attr('font-size', '10px')
     .text(props.xField === 'hour' ? 'm³/h' : 'm³')
 
-  // X-axis label
   svg.append('text')
     .attr('x', margin.left + W / 2)
     .attr('y', margin.top + H + margin.bottom - 2)
     .attr('text-anchor', 'middle')
     .attr('fill', tc.value.axisLabel).attr('font-size', '10px')
     .text(props.xField === 'hour' ? t('monitoring.hour_of_day') : t('monitoring.day_label'))
+
+  // ── Zoom ─────────────────────────────────────────────────────────────────
+  _zoom = d3.zoom<SVGSVGElement, unknown>()
+    .scaleExtent([1, 10])
+    .translateExtent([[0, 0], [W, H]])
+    .extent([[0, 0], [W, H]])
+    .on('zoom', (event) => { _zt = event.transform; draw(); if (_svg) d3.select(_svg).property('__zoom', _zt) })
+
+  svgEl.call(_zoom)
+  svgEl.property('__zoom', _zt)
 }
 
 onMounted(() => {
@@ -513,4 +555,22 @@ watch(() => props.theme, draw)
 .chart-theme-light .model-intro,
 .chart-theme-light .model-text { color: #5a6e94; }
 .chart-theme-light .model-subtitle { color: #102a83; }
+
+.zoom-controls {
+  position: absolute; bottom: 34px; right: 14px;
+  display: flex; flex-direction: column; gap: 2px;
+  opacity: 0.25; transition: opacity 0.2s; z-index: 5;
+}
+.zoom-controls:hover { opacity: 1; }
+.zoom-btn {
+  width: 22px; height: 22px;
+  background: rgba(128,128,128,0.15); border: 1px solid rgba(128,128,128,0.3);
+  border-radius: 4px; color: #aaa; font-size: 14px; line-height: 1;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;
+  transition: background 0.15s;
+}
+.zoom-btn:hover { background: rgba(128,128,128,0.35); color: #fff; }
+.zoom-btn--reset { font-size: 12px; }
+.chart-theme-light .zoom-btn { border-color: #c8d8e8; color: #6a7a9a; background: rgba(0,0,0,0.04); }
+.chart-theme-light .zoom-btn:hover { background: rgba(0,120,200,0.1); color: #009ee0; }
 </style>

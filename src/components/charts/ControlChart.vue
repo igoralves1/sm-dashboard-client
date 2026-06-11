@@ -1,7 +1,8 @@
 <template>
   <div class="cc-wrapper" :class="theme === 'light' ? 'chart-theme-light' : 'chart-theme-dark'">
     <div v-if="title" class="cc-title">{{ title }}</div>
-    <div ref="containerRef" class="cc-container" style="position:relative">
+    <div style="position:relative">
+      <div ref="containerRef" class="cc-container"></div>
       <div ref="tooltipRef" class="cc-tooltip" style="display:none">
         <div class="tt-time"></div>
         <div class="tt-row">
@@ -9,6 +10,11 @@
           <span class="tt-val"></span>
         </div>
         <div class="tt-stats"></div>
+      </div>
+      <div class="zoom-controls">
+        <button class="zoom-btn" @click="zoomBy(1.6)" title="Zoom in">+</button>
+        <button class="zoom-btn" @click="zoomBy(1/1.6)" title="Zoom out">−</button>
+        <button class="zoom-btn zoom-btn--reset" @click="zoomReset" title="Reset zoom">↺</button>
       </div>
     </div>
   </div>
@@ -41,6 +47,19 @@ const tooltipRef   = ref<HTMLDivElement | null>(null)
 let ro: ResizeObserver
 let io: IntersectionObserver
 
+let _zt   = d3.zoomIdentity
+let _zoom: d3.ZoomBehavior<SVGSVGElement, unknown> | null = null
+let _svg:  SVGSVGElement | null = null
+const _clipId = `cc-${Math.random().toString(36).slice(2, 8)}`
+
+function zoomBy(factor: number) {
+  if (_zoom && _svg) d3.select(_svg).call(_zoom.scaleBy, factor)
+}
+function zoomReset() {
+  _zt = d3.zoomIdentity
+  if (_zoom && _svg) d3.select(_svg).call(_zoom.transform, d3.zoomIdentity)
+}
+
 function draw() {
   if (!containerRef.value || !props.data.length) return
   const el = containerRef.value
@@ -51,16 +70,28 @@ function draw() {
   const W = el.clientWidth - margin.left - margin.right
   const H = (props.height ?? 200) - margin.top - margin.bottom
 
-  const svg = d3.select(el).append('svg')
+  const svgEl = d3.select(el).append('svg')
     .attr('width', el.clientWidth)
     .attr('height', props.height ?? 200)
-    .style('overflow', 'visible')
+    .style('overflow', 'hidden')
 
-  const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`)
+  _svg = svgEl.node()
 
-  const x = d3.scaleTime()
+  svgEl.append('defs').append('clipPath').attr('id', _clipId)
+    .append('rect').attr('width', W).attr('height', H + 4)
+
+  const g = svgEl.append('g')
+    .attr('transform', `translate(${margin.left},${margin.top})`)
+    .attr('clip-path', `url(#${_clipId})`)
+
+  const gAxes = svgEl.append('g').attr('transform', `translate(${margin.left},${margin.top})`)
+
+  const xBase = d3.scaleTime()
     .domain(d3.extent(props.data, d => d.time) as [Date, Date])
     .range([0, W])
+
+  const x = _zt.k !== 1 || _zt.x !== 0 ? _zt.rescaleX(xBase) : xBase
+  const svg = svgEl
 
   const vals   = props.data.map(d => d.value)
   const st     = props.stats
@@ -165,20 +196,19 @@ function draw() {
     })
   }
 
-  // ── Axes ──────────────────────────────────────────────────────────────────
-  g.append('g').attr('transform', `translate(0,${H})`)
+  // ── Axes (unclipped) ────────────────────────────────────────────────────
+  gAxes.append('g').attr('transform', `translate(0,${H})`)
     .call(d3.axisBottom(x).ticks(5).tickFormat(d => d3.timeFormat('%H:%M')(d as Date)))
     .call(gr => gr.select('.domain').attr('stroke', tc.value.axisLine))
     .call(gr => gr.selectAll('.tick line').attr('stroke', tc.value.axisLine))
     .call(gr => gr.selectAll('text').attr('fill', tc.value.axisText).attr('font-size', '9px'))
 
-  g.append('g')
+  gAxes.append('g')
     .call(d3.axisLeft(y).ticks(5).tickFormat(d => `${(d as number).toFixed(0)}${props.unit ?? ''}`))
     .call(gr => gr.select('.domain').attr('stroke', tc.value.axisLine))
     .call(gr => gr.selectAll('text').attr('fill', tc.value.axisText).attr('font-size', '9px'))
     .call(gr => gr.selectAll('.tick line').attr('stroke', tc.value.axisLine))
 
-  // X-label
   svg.append('text')
     .attr('x', margin.left + W / 2)
     .attr('y', margin.top + H + margin.bottom - 2)
@@ -198,7 +228,7 @@ function draw() {
     .attr('stroke', '#fff').attr('stroke-width', 1)
     .style('display', 'none')
 
-  g.append('rect')
+  gAxes.append('rect')
     .attr('width', W).attr('height', H).attr('fill', 'transparent')
     .on('mousemove', (event: MouseEvent) => {
       if (!tooltipRef.value) return
@@ -230,9 +260,8 @@ function draw() {
       const tt = tooltipRef.value
       tt.style.display = 'block'
       const ttW = tt.offsetWidth || 180
-      const chartW = el.clientWidth
       const absX = cx + margin.left
-      tt.style.left = (absX + ttW + 14 > chartW ? absX - ttW - 8 : absX + 12) + 'px'
+      tt.style.left = (absX + ttW + 14 > el.clientWidth ? absX - ttW - 8 : absX + 12) + 'px'
       tt.style.top  = (cy + margin.top - 14) + 'px'
       ;(tt.querySelector('.tt-time') as HTMLElement).textContent = d3.timeFormat('%Y-%m-%d %H:%M')(pt.time)
       ;(tt.querySelector('.tt-dot')  as HTMLElement).style.background = dotColor
@@ -244,6 +273,16 @@ function draw() {
       dot.style('display', 'none')
       if (tooltipRef.value) tooltipRef.value.style.display = 'none'
     })
+
+  // ── Zoom ─────────────────────────────────────────────────────────────────
+  _zoom = d3.zoom<SVGSVGElement, unknown>()
+    .scaleExtent([1, 50])
+    .translateExtent([[0, 0], [W, H]])
+    .extent([[0, 0], [W, H]])
+    .on('zoom', (event) => { _zt = event.transform; draw(); if (_svg) d3.select(_svg).property('__zoom', _zt) })
+
+  svgEl.call(_zoom)
+  svgEl.property('__zoom', _zt)
 }
 
 onMounted(async () => {
@@ -301,4 +340,22 @@ watch(() => props.theme, draw)
 .chart-theme-light .tt-time { color: #7a8fb5; }
 .chart-theme-light .tt-val  { color: #102a83; }
 .chart-theme-light .tt-stats { color: #5a8abd; }
+
+.zoom-controls {
+  position: absolute; bottom: 34px; right: 26px;
+  display: flex; flex-direction: column; gap: 2px;
+  opacity: 0.25; transition: opacity 0.2s; z-index: 5;
+}
+.zoom-controls:hover { opacity: 1; }
+.zoom-btn {
+  width: 22px; height: 22px;
+  background: rgba(128,128,128,0.15); border: 1px solid rgba(128,128,128,0.3);
+  border-radius: 4px; color: #aaa; font-size: 14px; line-height: 1;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;
+  transition: background 0.15s;
+}
+.zoom-btn:hover { background: rgba(128,128,128,0.35); color: #fff; }
+.zoom-btn--reset { font-size: 12px; }
+.chart-theme-light .zoom-btn { border-color: #c8d8e8; color: #6a7a9a; background: rgba(0,0,0,0.04); }
+.chart-theme-light .zoom-btn:hover { background: rgba(0,120,200,0.1); color: #009ee0; }
 </style>
