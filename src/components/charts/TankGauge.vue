@@ -1,5 +1,5 @@
 <template>
-  <div class="tank-gauge-outer">
+  <div class="tank-gauge-outer" :class="theme === 'light' ? 'chart-theme-light' : 'chart-theme-dark'">
     <!-- Header: title + legend -->
     <div v-if="title" class="chart-header">
       <div class="chart-main-title">{{ title }}</div>
@@ -32,6 +32,7 @@ const props = defineProps<{
   value: number   // 0–100 percentage
   size?: number
   title?: string
+  theme?: 'dark' | 'light'
 }>()
 
 const size = computed(() => props.size ?? 200)
@@ -357,6 +358,14 @@ watch(() => props.value, (newVal) => {
   color: #888;
   white-space: nowrap;
 }
+
+/* ── Light theme ── */
+.chart-theme-light .chart-header {
+  background: #ffffff;
+  border-bottom-color: #dce6f0;
+}
+.chart-theme-light .chart-main-title { color: #102a83; font-weight: 700; }
+.chart-theme-light .legend-text { color: #5a6e94; }
 
 .liquid-gauge-wrapper {
   display: flex;

@@ -1,5 +1,5 @@
 <template>
-  <div class="chart-wrapper">
+  <div class="chart-wrapper" :class="theme === 'light' ? 'chart-theme-light' : 'chart-theme-dark'">
     <!-- Header: title + legend -->
     <div v-if="title" class="chart-header">
       <div class="chart-main-title">{{ title }}</div>
@@ -35,7 +35,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import * as d3 from 'd3'
 
@@ -47,12 +47,21 @@ const props = defineProps<{
   thresholds?: Threshold[]
   height?: number
   title?: string
+  theme?: 'dark' | 'light'
 }>()
 
 const { t, locale } = useI18n()
 const containerRef = ref<HTMLDivElement | null>(null)
 const tooltipRef   = ref<HTMLDivElement | null>(null)
 let resizeObserver: ResizeObserver
+
+const tc = computed(() => props.theme === 'light' ? {
+  axisText: '#6a7a9a', axisLine: '#c8d8e8', grid: '#e4eaf4',
+  crosshair: '#9ab0cc', label: '#8a9ab8', currentHour: '#009ee0',
+} : {
+  axisText: '#888', axisLine: '#444', grid: '#2a2a2a',
+  crosshair: '#555', label: '#666', currentHour: '#fade2a',
+})
 
 const colorScale = (v: number) => {
   if (v < 50) return '#e84040'
@@ -86,7 +95,7 @@ function draw() {
   g.append('g')
     .call(d3.axisLeft(y).tickSize(-W).tickFormat(() => ''))
     .call(gr => gr.select('.domain').remove())
-    .call(gr => gr.selectAll('.tick line').attr('stroke', '#2a2a2a').attr('stroke-dasharray', '2,2'))
+    .call(gr => gr.selectAll('.tick line').attr('stroke', tc.value.grid).attr('stroke-dasharray', '2,2'))
 
   // Threshold lines
   props.thresholds?.forEach(t => {
@@ -112,26 +121,26 @@ function draw() {
   const currentHour = new Date().getHours()
   g.append('g').attr('transform', `translate(0,${H})`)
     .call(d3.axisBottom(x).ticks(6).tickFormat(d => d3.timeFormat('%H:%M')(d as Date)))
-    .call(gr => gr.select('.domain').attr('stroke', '#444'))
-    .call(gr => gr.selectAll('.tick line').attr('stroke', '#444'))
+    .call(gr => gr.select('.domain').attr('stroke', tc.value.axisLine))
+    .call(gr => gr.selectAll('.tick line').attr('stroke', tc.value.axisLine))
     .call(gr => gr.selectAll<SVGTextElement, Date>('text')
-      .attr('fill', d => (d as Date).getHours() === currentHour ? '#fade2a' : '#888')
+      .attr('fill', d => (d as Date).getHours() === currentHour ? tc.value.currentHour : tc.value.axisText)
       .attr('font-size', '10px')
       .attr('font-weight', d => (d as Date).getHours() === currentHour ? '700' : 'normal')
     )
 
   g.append('g')
     .call(d3.axisLeft(y).ticks(5).tickFormat(d => `${d}%`))
-    .call(gr => gr.select('.domain').attr('stroke', '#444'))
-    .call(gr => gr.selectAll('text').attr('fill', '#888').attr('font-size', '10px'))
-    .call(gr => gr.selectAll('.tick line').attr('stroke', '#444'))
+    .call(gr => gr.select('.domain').attr('stroke', tc.value.axisLine))
+    .call(gr => gr.selectAll('text').attr('fill', tc.value.axisText).attr('font-size', '10px'))
+    .call(gr => gr.selectAll('.tick line').attr('stroke', tc.value.axisLine))
 
   // X-axis label
   svg.append('text')
     .attr('x', margin.left + W / 2)
     .attr('y', margin.top + H + margin.bottom - 2)
     .attr('text-anchor', 'middle')
-    .attr('fill', '#666')
+    .attr('fill', tc.value.label)
     .attr('font-size', '10px')
     .text(t('monitoring.hour_of_day'))
 
@@ -140,7 +149,7 @@ function draw() {
 
   // Vertical crosshair line
   const crosshair = g.append('line')
-    .attr('stroke', '#555').attr('stroke-width', 1)
+    .attr('stroke', tc.value.crosshair).attr('stroke-width', 1)
     .attr('stroke-dasharray', '3,3')
     .attr('y1', 0).attr('y2', H)
     .style('display', 'none')
@@ -202,6 +211,7 @@ onMounted(() => {
 onUnmounted(() => resizeObserver?.disconnect())
 watch(() => props.data, draw, { deep: true })
 watch(locale, draw)
+watch(() => props.theme, draw)
 </script>
 
 <style scoped>
@@ -277,6 +287,24 @@ watch(locale, draw)
   gap: 8px;
   font-size: 0.82rem;
 }
+
+/* ── Light theme ── */
+.chart-theme-light .chart-header {
+  background: #ffffff;
+  border-bottom-color: #dce6f0;
+}
+.chart-theme-light .chart-main-title {
+  color: #102a83;
+  font-weight: 700;
+}
+.chart-theme-light .legend-text { color: #5a6e94; }
+.chart-theme-light .chart-tooltip {
+  background: #ffffff;
+  border-color: #dce6f0;
+  box-shadow: 0 4px 20px rgba(16,42,131,0.1);
+}
+.chart-theme-light .tt-time { color: #7a8fb5; }
+.chart-theme-light .tt-row { color: #1e2a45; }
 .tt-dot {
   width: 10px;
   height: 10px;

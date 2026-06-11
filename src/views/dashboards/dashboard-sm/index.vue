@@ -96,6 +96,7 @@
             :value="silvanopolis.level"
             :size="200"
             :title="t('monitoring.tank_title_sil')"
+            :theme="isDark ? 'dark' : 'light'"
           />
         </div>
       </div>
@@ -106,6 +107,7 @@
             :data="silvanopolis.levelSeries"
             :thresholds="levelThresholds"
             :title="t('monitoring.level_title_sil')"
+            :theme="isDark ? 'dark' : 'light'"
           />
           <!-- SPC panel -->
           <div class="spc-panel">
@@ -144,7 +146,7 @@
       <!-- Flow PTPs -->
       <div class="col-12">
         <div class="chart-card">
-          <FlowTimeSeries :data="silvanopolis.flowSeries" />
+          <FlowTimeSeries :data="silvanopolis.flowSeries" :theme="isDark ? 'dark' : 'light'" />
           <!-- SPC panel -->
           <div class="spc-panel">
             <button class="spc-toggle" @click="statsOpenSilFlow = !statsOpenSilFlow">
@@ -248,6 +250,7 @@
             :value="miranorte.level"
             :size="200"
             :title="t('monitoring.tank_title_mir')"
+            :theme="isDark ? 'dark' : 'light'"
           />
         </div>
       </div>
@@ -258,6 +261,7 @@
             :data="miranorte.levelSeries"
             :thresholds="levelThresholds"
             :title="t('monitoring.level_title_mir')"
+            :theme="isDark ? 'dark' : 'light'"
           />
           <!-- SPC panel -->
           <div class="spc-panel">
