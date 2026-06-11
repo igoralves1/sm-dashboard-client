@@ -457,19 +457,21 @@ function draw() {
 
   // ── Break symbols // at segment boundaries ────────────────────────────────
   const drawBreak = (bx: number) => {
-    const bh = 7
-    // Mask the underlying axis line with background color
+    const bh = 5
+    const slashColor = props.theme === 'light' ? '#b0c0d8' : '#666'
+    // Gap: short white/bg rect to erase the axis baseline at the break point
     g.append('rect')
-      .attr('x', bx - 4).attr('y', axY - bh)
-      .attr('width', 10).attr('height', bh * 2)
+      .attr('x', bx - 5).attr('y', axY - 1)
+      .attr('width', 10).attr('height', 2)
       .attr('fill', tc.value.breakMask)
-    // Two diagonal slash lines
+    // Two crisp diagonal slashes — tighter and smaller
     for (let i = 0; i < 2; i++) {
-      const ox = bx + i * 5
+      const ox = bx - 3 + i * 6
       g.append('line')
-        .attr('x1', ox - 2).attr('x2', ox + 2)
-        .attr('y1', axY + bh - 1).attr('y2', axY - bh + 1)
-        .attr('stroke', tc.value.breakSlash).attr('stroke-width', 1.5)
+        .attr('x1', ox - 1.5).attr('x2', ox + 1.5)
+        .attr('y1', axY + bh).attr('y2', axY - bh)
+        .attr('stroke', slashColor).attr('stroke-width', 1.2)
+        .attr('stroke-linecap', 'round')
     }
   }
 
