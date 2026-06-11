@@ -1,6 +1,6 @@
 <template>
   <RouterLink to="/" class="d-inline-block">
-    <svg viewBox="170 140 490 320" height="40" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg">
+    <svg viewBox="170 140 490 320" height="60" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <linearGradient id="sm-g1">
           <stop offset="0%" stop-color="#009ee0" stop-opacity="1"/>
