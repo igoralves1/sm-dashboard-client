@@ -1,5 +1,5 @@
 <template>
-  <div class="dashboard-sm">
+  <div class="dashboard-sm" :class="isDark ? 'theme-dark' : 'theme-light'">
 
     <!-- ═══ TOP HEADER BAR ═══ -->
     <div class="top-bar">
@@ -19,6 +19,10 @@
         </div>
       </div>
       <div class="top-bar__right">
+        <button class="theme-toggle" @click="isDark = !isDark" :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'">
+          <span v-if="isDark">☀️</span>
+          <span v-else>🌙</span>
+        </button>
         <button class="export-btn" @click="router.push('/dashboard')" :title="t('monitoring.back')">
           {{ t('monitoring.back') }}
         </button>
@@ -322,6 +326,8 @@ const levelThresholds = [
   { value: 75,  color: '#f4954e', dash: '6,3' },
   { value: 100, color: '#73bf69', dash: '6,3' },
 ]
+
+const isDark = ref(true)
 
 const bannerOpen  = ref(false)   // collapsed by default
 const statsOpenSilLevel   = ref(false)
@@ -719,5 +725,86 @@ onUnmounted(() => {
   background: #0d1018;
   border: 1px solid #1a1d26;
   border-radius: 6px;
+}
+
+/* ── Theme toggle button ── */
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.18s, border-color 0.18s;
+  flex-shrink: 0;
+}
+.theme-toggle:hover {
+  background: rgba(255,255,255,0.22);
+  border-color: rgba(255,255,255,0.5);
+}
+
+/* ══════════════════════════════════════════
+   LIGHT THEME
+   ══════════════════════════════════════════ */
+.theme-light {
+  background: #f0f4f9;
+  color: #1a2035;
+}
+
+/* topbar stays the same gradient in both modes */
+
+.theme-light .context-banner {
+  background: #ffffff;
+  border-color: #d0daea;
+}
+.theme-light .context-banner__toggle { color: #009ee0; }
+.theme-light .context-banner__toggle:hover { color: #0082c0; }
+.theme-light .context-banner__title { color: #102a83; }
+.theme-light .context-banner__desc { color: #4a5572; }
+.theme-light .context-banner__desc strong { color: #102a83; }
+.theme-light .context-banner__card {
+  background: #f5f8fc;
+  border-color: #d0daea;
+}
+.theme-light .context-banner__card:hover { border-color: #009ee0; }
+.theme-light .context-banner__card-title { color: #102a83; }
+.theme-light .context-banner__card-text { color: #4a5572; }
+
+.theme-light .section-header__icon { color: #009ee0; }
+.theme-light .section-header__title { color: #102a83; }
+.theme-light .section-header__line {
+  background: linear-gradient(to right, #c0cce0, transparent);
+}
+
+.theme-light .chart-card {
+  background: #ffffff;
+  border-color: #d0daea;
+  box-shadow: 0 1px 6px rgba(16,42,131,0.06);
+}
+.theme-light .chart-card:hover { border-color: #009ee0; }
+
+.theme-light .chart-title { color: #4a5572; }
+
+.theme-light .spc-panel { border-top-color: #d8e2ef; }
+.theme-light .spc-toggle__icon { color: #7a8fb5; }
+.theme-light .spc-toggle:hover .spc-toggle__icon { color: #009ee0; }
+.theme-light .spc-chevron { color: #7a8fb5; }
+.theme-light .spc-flow-col {
+  background: #f5f8fc;
+  border-color: #d0daea;
+}
+
+.theme-light .dashboard-footer {
+  border-top-color: #d0daea;
+  color: #9aadcc;
+}
+
+.theme-light .rate-limit-alert {
+  background: rgba(232,64,64,0.05);
+  border-color: rgba(232,64,64,0.25);
 }
 </style>
