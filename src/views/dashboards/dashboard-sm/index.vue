@@ -116,7 +116,7 @@
               <span class="spc-chevron" :class="{ open: statsOpenSilLevel }">▾</span>
             </button>
             <div v-show="statsOpenSilLevel" class="spc-body">
-              <ControlChart
+              <ControlChart :theme="isDark ? 'dark' : 'light'"
                 :data="silvanopolis.levelSeries"
                 :stats="silvanopolis.levelStats"
                 unit="%"
@@ -124,7 +124,7 @@
                 :height="180"
                 :y-domain="[0, 110]"
               />
-              <BoxPlot
+              <BoxPlot :theme="isDark ? 'dark' : 'light'"
                 :stats="silvanopolis.levelStats"
                 unit="%"
                 :label="`${t('spc.box_plot')} · ${t('spc.water_level')} ${t('spc.distribution_24h')}`"
@@ -157,14 +157,14 @@
               <div class="spc-flow-grid">
                 <template v-for="s in silvanopolis.flowSeries" :key="s.name">
                   <div class="spc-flow-col">
-                    <ControlChart
+                    <ControlChart :theme="isDark ? 'dark' : 'light'"
                       :data="s.values"
                       :stats="silvanopolis.flowStats[s.name] ?? null"
                       unit=" m³/h"
                       :title="`Control Chart — ${s.name}`"
                       :height="160"
                     />
-                    <BoxPlot
+                    <BoxPlot :theme="isDark ? 'dark' : 'light'"
                       :stats="silvanopolis.flowStats[s.name] ?? null"
                       unit=" m³/h"
                       :label="`${s.name} ${t('spc.distribution_24h')}`"
@@ -193,7 +193,7 @@
               <div class="spc-flow-grid">
                 <template v-for="(st, ptp) in silvanopolis.production24hStats" :key="ptp">
                   <div class="spc-flow-col">
-                    <BoxPlot
+                    <BoxPlot :theme="isDark ? 'dark' : 'light'"
                       :stats="st"
                       unit=" m³/h"
                       :label="`${ptp} · ${t('spc.production_24h')}`"
@@ -221,7 +221,7 @@
               <div class="spc-flow-grid">
                 <template v-for="(st, ptp) in silvanopolis.productionDailyStats" :key="ptp">
                   <div class="spc-flow-col">
-                    <BoxPlot
+                    <BoxPlot :theme="isDark ? 'dark' : 'light'"
                       :stats="st"
                       unit=" m³"
                       :label="`${ptp} · ${t('spc.production_daily')}`"
@@ -270,7 +270,7 @@
               <span class="spc-chevron" :class="{ open: statsOpenMirLevel }">▾</span>
             </button>
             <div v-show="statsOpenMirLevel" class="spc-body">
-              <ControlChart
+              <ControlChart :theme="isDark ? 'dark' : 'light'"
                 :data="miranorte.levelSeries"
                 :stats="miranorte.levelStats"
                 unit="%"
@@ -278,7 +278,7 @@
                 :height="180"
                 :y-domain="[0, 110]"
               />
-              <BoxPlot
+              <BoxPlot :theme="isDark ? 'dark' : 'light'"
                 :stats="miranorte.levelStats"
                 unit="%"
                 :label="`${t('spc.box_plot')} · ${t('spc.water_level')} ${t('spc.distribution_24h')}`"

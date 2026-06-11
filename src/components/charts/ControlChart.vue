@@ -1,5 +1,5 @@
 <template>
-  <div class="cc-wrapper">
+  <div class="cc-wrapper" :class="theme === 'light' ? 'chart-theme-light' : 'chart-theme-dark'">
     <div v-if="title" class="cc-title">{{ title }}</div>
     <div ref="containerRef" class="cc-container" style="position:relative">
       <div ref="tooltipRef" class="cc-tooltip" style="display:none">
@@ -15,7 +15,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
+import { ref, onMounted, onUnmounted, watch, nextTick, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import * as d3 from 'd3'
 import { zScore, pValue, sigmaZone, ZONE_COLORS, type SensorStats } from '@/composables/useStatistics'
@@ -29,10 +29,19 @@ const props = defineProps<{
   title?:  string
   height?: number
   yDomain?: [number, number]
+  theme?:  'dark' | 'light'
 }>()
 
 const { t } = useI18n()
 const containerRef = ref<HTMLDivElement | null>(null)
+
+const tc = computed(() => props.theme === 'light' ? {
+  grid: '#e4eaf4', axisLine: '#c8d8e8', axisText: '#6a7a9a',
+  label: '#8a9ab8', crosshair: '#9ab0cc', dataLine: '#3a7abf',
+} : {
+  grid: '#222', axisLine: '#333', axisText: '#666',
+  label: '#555', crosshair: '#444', dataLine: '#4a90d9',
+})
 const tooltipRef   = ref<HTMLDivElement | null>(null)
 let ro: ResizeObserver
 let io: IntersectionObserver
@@ -127,7 +136,7 @@ function draw() {
   g.append('g')
     .call(d3.axisLeft(y).tickSize(-W).tickFormat(() => ''))
     .call(gr => gr.select('.domain').remove())
-    .call(gr => gr.selectAll('.tick line').attr('stroke', '#222').attr('stroke-dasharray', '2,2'))
+    .call(gr => gr.selectAll('.tick line').attr('stroke', tc.value.grid).attr('stroke-dasharray', '2,2'))
 
   // ── Data line ─────────────────────────────────────────────────────────────
   const line = d3.line<DataPoint>()
@@ -138,7 +147,7 @@ function draw() {
   g.append('path')
     .datum(props.data)
     .attr('fill', 'none')
-    .attr('stroke', '#4a90d9')
+    .attr('stroke', tc.value.dataLine)
     .attr('stroke-width', 1.5)
     .attr('opacity', 0.5)
     .attr('d', line)
@@ -164,29 +173,29 @@ function draw() {
   // ── Axes ──────────────────────────────────────────────────────────────────
   g.append('g').attr('transform', `translate(0,${H})`)
     .call(d3.axisBottom(x).ticks(5).tickFormat(d => d3.timeFormat('%H:%M')(d as Date)))
-    .call(gr => gr.select('.domain').attr('stroke', '#333'))
-    .call(gr => gr.selectAll('.tick line').attr('stroke', '#333'))
-    .call(gr => gr.selectAll('text').attr('fill', '#666').attr('font-size', '9px'))
+    .call(gr => gr.select('.domain').attr('stroke', tc.value.axisLine))
+    .call(gr => gr.selectAll('.tick line').attr('stroke', tc.value.axisLine))
+    .call(gr => gr.selectAll('text').attr('fill', tc.value.axisText).attr('font-size', '9px'))
 
   g.append('g')
     .call(d3.axisLeft(y).ticks(5).tickFormat(d => `${(d as number).toFixed(0)}${props.unit ?? ''}`))
-    .call(gr => gr.select('.domain').attr('stroke', '#333'))
-    .call(gr => gr.selectAll('text').attr('fill', '#666').attr('font-size', '9px'))
-    .call(gr => gr.selectAll('.tick line').attr('stroke', '#333'))
+    .call(gr => gr.select('.domain').attr('stroke', tc.value.axisLine))
+    .call(gr => gr.selectAll('text').attr('fill', tc.value.axisText).attr('font-size', '9px'))
+    .call(gr => gr.selectAll('.tick line').attr('stroke', tc.value.axisLine))
 
   // X-label
   svg.append('text')
     .attr('x', margin.left + W / 2)
     .attr('y', margin.top + H + margin.bottom - 2)
     .attr('text-anchor', 'middle')
-    .attr('fill', '#555').attr('font-size', '9px')
+    .attr('fill', tc.value.label).attr('font-size', '9px')
     .text(t('spc.hora_do_dia'))
 
   // ── Tooltip overlay ───────────────────────────────────────────────────────
   const bisect = d3.bisector((d: DataPoint) => d.time).left
 
   const crosshair = g.append('line')
-    .attr('stroke', '#444').attr('stroke-width', 1)
+    .attr('stroke', tc.value.crosshair).attr('stroke-width', 1)
     .attr('stroke-dasharray', '3,3')
     .attr('y1', 0).attr('y2', H).style('display', 'none')
 
@@ -255,6 +264,7 @@ onMounted(async () => {
 })
 onUnmounted(() => { ro?.disconnect(); io?.disconnect() })
 watch(() => [props.data, props.stats], draw, { deep: true })
+watch(() => props.theme, draw)
 </script>
 
 <style scoped>
@@ -285,4 +295,15 @@ watch(() => [props.data, props.stats], draw, { deep: true })
 .tt-dot   { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
 .tt-val   { color: #e0e0e0; font-weight: 600; }
 .tt-stats { font-size: 0.72rem; color: #8ab4d4; margin-top: 5px; font-family: monospace; }
+
+/* ── Light theme ── */
+.chart-theme-light .cc-title { color: #102a83; }
+.chart-theme-light .cc-tooltip {
+  background: #ffffff;
+  border-color: #dce6f0;
+  box-shadow: 0 4px 20px rgba(16,42,131,0.1);
+}
+.chart-theme-light .tt-time { color: #7a8fb5; }
+.chart-theme-light .tt-val  { color: #102a83; }
+.chart-theme-light .tt-stats { color: #5a8abd; }
 </style>

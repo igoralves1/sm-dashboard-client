@@ -1,5 +1,5 @@
 <template>
-  <div class="bp-wrapper">
+  <div class="bp-wrapper" :class="theme === 'light' ? 'chart-theme-light' : 'chart-theme-dark'">
     <div v-if="label" class="bp-label" :style="{ color: labelColor }">
       {{ label }}<span v-if="unit" class="bp-label__unit"> ({{ unit }})</span>
       <span v-if="stats !== null" class="bp-label__status">
@@ -49,6 +49,7 @@ const props = defineProps<{
   unit?:    string
   label?:   string
   decimals?: number
+  theme?:   'dark' | 'light'
 }>()
 
 const { t } = useI18n()
@@ -66,6 +67,16 @@ const isInControl = computed(() => {
 const labelColor = computed(() => {
   if (isInControl.value === null) return '#666'
   return isInControl.value ? '#73bf69' : '#e84040'
+})
+
+const tc = computed(() => props.theme === 'light' ? {
+  whisker: '#8a9ab8', axisLine: '#c8d8e8', axisText: '#6a7a9a',
+  breakMask: '#ffffff', breakSlash: '#b0c0d8',
+  boxFill: '#e0ecff', slashColor: '#666',
+} : {
+  whisker: '#555', axisLine: '#444', axisText: '#555',
+  breakMask: '#0d1018', breakSlash: '#666',
+  boxFill: '#1a3055', slashColor: '#666',
 })
 
 interface InterpLine { icon: string; color: string; text: string }
@@ -282,13 +293,13 @@ function draw() {
   g.append('line')
     .attr('x1', x(st.whiskerLow)).attr('x2', x(st.whiskerHigh))
     .attr('y1', cy).attr('y2', cy)
-    .attr('stroke', '#555').attr('stroke-width', 1.5)
+    .attr('stroke', tc.value.whisker).attr('stroke-width', 1.5)
 
   ;[{ v: st.whiskerLow, label: 'Min' }, { v: st.whiskerHigh, label: 'Max' }].forEach(({ v, label }) => {
     g.append('line')
       .attr('x1', x(v)).attr('x2', x(v))
       .attr('y1', cy - 7).attr('y2', cy + 7)
-      .attr('stroke', '#888').attr('stroke-width', 1.5)
+      .attr('stroke', tc.value.whisker).attr('stroke-width', 1.5)
     // Hit area
     g.append('line')
       .attr('x1', x(v)).attr('x2', x(v))
@@ -305,7 +316,7 @@ function draw() {
     .attr('y', cy - boxH / 2)
     .attr('width', Math.max(x(st.q3) - x(st.q1), 1))
     .attr('height', boxH)
-    .attr('fill', '#1a3055')
+    .attr('fill', tc.value.boxFill)
     .attr('stroke', '#4a90d9')
     .attr('stroke-width', 1.5)
     .attr('rx', 2)
@@ -426,8 +437,8 @@ function draw() {
     g.append('g').attr('transform', `translate(0,${axY})`)
       .call(d3.axisBottom(scale).ticks(ticks).tickFormat(d => `${(d as number).toFixed(dec)}`))
       .call(gr => gr.select('.domain').remove())
-      .call(gr => gr.selectAll('.tick line').attr('stroke', '#3a3a3a').attr('y2', 4))
-      .call(gr => gr.selectAll('text').attr('fill', '#555').attr('font-size', '8px').attr('dy', '5px'))
+      .call(gr => gr.selectAll('.tick line').attr('stroke', tc.value.axisLine).attr('y2', 4))
+      .call(gr => gr.selectAll('text').attr('fill', tc.value.axisText).attr('font-size', '8px').attr('dy', '5px'))
   }
 
   // Axis baseline per segment
@@ -435,7 +446,7 @@ function draw() {
     g.append('line')
       .attr('x1', x1).attr('x2', x2)
       .attr('y1', axY).attr('y2', axY)
-      .attr('stroke', '#444').attr('stroke-width', 1.5)
+      .attr('stroke', tc.value.axisLine).attr('stroke-width', 1.5)
   }
 
   if (needLeft && xLeft) { drawAxisSeg(xLeft, 2);  drawBaseline(leftStart, leftEnd) }
@@ -449,14 +460,14 @@ function draw() {
     g.append('rect')
       .attr('x', bx - 4).attr('y', axY - bh)
       .attr('width', 10).attr('height', bh * 2)
-      .attr('fill', '#0d1018')
+      .attr('fill', tc.value.breakMask)
     // Two diagonal slash lines
     for (let i = 0; i < 2; i++) {
       const ox = bx + i * 5
       g.append('line')
         .attr('x1', ox - 2).attr('x2', ox + 2)
         .attr('y1', axY + bh - 1).attr('y2', axY - bh + 1)
-        .attr('stroke', '#666').attr('stroke-width', 1.5)
+        .attr('stroke', tc.value.breakSlash).attr('stroke-width', 1.5)
     }
   }
 
@@ -477,6 +488,7 @@ onMounted(async () => {
 })
 onUnmounted(() => { ro?.disconnect(); io?.disconnect() })
 watch(() => props.stats, () => requestAnimationFrame(draw), { deep: true, flush: 'post' })
+watch(() => props.theme, () => requestAnimationFrame(draw))
 </script>
 
 <style scoped>
@@ -624,4 +636,23 @@ watch(() => props.stats, () => requestAnimationFrame(draw), { deep: true, flush:
   font-size: 0.65rem;
   margin-top: 1px;
 }
+
+/* ── Light theme ── */
+.chart-theme-light .bp-tip {
+  background: #ffffff;
+  border-color: #dce6f0;
+  box-shadow: 0 3px 12px rgba(16,42,131,0.1);
+}
+.chart-theme-light .bp-tip__k  { color: inherit; }
+.chart-theme-light .bp-tip__v  { color: #102a83; }
+.chart-theme-light .bp-tip__sep { color: #b0c0d8; }
+.chart-theme-light .bp-stats-strip { border-top-color: #dce6f0; }
+.chart-theme-light .bp-stat--divider { border-left-color: #dce6f0; }
+.chart-theme-light .bp-stat__k { color: #8a9ab8; }
+.chart-theme-light .bp-empty { color: #8a9ab8; }
+.chart-theme-light .bp-interp { border-top-color: #dce6f0; }
+.chart-theme-light .bp-interp__toggle { color: #8a9ab8; }
+.chart-theme-light .bp-interp__toggle:hover { color: #009ee0; }
+.chart-theme-light .bp-interp__findings { border-top-color: #dce6f0; }
+.chart-theme-light .bp-interp__line { color: #4a5572; }
 </style>
