@@ -183,6 +183,7 @@
             :data="silvanopolis.production24h"
             x-field="hour"
             :title="t('monitoring.production_24h_sil')"
+            :theme="isDark ? 'dark' : 'light'"
           />
           <div class="spc-panel">
             <button class="spc-toggle" @click="statsOpenSilProd24h = !statsOpenSilProd24h">
@@ -211,6 +212,7 @@
             :data="silvanopolis.productionDaily"
             x-field="day"
             :title="t('monitoring.production_daily_sil')"
+            :theme="isDark ? 'dark' : 'light'"
           />
           <div class="spc-panel">
             <button class="spc-toggle" @click="statsOpenSilProdDay = !statsOpenSilProdDay">

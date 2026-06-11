@@ -36,6 +36,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
+import { useChartTheme } from '@/composables/useChartTheme'
 import { useI18n } from 'vue-i18n'
 import * as d3 from 'd3'
 
@@ -55,13 +56,7 @@ const containerRef = ref<HTMLDivElement | null>(null)
 const tooltipRef   = ref<HTMLDivElement | null>(null)
 let resizeObserver: ResizeObserver
 
-const tc = computed(() => props.theme === 'light' ? {
-  axisText: '#6a7a9a', axisLine: '#c8d8e8', grid: '#e4eaf4',
-  crosshair: '#9ab0cc', label: '#8a9ab8', currentHour: '#009ee0',
-} : {
-  axisText: '#888', axisLine: '#444', grid: '#2a2a2a',
-  crosshair: '#555', label: '#666', currentHour: '#fade2a',
-})
+const tc = useChartTheme(() => props.theme)
 
 const colorScale = (v: number) => {
   if (v < 50) return '#e84040'
@@ -140,7 +135,7 @@ function draw() {
     .attr('x', margin.left + W / 2)
     .attr('y', margin.top + H + margin.bottom - 2)
     .attr('text-anchor', 'middle')
-    .attr('fill', tc.value.label)
+    .attr('fill', tc.value.axisLabel)
     .attr('font-size', '10px')
     .text(t('monitoring.hour_of_day'))
 

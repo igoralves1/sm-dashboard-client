@@ -16,6 +16,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch, nextTick, computed } from 'vue'
+import { useChartTheme } from '@/composables/useChartTheme'
 import { useI18n } from 'vue-i18n'
 import * as d3 from 'd3'
 import { zScore, pValue, sigmaZone, ZONE_COLORS, type SensorStats } from '@/composables/useStatistics'
@@ -35,13 +36,7 @@ const props = defineProps<{
 const { t } = useI18n()
 const containerRef = ref<HTMLDivElement | null>(null)
 
-const tc = computed(() => props.theme === 'light' ? {
-  grid: '#e4eaf4', axisLine: '#c8d8e8', axisText: '#6a7a9a',
-  label: '#8a9ab8', crosshair: '#9ab0cc', dataLine: '#3a7abf',
-} : {
-  grid: '#222', axisLine: '#333', axisText: '#666',
-  label: '#555', crosshair: '#444', dataLine: '#4a90d9',
-})
+const tc = useChartTheme(() => props.theme)
 const tooltipRef   = ref<HTMLDivElement | null>(null)
 let ro: ResizeObserver
 let io: IntersectionObserver
@@ -188,7 +183,7 @@ function draw() {
     .attr('x', margin.left + W / 2)
     .attr('y', margin.top + H + margin.bottom - 2)
     .attr('text-anchor', 'middle')
-    .attr('fill', tc.value.label).attr('font-size', '9px')
+    .attr('fill', tc.value.axisLabel).attr('font-size', '9px')
     .text(t('spc.hora_do_dia'))
 
   // ── Tooltip overlay ───────────────────────────────────────────────────────

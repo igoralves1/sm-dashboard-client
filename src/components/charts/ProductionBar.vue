@@ -1,5 +1,5 @@
 <template>
-  <div class="bar-wrapper">
+  <div class="bar-wrapper" :class="theme === 'light' ? 'chart-theme-light' : 'chart-theme-dark'">
     <!-- Header: title + legend -->
     <div class="chart-header">
       <div class="chart-main-title">{{ title ?? t('monitoring.production_title_fallback') }}</div>
@@ -82,6 +82,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch, computed, nextTick } from 'vue'
+import { useChartTheme } from '@/composables/useChartTheme'
 import { useI18n } from 'vue-i18n'
 import * as d3 from 'd3'
 import { detectAnomalies, fmtP, type Anomaly } from '@/composables/useAnomalyDetection'
@@ -95,8 +96,10 @@ const props = defineProps<{
   xField: string
   height?: number
   title?: string
+  theme?: 'dark' | 'light'
 }>()
 
+const tc = useChartTheme(() => props.theme)
 const containerRef = ref<HTMLDivElement | null>(null)
 const tooltipRef   = ref<HTMLDivElement | null>(null)
 const notesRef     = ref<HTMLDivElement | null>(null)
@@ -188,7 +191,7 @@ function draw() {
   // Grid
   g.append('g').call(d3.axisLeft(y).tickSize(-W).tickFormat(() => ''))
     .call(gr => gr.select('.domain').remove())
-    .call(gr => gr.selectAll('.tick line').attr('stroke', '#2a2a2a').attr('stroke-dasharray', '2,2'))
+    .call(gr => gr.selectAll('.tick line').attr('stroke', tc.value.grid).attr('stroke-dasharray', '2,2'))
 
   // Bars — with hover highlight
   const groups = g.selectAll('.group')
@@ -252,8 +255,8 @@ function draw() {
 
   g.append('g').attr('transform', `translate(0,${H})`)
     .call(d3.axisBottom(x0))
-    .call(gr => gr.select('.domain').attr('stroke', '#444'))
-    .call(gr => gr.selectAll('.tick line').attr('stroke', '#444'))
+    .call(gr => gr.select('.domain').attr('stroke', tc.value.axisLine))
+    .call(gr => gr.selectAll('.tick line').attr('stroke', tc.value.axisLine))
     .call(gr => gr.selectAll<SVGTextElement, string>('text')
       .attr('font-size', '10px')
       .attr('font-weight', d => {
@@ -264,10 +267,10 @@ function draw() {
       })
       .attr('fill', d => {
         const h = +d
-        if (props.xField === 'hour' && h === currentHour) return '#fade2a'
+        if (props.xField === 'hour' && h === currentHour) return tc.value.currentHour
         if (criticalHours.has(h)) return '#e84040'
         if (warningHours.has(h)) return '#f58b06'
-        return '#888'
+        return tc.value.axisText
       })
       .attr('class', d => {
         const h = +d
@@ -279,15 +282,15 @@ function draw() {
 
   g.append('g')
     .call(d3.axisLeft(y).ticks(5).tickFormat(d => `${(+d).toFixed(1)}`))
-    .call(gr => gr.select('.domain').attr('stroke', '#444'))
-    .call(gr => gr.selectAll('text').attr('fill', '#888').attr('font-size', '10px'))
-    .call(gr => gr.selectAll('.tick line').attr('stroke', '#444'))
+    .call(gr => gr.select('.domain').attr('stroke', tc.value.axisLine))
+    .call(gr => gr.selectAll('text').attr('fill', tc.value.axisText).attr('font-size', '10px'))
+    .call(gr => gr.selectAll('.tick line').attr('stroke', tc.value.axisLine))
 
   // Y-axis label
   svg.append('text')
     .attr('transform', `translate(13,${margin.top + H / 2}) rotate(-90)`)
     .attr('text-anchor', 'middle')
-    .attr('fill', '#666').attr('font-size', '10px')
+    .attr('fill', tc.value.axisLabel).attr('font-size', '10px')
     .text(props.xField === 'hour' ? 'm³/h' : 'm³')
 
   // X-axis label
@@ -295,7 +298,7 @@ function draw() {
     .attr('x', margin.left + W / 2)
     .attr('y', margin.top + H + margin.bottom - 2)
     .attr('text-anchor', 'middle')
-    .attr('fill', '#666').attr('font-size', '10px')
+    .attr('fill', tc.value.axisLabel).attr('font-size', '10px')
     .text(props.xField === 'hour' ? t('monitoring.hour_of_day') : t('monitoring.day_label'))
 }
 
@@ -307,6 +310,7 @@ onMounted(() => {
 onUnmounted(() => resizeObserver?.disconnect())
 watch(() => props.data, draw, { deep: true })
 watch(locale, draw)
+watch(() => props.theme, draw)
 </script>
 
 <style scoped>
@@ -480,4 +484,33 @@ watch(locale, draw)
 .tt-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 .tt-series { color: #ccc; flex: 1; }
 .tt-value { color: #fff; font-weight: 600; white-space: nowrap; }
+
+/* ── Light theme ── */
+.chart-theme-light .chart-header {
+  background: #ffffff;
+  border-bottom-color: #dce6f0;
+}
+.chart-theme-light .chart-main-title { color: #102a83; font-weight: 700; }
+.chart-theme-light .legend-text { color: #5a6e94; }
+.chart-theme-light .chart-tooltip {
+  background: #ffffff;
+  border-color: #dce6f0;
+  box-shadow: 0 4px 20px rgba(16,42,131,0.1);
+}
+.chart-theme-light .tt-label { color: #7a8fb5; }
+.chart-theme-light .tt-series { color: #4a5572; }
+.chart-theme-light .tt-value { color: #102a83; }
+.chart-theme-light .chart-notes { border-top-color: #dce6f0; }
+.chart-theme-light .alert-text { color: #4a5572; }
+.chart-theme-light .model-section { border-top-color: #dce6f0; }
+.chart-theme-light .model-toggle { color: #8a9ab8; }
+.chart-theme-light .model-toggle:hover { color: #009ee0; }
+.chart-theme-light .model-body {
+  background: #f5f8fc;
+  border-color: #dce6f0;
+  color: #5a6e94;
+}
+.chart-theme-light .model-intro,
+.chart-theme-light .model-text { color: #5a6e94; }
+.chart-theme-light .model-subtitle { color: #102a83; }
 </style>

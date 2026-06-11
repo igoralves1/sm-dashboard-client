@@ -40,6 +40,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
+import { useChartTheme } from '@/composables/useChartTheme'
 import { useI18n } from 'vue-i18n'
 import * as d3 from 'd3'
 import type { SensorStats } from '@/composables/useStatistics'
@@ -69,17 +70,7 @@ const labelColor = computed(() => {
   return isInControl.value ? '#73bf69' : '#e84040'
 })
 
-const medianColor = computed(() => props.theme === 'light' ? '#c07a00' : '#fade2a')
-
-const tc = computed(() => props.theme === 'light' ? {
-  whisker: '#8a9ab8', axisLine: '#c8d8e8', axisText: '#6a7a9a',
-  breakMask: '#ffffff', breakSlash: '#b0c0d8',
-  boxFill: '#e0ecff', slashColor: '#666',
-} : {
-  whisker: '#555', axisLine: '#444', axisText: '#555',
-  breakMask: '#0d1018', breakSlash: '#666',
-  boxFill: '#1a3055', slashColor: '#666',
-})
+const tc = useChartTheme(() => props.theme)
 
 interface InterpLine { icon: string; color: string; text: string }
 
@@ -93,7 +84,7 @@ const sortedStatsStrip = computed(() => {
     { k: t('spc.stats.min'),    numV: st.whiskerLow,  color: '#aaa' },
     { k: t('spc.stats.q1'),     numV: st.q1,          color: '#aaa' },
     { k: 'μ',                   numV: st.mean,        color: '#aaaaaa' },
-    { k: t('spc.stats.median'), numV: st.median,      color: medianColor.value },
+    { k: t('spc.stats.median'), numV: st.median,      color: tc.value.median },
     { k: t('spc.stats.q3'),     numV: st.q3,          color: '#aaa' },
     { k: t('spc.stats.max'),    numV: st.whiskerHigh, color: '#aaa' },
     { k: t('spc.stats.ucl'),    numV: st.ucl,    color: '#e84040' },
@@ -251,7 +242,7 @@ function draw() {
     { v: st.whiskerHigh,  label: 'Max', color: '#888888', dash: '',    width: 1.5 },
     { v: st.q1,           label: 'Q1',  color: '#4a90d9', dash: '',    width: 0 },
     { v: st.q3,           label: 'Q3',  color: '#4a90d9', dash: '',    width: 0 },
-    { v: st.median,       label: 'Med', color: medianColor.value, dash: '',    width: 0 },
+    { v: st.median,       label: 'Med', color: tc.value.median, dash: '',    width: 0 },
     { v: st.mean,         label: 'μ',   color: '#aaaaaa', dash: '',    width: 0 },
   ]
 
@@ -346,13 +337,13 @@ function draw() {
   g.append('line')
     .attr('x1', x(st.median)).attr('x2', x(st.median))
     .attr('y1', cy - boxH / 2).attr('y2', cy + boxH / 2)
-    .attr('stroke', medianColor.value).attr('stroke-width', 2.5)
+    .attr('stroke', tc.value.median).attr('stroke-width', 2.5)
   g.append('line')  // hit area
     .attr('x1', x(st.median)).attr('x2', x(st.median))
     .attr('y1', cy - boxH / 2 - 4).attr('y2', cy + boxH / 2 + 4)
     .attr('stroke', 'transparent').attr('stroke-width', 10)
     .style('cursor', 'crosshair')
-    .on('mousemove', (e: MouseEvent) => showTip(e, 'Median', st.median, medianColor.value))
+    .on('mousemove', (e: MouseEvent) => showTip(e, 'Median', st.median, tc.value.median))
     .on('mouseleave', hideTip)
 
   // ── Mean diamond ──────────────────────────────────────────────────────────
@@ -458,7 +449,7 @@ function draw() {
   // ── Break symbols // at segment boundaries ────────────────────────────────
   const drawBreak = (bx: number) => {
     const bh = 5
-    const slashColor = props.theme === 'light' ? '#b0c0d8' : '#666'
+    const slashColor = tc.value.breakSlash
     // Gap: short white/bg rect to erase the axis baseline at the break point
     g.append('rect')
       .attr('x', bx - 5).attr('y', axY - 1)
