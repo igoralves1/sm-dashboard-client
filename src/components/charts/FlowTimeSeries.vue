@@ -182,44 +182,66 @@ function draw() {
       .style('display', 'none')
   )
 
-  gAxes.append('rect').attr('width', W).attr('height', H).attr('fill', 'transparent')
-    .on('mousemove', (event: MouseEvent) => {
-      if (!tooltipRef.value) return
-      const [mx] = d3.pointer(event)
-      const date = x.invert(mx)
-
-      crosshair.attr('x1', mx).attr('x2', mx).style('display', null)
-      tooltipRef.value.querySelector('.tt-time')!.textContent = d3.timeFormat('%Y-%m-%d %H:%M:%S')(date)
-
-      visibleData.forEach((series, i) => {
-        const idx = bisect(series.values, date, 1)
-        const d0 = series.values[idx - 1]
-        const d1 = series.values[idx]
-        if (!d0) return
-        const d = d1 && (date.getTime() - d0.time.getTime()) > (d1.time.getTime() - date.getTime()) ? d1 : d0
-        dots[i].attr('cx', x(d.time)).attr('cy', y(d.value)).style('display', null)
-        const valEl = tooltipRef.value!.querySelector(`[data-series="${series.name}"]`)
-        if (valEl) valEl.textContent = d.value.toFixed(2) + ' m³/h'
-      })
-
-      const tt = tooltipRef.value
-      tt.style.display = 'block'
-      const ttW = tt.offsetWidth || 180
-      const absX = mx + margin.left
-      tt.style.left = (absX + ttW + 12 > el.clientWidth ? absX - ttW - 8 : absX + 12) + 'px'
-      tt.style.top = '10px'
-    })
-    .on('mouseleave', () => {
+  // ── Brush for rectangle-select zoom ──────────────────────────────────
+  let _brushing = false
+  const brush = d3.brushX()
+    .extent([[0, 0], [W, H]])
+    .on('start', () => {
+      _brushing = true
       crosshair.style('display', 'none')
       dots.forEach(d => d.style('display', 'none'))
       if (tooltipRef.value) tooltipRef.value.style.display = 'none'
     })
+    .on('end', (event: d3.D3BrushEvent<unknown>) => {
+      _brushing = false
+      const sel = event.selection as [number, number] | null
+      if (!sel || sel[1] - sel[0] < 5) return
+      const [px0, px1] = sel
+      const k_new = W * _zt.k / (px1 - px0)
+      const x_new = -(px0 - _zt.x) * W / (px1 - px0)
+      _zt = d3.zoomIdentity.translate(x_new / k_new, 0).scale(k_new)
+      draw()
+      if (_svg) d3.select(_svg).property('__zoom', _zt)
+    })
 
-  // ── Zoom ─────────────────────────────────────────────────────────────────
+  const gBrush = gAxes.append('g').attr('class', 'chart-brush').call(brush)
+
+  gBrush.on('mousemove', (event: MouseEvent) => {
+    if (_brushing || !tooltipRef.value) return
+    const [mx] = d3.pointer(event)
+    const date = x.invert(mx)
+
+    crosshair.attr('x1', mx).attr('x2', mx).style('display', null)
+    tooltipRef.value.querySelector('.tt-time')!.textContent = d3.timeFormat('%Y-%m-%d %H:%M:%S')(date)
+
+    visibleData.forEach((series, i) => {
+      const idx = bisect(series.values, date, 1)
+      const d0 = series.values[idx - 1]
+      const d1 = series.values[idx]
+      if (!d0) return
+      const d = d1 && (date.getTime() - d0.time.getTime()) > (d1.time.getTime() - date.getTime()) ? d1 : d0
+      dots[i].attr('cx', x(d.time)).attr('cy', y(d.value)).style('display', null)
+      const valEl = tooltipRef.value!.querySelector(`[data-series="${series.name}"]`)
+      if (valEl) valEl.textContent = d.value.toFixed(2) + ' m³/h'
+    })
+
+    const tt = tooltipRef.value
+    tt.style.display = 'block'
+    const ttW = tt.offsetWidth || 180
+    const absX = mx + margin.left
+    tt.style.left = (absX + ttW + 12 > el.clientWidth ? absX - ttW - 8 : absX + 12) + 'px'
+    tt.style.top = '10px'
+  }).on('mouseleave', () => {
+    if (_brushing) return
+    crosshair.style('display', 'none')
+    dots.forEach(d => d.style('display', 'none'))
+    if (tooltipRef.value) tooltipRef.value.style.display = 'none'
+  })
+
+  // ── Zoom (scroll wheel only — brush handles drag) ─────────────────────
   _zoom = d3.zoom<SVGSVGElement, unknown>()
     .scaleExtent([1, 50])
-    .translateExtent([[0, 0], [W, H]])
-    .extent([[0, 0], [W, H]])
+    .filter(event => event.type === 'wheel')
     .on('zoom', (event) => { _zt = event.transform; draw(); if (_svg) d3.select(_svg).property('__zoom', _zt) })
 
   svgEl.call(_zoom)
@@ -319,6 +341,15 @@ watch(() => props.theme, draw)
   opacity: 0.25; transition: opacity 0.2s; z-index: 5;
 }
 .zoom-controls:hover { opacity: 1; }
+
+:global(.chart-brush .overlay) { cursor: crosshair; }
+:global(.chart-brush .selection) {
+  fill: rgba(0, 158, 224, 0.12);
+  stroke: #009ee0;
+  stroke-width: 1;
+  stroke-dasharray: 4, 2;
+}
+:global(.chart-brush .handle) { fill: none; }
 .zoom-btn {
   width: 22px; height: 22px;
   background: rgba(128,128,128,0.15); border: 1px solid rgba(128,128,128,0.3);

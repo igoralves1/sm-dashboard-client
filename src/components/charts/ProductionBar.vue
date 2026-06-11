@@ -243,35 +243,7 @@ function draw() {
     .attr('opacity', 0.85)
     .attr('rx', 1)
 
-  // Invisible full-height hover zones per group
-  groups.append('rect')
-    .attr('x', 0).attr('y', 0)
-    .attr('width', x0.bandwidth()).attr('height', H)
-    .attr('fill', 'transparent')
-    .on('mouseover', function(event, d) {
-      if (!tooltipRef.value) return
-      const tt = tooltipRef.value
-      tt.style.display = 'block'
-      tt.querySelector('.tt-label')!.textContent = String(d[props.xField])
-      keys.forEach(k => {
-        const el2 = tt.querySelector(`[data-key="${k}"]`)
-        if (el2) el2.textContent = (+d[k]).toFixed(2) + ' m³'
-      })
-      // Highlight group
-      d3.select(this.parentElement).selectAll('rect:not(:last-child)').attr('opacity', 1)
-    })
-    .on('mousemove', function(event) {
-      if (!tooltipRef.value) return
-      const tt = tooltipRef.value
-      const [mx] = d3.pointer(event, el)
-      const ttW = tt.offsetWidth || 160
-      tt.style.left = (mx + ttW + 12 > el.clientWidth ? mx - ttW - 8 : mx + 12) + 'px'
-      tt.style.top = '10px'
-    })
-    .on('mouseleave', function() {
-      d3.select(this.parentElement).selectAll('rect:not(:last-child)').attr('opacity', 0.85)
-      if (tooltipRef.value) tooltipRef.value.style.display = 'none'
-    })
+  // (tooltip is handled via brush overlay below)
 
   // Axes
   const currentHour = new Date().getHours()
@@ -333,11 +305,82 @@ function draw() {
     .attr('fill', tc.value.axisLabel).attr('font-size', '10px')
     .text(props.xField === 'hour' ? t('monitoring.hour_of_day') : t('monitoring.day_label'))
 
-  // ── Zoom ─────────────────────────────────────────────────────────────────
+  // ── Brush for rectangle-select zoom ──────────────────────────────────
+  let _hoveredLabel: string | null = null
+  let _brushing = false
+  const brush = d3.brushX()
+    .extent([[0, 0], [W, H]])
+    .on('start', () => {
+      _brushing = true
+      if (tooltipRef.value) tooltipRef.value.style.display = 'none'
+      groups.selectAll<SVGRectElement, unknown>('rect:not(:last-child)').attr('opacity', 0.85)
+    })
+    .on('end', (event: d3.D3BrushEvent<unknown>) => {
+      _brushing = false
+      const sel = event.selection as [number, number] | null
+      if (!sel || sel[1] - sel[0] < 5) return
+      const [px0, px1] = sel
+      const k_new = W * _zt.k / (px1 - px0)
+      const x_new = -(px0 - _zt.x) * W / (px1 - px0)
+      _zt = d3.zoomIdentity.translate(x_new / k_new, 0).scale(k_new)
+      draw()
+      if (_svg) d3.select(_svg).property('__zoom', _zt)
+    })
+
+  const gBrush = gAxes.append('g').attr('class', 'chart-brush').call(brush)
+
+  gBrush.on('mousemove', (event: MouseEvent) => {
+    if (_brushing || !tooltipRef.value) return
+    const [mx] = d3.pointer(event)
+    const xLabel = x0.domain().find(d => {
+      const bx = x0(d)!
+      return mx >= bx && mx < bx + x0.bandwidth()
+    }) ?? null
+
+    if (xLabel !== _hoveredLabel) {
+      if (_hoveredLabel) {
+        groups.filter(d => d[props.xField] === _hoveredLabel)
+          .selectAll('rect').attr('opacity', 0.85)
+      }
+      _hoveredLabel = xLabel
+      if (xLabel) {
+        const row = sortedData.find(d => d[props.xField] === xLabel)
+        if (row) {
+          const tt = tooltipRef.value!
+          tt.querySelector('.tt-label')!.textContent = String(xLabel)
+          keys.forEach(k => {
+            const el2 = tt.querySelector(`[data-key="${k}"]`)
+            if (el2) el2.textContent = (+row[k]).toFixed(2) + ' m³'
+          })
+          groups.filter(d => d[props.xField] === xLabel)
+            .selectAll('rect').attr('opacity', 1)
+        }
+      }
+    }
+
+    if (xLabel && tooltipRef.value) {
+      const tt = tooltipRef.value
+      tt.style.display = 'block'
+      const ttW = tt.offsetWidth || 160
+      tt.style.left = (mx + margin.left + ttW + 12 > el.clientWidth ? mx + margin.left - ttW - 8 : mx + margin.left + 12) + 'px'
+      tt.style.top = '10px'
+    } else if (tooltipRef.value) {
+      tooltipRef.value.style.display = 'none'
+    }
+  }).on('mouseleave', () => {
+    if (_brushing) return
+    if (_hoveredLabel) {
+      groups.filter(d => d[props.xField] === _hoveredLabel)
+        .selectAll('rect').attr('opacity', 0.85)
+      _hoveredLabel = null
+    }
+    if (tooltipRef.value) tooltipRef.value.style.display = 'none'
+  })
+
+  // ── Zoom (scroll wheel only — brush handles drag) ─────────────────────
   _zoom = d3.zoom<SVGSVGElement, unknown>()
     .scaleExtent([1, 10])
-    .translateExtent([[0, 0], [W, H]])
-    .extent([[0, 0], [W, H]])
+    .filter(event => event.type === 'wheel')
     .on('zoom', (event) => { _zt = event.transform; draw(); if (_svg) d3.select(_svg).property('__zoom', _zt) })
 
   svgEl.call(_zoom)
@@ -573,4 +616,13 @@ watch(() => props.theme, draw)
 .zoom-btn--reset { font-size: 12px; }
 .chart-theme-light .zoom-btn { border-color: #c8d8e8; color: #6a7a9a; background: rgba(0,0,0,0.04); }
 .chart-theme-light .zoom-btn:hover { background: rgba(0,120,200,0.1); color: #009ee0; }
+
+:global(.chart-brush .overlay) { cursor: crosshair; }
+:global(.chart-brush .selection) {
+  fill: rgba(0, 158, 224, 0.12);
+  stroke: #009ee0;
+  stroke-width: 1;
+  stroke-dasharray: 4, 2;
+}
+:global(.chart-brush .handle) { fill: none; }
 </style>
