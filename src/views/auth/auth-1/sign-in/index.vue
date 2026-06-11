@@ -29,7 +29,7 @@
         <!-- Logo -->
         <div class="sm-auth__logo">
           <RouterLink to="/">
-            <img :src="pranLogo" alt="SIMEMAP" style="height:120px" />
+            <img :src="pranLogo" alt="SIMEMAP" style="height:180px" />
           </RouterLink>
         </div>
 
