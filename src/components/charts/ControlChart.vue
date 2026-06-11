@@ -78,12 +78,12 @@ function draw() {
 
   const y = d3.scaleLinear().domain([yMin, yMax]).range([H, 0]).nice()
 
-  // ── Sigma band fills ───────────────────────────────────────────────────────
-  if (st) {
+  // ── Sigma band fills (dark mode only) ────────────────────────────────────
+  if (st && props.theme !== 'light') {
     const bands = [
-      { lo: st.sigma2.lower, hi: st.sigma3.upper, fill: 'rgba(232,64,64,0.06)' },   // 2σ–3σ outer
-      { lo: st.sigma1.lower, hi: st.sigma2.upper, fill: 'rgba(245,139,6,0.07)' },   // 1σ–2σ middle
-      { lo: st.sigma1.lower, hi: st.sigma1.upper, fill: 'rgba(115,191,105,0.07)' }, // ±1σ inner
+      { lo: st.sigma2.lower, hi: st.sigma3.upper, fill: 'rgba(232,64,64,0.06)' },
+      { lo: st.sigma1.lower, hi: st.sigma2.upper, fill: 'rgba(245,139,6,0.07)' },
+      { lo: st.sigma1.lower, hi: st.sigma1.upper, fill: 'rgba(115,191,105,0.07)' },
     ]
     bands.forEach(b => {
       const lo = Math.max(b.lo, yMin)
