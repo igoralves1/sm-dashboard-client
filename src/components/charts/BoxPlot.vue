@@ -69,6 +69,8 @@ const labelColor = computed(() => {
   return isInControl.value ? '#73bf69' : '#e84040'
 })
 
+const medianColor = computed(() => props.theme === 'light' ? '#c07a00' : '#fade2a')
+
 const tc = computed(() => props.theme === 'light' ? {
   whisker: '#8a9ab8', axisLine: '#c8d8e8', axisText: '#6a7a9a',
   breakMask: '#ffffff', breakSlash: '#b0c0d8',
@@ -91,7 +93,7 @@ const sortedStatsStrip = computed(() => {
     { k: t('spc.stats.min'),    numV: st.whiskerLow,  color: '#aaa' },
     { k: t('spc.stats.q1'),     numV: st.q1,          color: '#aaa' },
     { k: 'μ',                   numV: st.mean,        color: '#aaaaaa' },
-    { k: t('spc.stats.median'), numV: st.median,      color: '#fade2a' },
+    { k: t('spc.stats.median'), numV: st.median,      color: medianColor.value },
     { k: t('spc.stats.q3'),     numV: st.q3,          color: '#aaa' },
     { k: t('spc.stats.max'),    numV: st.whiskerHigh, color: '#aaa' },
     { k: t('spc.stats.ucl'),    numV: st.ucl,    color: '#e84040' },
@@ -249,7 +251,7 @@ function draw() {
     { v: st.whiskerHigh,  label: 'Max', color: '#888888', dash: '',    width: 1.5 },
     { v: st.q1,           label: 'Q1',  color: '#4a90d9', dash: '',    width: 0 },
     { v: st.q3,           label: 'Q3',  color: '#4a90d9', dash: '',    width: 0 },
-    { v: st.median,       label: 'Med', color: '#fade2a', dash: '',    width: 0 },
+    { v: st.median,       label: 'Med', color: medianColor.value, dash: '',    width: 0 },
     { v: st.mean,         label: 'μ',   color: '#aaaaaa', dash: '',    width: 0 },
   ]
 
@@ -344,13 +346,13 @@ function draw() {
   g.append('line')
     .attr('x1', x(st.median)).attr('x2', x(st.median))
     .attr('y1', cy - boxH / 2).attr('y2', cy + boxH / 2)
-    .attr('stroke', '#fade2a').attr('stroke-width', 2.5)
+    .attr('stroke', medianColor.value).attr('stroke-width', 2.5)
   g.append('line')  // hit area
     .attr('x1', x(st.median)).attr('x2', x(st.median))
     .attr('y1', cy - boxH / 2 - 4).attr('y2', cy + boxH / 2 + 4)
     .attr('stroke', 'transparent').attr('stroke-width', 10)
     .style('cursor', 'crosshair')
-    .on('mousemove', (e: MouseEvent) => showTip(e, 'Median', st.median, '#fade2a'))
+    .on('mousemove', (e: MouseEvent) => showTip(e, 'Median', st.median, medianColor.value))
     .on('mouseleave', hideTip)
 
   // ── Mean diamond ──────────────────────────────────────────────────────────
