@@ -6,15 +6,15 @@
       <div class="chart-legend">
         <span class="legend-item">
           <span class="legend-dot" style="background:#e84040"></span>
-          <span class="legend-text">Crítico &lt; 50%</span>
+          <span class="legend-text">{{ t('monitoring.level_critical') }}</span>
         </span>
         <span class="legend-item">
           <span class="legend-dot" style="background:#f58b06"></span>
-          <span class="legend-text">Alerta 50–80%</span>
+          <span class="legend-text">{{ t('monitoring.level_alert') }}</span>
         </span>
         <span class="legend-item">
           <span class="legend-dot" style="background:#37872d"></span>
-          <span class="legend-text">Normal &gt; 80%</span>
+          <span class="legend-text">{{ t('monitoring.level_normal') }}</span>
         </span>
       </div>
     </div>
@@ -26,6 +26,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import * as d3 from 'd3'
 
 const props = defineProps<{
@@ -35,6 +36,7 @@ const props = defineProps<{
   theme?: 'dark' | 'light'
 }>()
 
+const { t } = useI18n()
 const size = computed(() => props.size ?? 200)
 
 // Unique ID per instance to avoid clipPath collisions
