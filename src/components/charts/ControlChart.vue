@@ -78,9 +78,9 @@ function draw() {
 
   const y = d3.scaleLinear().domain([yMin, yMax]).range([H, 0]).nice()
 
-  // ── Sigma band fills (dark mode only) ────────────────────────────────────
-  if (st && props.theme !== 'light') {
-    const bands = [
+  // ── Sigma band fills + lines ──────────────────────────────────────────────
+  if (st) {
+    const bands = props.theme === 'light' ? [] : [
       { lo: st.sigma2.lower, hi: st.sigma3.upper, fill: 'rgba(232,64,64,0.06)' },
       { lo: st.sigma1.lower, hi: st.sigma2.upper, fill: 'rgba(245,139,6,0.07)' },
       { lo: st.sigma1.lower, hi: st.sigma1.upper, fill: 'rgba(115,191,105,0.07)' },
