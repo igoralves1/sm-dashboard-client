@@ -29,7 +29,7 @@
         <!-- Logo -->
         <div class="sm-auth__logo">
           <RouterLink to="/">
-            <img :src="pranLogo" alt="SIMEMAP" style="height:200px" />
+            <img :src="pranLogo" alt="SIMEMAP" style="height:120px" />
           </RouterLink>
         </div>
 
@@ -205,7 +205,7 @@ async function handleLogin() {
 .sm-auth__left {
   position: relative;
   width: 55%;
-  background: #303287;
+  background: linear-gradient(135deg, #009ee0 0%, #303287 100%);
   display: flex;
   align-items: center;
   justify-content: center;
