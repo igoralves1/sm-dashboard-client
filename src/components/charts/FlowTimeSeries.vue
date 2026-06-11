@@ -4,7 +4,12 @@
     <div class="chart-header">
       <div class="chart-main-title">{{ t('monitoring.flow_title') }}</div>
       <div class="chart-legend">
-        <span v-for="s in data" :key="s.name" class="legend-item">
+        <span
+          v-for="s in data" :key="s.name"
+          class="legend-item"
+          :class="{ 'legend-item--off': !activeSeries.has(s.name) }"
+          @click="toggleSeries(s.name)"
+        >
           <span class="legend-dot" :style="{ background: colorOf(s.name) }"></span>
           <span class="legend-text">{{ s.name }}</span>
         </span>
@@ -40,6 +45,26 @@ let resizeObserver: ResizeObserver
 
 const tc = useChartTheme(() => props.theme)
 
+const activeSeries = ref<Set<string>>(new Set())
+
+watch(() => props.data, (series) => {
+  const s = new Set(activeSeries.value)
+  series.forEach(({ name }) => s.add(name))
+  activeSeries.value = s
+}, { immediate: true })
+
+function toggleSeries(name: string) {
+  const s = new Set(activeSeries.value)
+  if (s.has(name)) {
+    if (s.size === 1) return
+    s.delete(name)
+  } else {
+    s.add(name)
+  }
+  activeSeries.value = s
+  draw()
+}
+
 const COLORS: Record<string, string> = {
   PTP_01: '#fade2a', PTP_02: '#ff9830', PTP_03: '#5794f2',
   PTP_04: '#73bf69', PTP_07: '#f2495c',
@@ -51,6 +76,9 @@ function draw() {
   const el = containerRef.value
   d3.select(el).select('svg').remove()
 
+  const visibleData = props.data.filter(s => activeSeries.value.has(s.name))
+  if (!visibleData.length) return
+
   const margin = { top: 10, right: 20, bottom: 30, left: 55 }
   const W = el.clientWidth - margin.left - margin.right
   const H = (props.height ?? 180) - margin.top - margin.bottom
@@ -61,8 +89,8 @@ function draw() {
 
   const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`)
 
-  const allTimes  = props.data.flatMap(s => s.values.map(v => v.time))
-  const allValues = props.data.flatMap(s => s.values.map(v => v.value))
+  const allTimes  = visibleData.flatMap(s => s.values.map(v => v.time))
+  const allValues = visibleData.flatMap(s => s.values.map(v => v.value))
 
   const x = d3.scaleTime().domain(d3.extent(allTimes) as [Date, Date]).range([0, W])
   const y = d3.scaleLinear().domain([0, (d3.max(allValues) ?? 1) * 1.1]).range([H, 0])
@@ -76,7 +104,7 @@ function draw() {
   const line = d3.line<{ time: Date; value: number }>()
     .x(d => x(d.time)).y(d => y(d.value)).curve(d3.curveCatmullRom)
 
-  props.data.forEach(series => {
+  visibleData.forEach(series => {
     g.append('path').datum(series.values)
       .attr('fill', 'none').attr('stroke', colorOf(series.name))
       .attr('stroke-width', 1.5).attr('d', line)
@@ -122,8 +150,8 @@ function draw() {
     .attr('stroke', tc.value.crosshair).attr('stroke-width', 1).attr('stroke-dasharray', '3,3')
     .attr('y1', 0).attr('y2', H).style('display', 'none')
 
-  // One dot per series
-  const dots = props.data.map(series =>
+  // One dot per visible series
+  const dots = visibleData.map(series =>
     g.append('circle').attr('r', 4)
       .attr('fill', colorOf(series.name)).attr('stroke', '#fff').attr('stroke-width', 1)
       .style('display', 'none')
@@ -140,7 +168,7 @@ function draw() {
       tooltipRef.value.querySelector('.tt-time')!.textContent =
         d3.timeFormat('%Y-%m-%d %H:%M:%S')(date)
 
-      props.data.forEach((series, i) => {
+      visibleData.forEach((series, i) => {
         const idx = bisect(series.values, date, 1)
         const d0 = series.values[idx - 1]
         const d1 = series.values[idx]
@@ -210,7 +238,15 @@ watch(() => props.theme, draw)
   gap: 1rem;
 }
 
-.legend-item { display: flex; align-items: center; gap: 5px; }
+.legend-item {
+  display: flex; align-items: center; gap: 5px;
+  cursor: pointer;
+  user-select: none;
+  transition: opacity 0.15s;
+}
+.legend-item:hover { opacity: 0.75; }
+.legend-item--off { opacity: 0.28; }
+.legend-item--off .legend-dot { filter: grayscale(0.8); }
 
 .legend-dot {
   width: 10px; height: 10px;
