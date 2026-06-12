@@ -39,7 +39,7 @@ import AppMenu from '@/layouts/components/sidenav/components/AppMenu.vue'
 import { useLayout } from '@/stores/layout.ts'
 
 import logo from '@/assets/images/simemap-logo-white.svg'
-import logoSm from '@/assets/images/simemap-logo.svg'
+import logoSm from '@/assets/images/simemap-globe-white.svg'
 import logoDark from '@/assets/images/simemap-logo.svg'
 
 const { layout, setSideNavSize, toggleMobileMenu } = useLayout()
