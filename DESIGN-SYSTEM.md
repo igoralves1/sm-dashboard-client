@@ -137,6 +137,35 @@ Chart colors centralized in the `useChartTheme` composable — use it, don't har
 - **Body / inputs / helper / footer text: `'IBM Plex Sans', sans-serif`** (weights 400–600)
 - Loaded via Google Fonts in `index.html` (preconnect + css2 link)
 - Dashboard data-dense views may keep the system stack until migrated
+- See §4b for the full candidate list — final decision pending
+
+### 4b. TYPOGRAPHY CANDIDATES (decision list — pick later)
+
+Context: SIMEMAP builds IoT + AI solutions — innovation, smart cities, robotics.
+The display font must signal "engineered future" while body text stays legible in
+4 languages on dense dashboards. All fonts via Google Fonts.
+
+Legend: `[x]` = currently applied · `[ ]` = candidate · `[s]` = shortlisted by user
+
+| Sel | Pairing (heading + body) | Character vs our use case |
+|---|---|---|
+| [x] | **Space Grotesk + IBM Plex Sans** | Squared techy letterforms echo the circuit logo; Plex was designed by IBM for industrial/IoT contexts. Balanced innovation signal. |
+| [ ] | Orbitron + Inter | The iconic robotics/sci-fi face; geometric circles match the globe mark. Strongest statement — heading-only, never body. |
+| [ ] | Exo 2 + Inter | Techno-futuristic yet readable at every size; best all-rounder if one pairing must cover hero AND dashboards. |
+| [ ] | Audiowide + Roboto | Loud tech-display energy (racing/electronics vibe). Hero-only; too decorative for UI labels. |
+| [ ] | Saira (single family) | Engineered semi-condensed grotesque; condensed widths help long PT/FR strings; quiet futurism. |
+| [ ] | Michroma + IBM Plex Sans | Aerospace/NASA-adjacent, very wide caps — premium "mission control" feel; needs smaller sizes, hero-only. |
+| [ ] | Oxanium + Inter | Angular gaming-tech; energetic, slightly informal — fits robotics demos more than utility dashboards. |
+| [ ] | Titillium Web (single family) | Born at CERN — genuine scientific heritage; understated, safe, multilingual-proof. |
+| [ ] | Jura + Inter | Thin Eurostile spirit; minimal sci-fi elegance, but light weights risk low contrast on the gradient. |
+| [ ] | Electrolize + Roboto | Instrumentation-panel look — like SCADA HMI text; great for telemetry numbers, single weight only. |
+| [ ] | Tomorrow + Inter | Angular cuts, designed for a Brazilian smart-comm brand; "smart city" modernism with local resonance. |
+| [ ] | Inter (single family) | Neutral SaaS standard; zero futurism but maximum legibility — fallback if branding ever needs to calm down. |
+| [ ] | Poppins + Inter | Friendly geometric; rounded forms echo logo nodes but reads consumer-app, weak robotics signal. |
+
+**How to update:** mark `[s]` to shortlist, move chosen one to `[x]` (only one `[x]` at
+a time), and apply per §"Typography & shape language" (index.html import + auth pages +
+this file). Remove unused font imports from index.html when the decision is final.
 - Border radius: cards 12px (rounded-4 on auth cards), inputs/buttons 10px
 - Buttons: gradient primary, 600 weight, subtle hover lift (translateY(-1px))
 - Spinner: 16px, 2px border, white-on-transparent, 0.7s spin
