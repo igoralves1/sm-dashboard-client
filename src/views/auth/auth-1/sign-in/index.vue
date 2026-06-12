@@ -236,13 +236,13 @@ async function handleLogin() {
 }
 
 .sm-auth__tagline h1 {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 2rem;
-  font-weight: 700;
+  font-family: 'Michroma', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 400;
   color: #ffffff;
-  line-height: 1.25;
+  line-height: 1.45;
   margin-bottom: 12px;
-  letter-spacing: -0.5px;
+  letter-spacing: 0;
 }
 
 .sm-auth__tagline p {
@@ -295,10 +295,10 @@ async function handleLogin() {
 }
 
 .sm-feature__title {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: 'Michroma', sans-serif;
   color: #ffffff;
-  font-weight: 500;
-  font-size: 0.9rem;
+  font-weight: 400;
+  font-size: 0.72rem;
   margin-bottom: 2px;
 }
 
@@ -353,9 +353,9 @@ async function handleLogin() {
 }
 
 .sm-auth__form-header h2 {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 1.75rem;
-  font-weight: 700;
+  font-family: 'Michroma', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 400;
   color: #102a83;
   margin-bottom: 6px;
 }
@@ -447,13 +447,13 @@ async function handleLogin() {
 
 /* Primary button */
 .sm-btn-primary {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: 'Michroma', sans-serif;
   height: 48px;
   background: linear-gradient(135deg, #009ee0 0%, #303287 100%) !important;
   border: none !important;
   border-radius: 10px !important;
-  font-weight: 600 !important;
-  font-size: 0.9rem !important;
+  font-weight: 400 !important;
+  font-size: 0.78rem !important;
   letter-spacing: 0.3px;
   display: flex !important;
   align-items: center;
@@ -506,7 +506,7 @@ async function handleLogin() {
   .sm-auth { flex-direction: column; }
   .sm-auth__left { width: 100%; padding: 48px 32px; }
   .sm-auth__right { width: 100%; padding: 48px 32px; }
-  .sm-auth__tagline h1 { font-size: 1.5rem; }
+  .sm-auth__tagline h1 { font-size: 1.05rem; }
 }
 
 @media (max-width: 480px) {

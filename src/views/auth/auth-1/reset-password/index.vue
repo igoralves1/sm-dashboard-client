@@ -83,6 +83,10 @@ function handleSubmit() {
 }
 .auth-box h4,
 .auth-box .btn {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: 'Michroma', sans-serif;
+  font-weight: 400;
+}
+.auth-box h4 {
+  font-size: 1.1rem;
 }
 </style>

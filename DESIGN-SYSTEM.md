@@ -133,8 +133,9 @@ Chart colors centralized in the `useChartTheme` composable — use it, don't har
 - Every view calls `usePageMeta('Page Title')` — sets title, description, favicon
 
 ### Typography & shape language
-- **Headings / buttons / pill titles / form labels (display font): `'Space Grotesk', sans-serif`** (weights 400–700)
-- **Body / inputs / helper / footer text: `'IBM Plex Sans', sans-serif`** (weights 400–600)
+- **Headings / buttons / pill titles (display font): `'Michroma', sans-serif`** (single weight 400 — never bold; it synthesizes badly)
+- **Body / inputs / labels / helper / footer text: `'IBM Plex Sans', sans-serif`** (weights 400–600)
+- Michroma is very wide: hero h1 1.35rem (1.05rem mobile), form h2 1.2rem, pill titles 0.72rem, buttons 0.78rem
 - Loaded via Google Fonts in `index.html` (preconnect + css2 link)
 - Dashboard data-dense views may keep the system stack until migrated
 - See §4b for the full candidate list — final decision pending
@@ -149,12 +150,12 @@ Legend: `[x]` = currently applied · `[ ]` = candidate · `[s]` = shortlisted by
 
 | # | Sel | Pairing (heading + body) | Character vs our use case |
 |---|---|---|---|
-| 1 | `[x]` | **Space Grotesk + IBM Plex Sans** | Squared techy letterforms echo the circuit logo; Plex was designed by IBM for industrial/IoT contexts. Balanced innovation signal. |
+| 1 | `[ ]` | Space Grotesk + IBM Plex Sans | Squared techy letterforms echo the circuit logo; Plex was designed by IBM for industrial/IoT contexts. Balanced innovation signal. |
 | 2 | `[s]` | Orbitron + Inter | The iconic robotics/sci-fi face; geometric circles match the globe mark. Strongest statement — heading-only, never body. |
 | 3 | `[ ]` | Exo 2 + Inter | Techno-futuristic yet readable at every size; best all-rounder if one pairing must cover hero AND dashboards. |
 | 4 | `[s]` | Audiowide + Roboto | Loud tech-display energy (racing/electronics vibe). Hero-only; too decorative for UI labels. |
 | 5 | `[ ]` | Saira (single family) | Engineered semi-condensed grotesque; condensed widths help long PT/FR strings; quiet futurism. |
-| 6 | `[s]` | Michroma + IBM Plex Sans | Aerospace/NASA-adjacent, very wide caps — premium "mission control" feel; needs smaller sizes, hero-only. |
+| 6 | `[x]` | **Michroma + IBM Plex Sans** | Aerospace/NASA-adjacent, very wide caps — premium "mission control" feel; needs smaller sizes, hero-only. |
 | 7 | `[ ]` | Oxanium + Inter | Angular gaming-tech; energetic, slightly informal — fits robotics demos more than utility dashboards. |
 | 8 | `[ ]` | Titillium Web (single family) | Born at CERN — genuine scientific heritage; understated, safe, multilingual-proof. |
 | 9 | `[s]` | Jura + Inter | Thin Eurostile spirit; minimal sci-fi elegance, but light weights risk low contrast on the gradient. |
