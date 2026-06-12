@@ -191,7 +191,8 @@
     "water_monitoring": "Water Monitoring",
     "water_sub": "Flow rate, pressure & quality sensors",
     "telemetry": "Telemetry Data",
-    "telemetry_sub": "Multi-sensor aggregation & alerts"
+    "telemetry_sub": "Multi-sensor aggregation & alerts",
+    "rights": "All rights reserved."
   },
   "new_password": {
     "title": "Set New Password",
@@ -452,5 +453,14 @@
       "high_variability": "High variability — CV = {cv}%, σ = {sigma}. Process is unstable.",
       "small_sample": "Small sample (n = {n}) — statistical conclusions are preliminary."
     }
+  },
+  "forgot": {
+    "title": "Forgot Password?",
+    "subtitle": "Enter your email address and we'll send you a link to reset your password.",
+    "email_label": "Email address",
+    "agree_terms": "Agree the Terms & Policy",
+    "send_link": "Send Reset Link",
+    "return_to": "Return to",
+    "sign_in": "Sign in"
   }
 }

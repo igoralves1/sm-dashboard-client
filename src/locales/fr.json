@@ -191,7 +191,8 @@
     "water_monitoring": "Surveillance de l'eau",
     "water_sub": "Débit, pression et capteurs de qualité",
     "telemetry": "Données de télémétrie",
-    "telemetry_sub": "Agrégation multi-capteurs et alertes"
+    "telemetry_sub": "Agrégation multi-capteurs et alertes",
+    "rights": "Tous droits réservés."
   },
   "new_password": {
     "title": "Définir un nouveau mot de passe",
@@ -452,5 +453,14 @@
       "high_variability": "Variabilité élevée — CV = {cv}%, σ = {sigma}. Processus instable.",
       "small_sample": "Petit échantillon (n = {n}) — les conclusions statistiques sont préliminaires."
     }
+  },
+  "forgot": {
+    "title": "Mot de passe oublié ?",
+    "subtitle": "Saisissez votre adresse e-mail et nous vous enverrons un lien pour réinitialiser votre mot de passe.",
+    "email_label": "Adresse e-mail",
+    "agree_terms": "J'accepte les conditions et la politique",
+    "send_link": "Envoyer le lien de réinitialisation",
+    "return_to": "Retour à",
+    "sign_in": "Se connecter"
   }
 }

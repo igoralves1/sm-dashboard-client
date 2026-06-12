@@ -191,7 +191,8 @@
     "water_monitoring": "Monitoreo de agua",
     "water_sub": "Caudal, presión y sensores de calidad",
     "telemetry": "Datos de telemetría",
-    "telemetry_sub": "Agregación de múltiples sensores y alertas"
+    "telemetry_sub": "Agregación de múltiples sensores y alertas",
+    "rights": "Todos los derechos reservados."
   },
   "new_password": {
     "title": "Establecer nueva contraseña",
@@ -452,5 +453,14 @@
       "high_variability": "Alta variabilidad — CV = {cv}%, σ = {sigma}. Proceso inestable.",
       "small_sample": "Muestra pequeña (n = {n}) — las conclusiones estadísticas son preliminares."
     }
+  },
+  "forgot": {
+    "title": "¿Olvidó su contraseña?",
+    "subtitle": "Ingrese su correo electrónico y le enviaremos un enlace para restablecer su contraseña.",
+    "email_label": "Correo electrónico",
+    "agree_terms": "Acepto los Términos y la Política",
+    "send_link": "Enviar enlace de restablecimiento",
+    "return_to": "Volver a",
+    "sign_in": "Iniciar sesión"
   }
 }

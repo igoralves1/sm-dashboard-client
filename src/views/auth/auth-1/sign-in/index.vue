@@ -92,7 +92,7 @@
           </BAlert>
 
           <div class="sm-field mb-4">
-            <label for="userEmail">Email</label>
+            <label for="userEmail">{{ t('login.email') }}</label>
             <div class="sm-field__input-wrap">
               <Icon icon="tabler:mail" class="sm-field__icon" />
               <BFormInput
@@ -146,7 +146,7 @@
         </p>
 
         <div class="sm-auth__footer">
-          © {{ currentYear }} SIMEMAP. Todos os direitos reservados.
+          © {{ currentYear }} SIMEMAP. {{ t('login.rights') }}
         </div>
       </div>
     </div>

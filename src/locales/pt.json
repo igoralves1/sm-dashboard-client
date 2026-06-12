@@ -191,7 +191,8 @@
     "water_monitoring": "Monitoramento de Água",
     "water_sub": "Vazão, pressão e sensores de qualidade",
     "telemetry": "Dados de Telemetria",
-    "telemetry_sub": "Agregação de múltiplos sensores e alertas"
+    "telemetry_sub": "Agregação de múltiplos sensores e alertas",
+    "rights": "Todos os direitos reservados."
   },
   "new_password": {
     "title": "Definir Nova Senha",
@@ -452,5 +453,14 @@
       "high_variability": "Alta variabilidade — CV = {cv}%, σ = {sigma}. Processo instável.",
       "small_sample": "Amostra pequena (n = {n}) — conclusões estatísticas são preliminares."
     }
+  },
+  "forgot": {
+    "title": "Esqueceu a senha?",
+    "subtitle": "Digite seu e-mail e enviaremos um link para redefinir sua senha.",
+    "email_label": "Endereço de e-mail",
+    "agree_terms": "Concordo com os Termos e Política",
+    "send_link": "Enviar link de redefinição",
+    "return_to": "Voltar para",
+    "sign_in": "Entrar"
   }
 }
