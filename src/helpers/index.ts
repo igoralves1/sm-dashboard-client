@@ -1,12 +1,10 @@
-import favicon from '@/assets/images/favicon.ico'
-
 type CurrencyType = '₹' | '$' | '€'
 
 export const currency: CurrencyType = '$'
 
 export const currentYear = new Date().getFullYear()
 
-export const appFavicon = favicon
+export const appFavicon = '/sm-dashboard-client/favicon.svg'
 export const appName = 'SIMEMAP'
 export const appTitle = 'SIMEMAP - Admin Dashboard'
 export const appDescription: string =
