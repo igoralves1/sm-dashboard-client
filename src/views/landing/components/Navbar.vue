@@ -6,14 +6,13 @@
     body-class="d-flex align-items-center justify-content-center w-100"
   >
     <div class="fst-italic fw-medium text-center">
-      🚀 SIMEMAP 4.x is here! Now with Bootstrap 5, dark mode, and a refreshed UI. Upgrade today
-      for the best experience!
+      🚀 SIMEMAP — Monitoramento IoT em tempo real de água e energia.
       <RouterLink
-        to="https://wrapbootstrap.com/theme/inspinia-multipurpose-admin-dashboard-template-WB0R5L90S?ref=inspinia"
+        to="https://simemap.com.br"
         target="_blank"
         class="fw-semibold fst-normal text-white text-decoration-underline link-offset-3 ms-2"
       >
-        Buy Now!
+        Saiba mais
       </RouterLink>
     </div>
     <button

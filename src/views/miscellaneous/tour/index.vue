@@ -35,12 +35,12 @@
                           <Icon icon="tabler:compass" class="me-1" /> Explore Features
                         </a>
                         <a
-                          href="https://wrapbootstrap.com/theme/inspinia-multipurpose-admin-dashboard-template-WB0R5L90S?ref=inspinia"
+                          href="https://simemap.com.br"
                           target="_blank"
                           class="btn btn-danger"
                           id="buyNow"
                         >
-                          <Icon icon="tabler:shopping-cart" class="me-1"></Icon> Buy Now
+                          <Icon icon="tabler:external-link" class="me-1"></Icon> SIMEMAP
                         </a>
                       </div>
                     </div>

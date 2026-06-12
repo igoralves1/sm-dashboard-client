@@ -226,10 +226,10 @@
           </BCol>
           <BCol cols="6">
             <a
-              href="https://wrapbootstrap.com/theme/inspinia-multipurpose-admin-dashboard-template-WB0R5L90S?ref=inspinia"
+              href="https://simemap.com.br"
               target="_blank"
               class="btn btn-danger bg-gradient py-2 fw-semibold w-100"
-              >Buy Now</a
+              >SIMEMAP</a
             >
           </BCol>
         </BRow>
