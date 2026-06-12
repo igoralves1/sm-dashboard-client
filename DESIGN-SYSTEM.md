@@ -147,25 +147,26 @@ The display font must signal "engineered future" while body text stays legible i
 
 Legend: `[x]` = currently applied · `[ ]` = candidate · `[s]` = shortlisted by user
 
-| Sel | Pairing (heading + body) | Character vs our use case |
-|---|---|---|
-| [x] | **Space Grotesk + IBM Plex Sans** | Squared techy letterforms echo the circuit logo; Plex was designed by IBM for industrial/IoT contexts. Balanced innovation signal. |
-| [s] | Orbitron + Inter | The iconic robotics/sci-fi face; geometric circles match the globe mark. Strongest statement — heading-only, never body. |
-| [ ] | Exo 2 + Inter | Techno-futuristic yet readable at every size; best all-rounder if one pairing must cover hero AND dashboards. |
-| [s] | Audiowide + Roboto | Loud tech-display energy (racing/electronics vibe). Hero-only; too decorative for UI labels. |
-| [ ] | Saira (single family) | Engineered semi-condensed grotesque; condensed widths help long PT/FR strings; quiet futurism. |
-| [s] | Michroma + IBM Plex Sans | Aerospace/NASA-adjacent, very wide caps — premium "mission control" feel; needs smaller sizes, hero-only. |
-| [ ] | Oxanium + Inter | Angular gaming-tech; energetic, slightly informal — fits robotics demos more than utility dashboards. |
-| [ ] | Titillium Web (single family) | Born at CERN — genuine scientific heritage; understated, safe, multilingual-proof. |
-| [s] | Jura + Inter | Thin Eurostile spirit; minimal sci-fi elegance, but light weights risk low contrast on the gradient. |
-| [s] | Electrolize + Roboto | Instrumentation-panel look — like SCADA HMI text; great for telemetry numbers, single weight only. |
-| [ ] | Tomorrow + Inter | Angular cuts, designed for a Brazilian smart-comm brand; "smart city" modernism with local resonance. |
-| [ ] | Inter (single family) | Neutral SaaS standard; zero futurism but maximum legibility — fallback if branding ever needs to calm down. |
-| [ ] | Poppins + Inter | Friendly geometric; rounded forms echo logo nodes but reads consumer-app, weak robotics signal. |
+| # | Sel | Pairing (heading + body) | Character vs our use case |
+|---|---|---|---|
+| 1 | [x] | **Space Grotesk + IBM Plex Sans** | Squared techy letterforms echo the circuit logo; Plex was designed by IBM for industrial/IoT contexts. Balanced innovation signal. |
+| 2 | [s] | Orbitron + Inter | The iconic robotics/sci-fi face; geometric circles match the globe mark. Strongest statement — heading-only, never body. |
+| 3 | [ ] | Exo 2 + Inter | Techno-futuristic yet readable at every size; best all-rounder if one pairing must cover hero AND dashboards. |
+| 4 | [s] | Audiowide + Roboto | Loud tech-display energy (racing/electronics vibe). Hero-only; too decorative for UI labels. |
+| 5 | [ ] | Saira (single family) | Engineered semi-condensed grotesque; condensed widths help long PT/FR strings; quiet futurism. |
+| 6 | [s] | Michroma + IBM Plex Sans | Aerospace/NASA-adjacent, very wide caps — premium "mission control" feel; needs smaller sizes, hero-only. |
+| 7 | [ ] | Oxanium + Inter | Angular gaming-tech; energetic, slightly informal — fits robotics demos more than utility dashboards. |
+| 8 | [ ] | Titillium Web (single family) | Born at CERN — genuine scientific heritage; understated, safe, multilingual-proof. |
+| 9 | [s] | Jura + Inter | Thin Eurostile spirit; minimal sci-fi elegance, but light weights risk low contrast on the gradient. |
+| 10 | [s] | Electrolize + Roboto | Instrumentation-panel look — like SCADA HMI text; great for telemetry numbers, single weight only. |
+| 11 | [ ] | Tomorrow + Inter | Angular cuts, designed for a Brazilian smart-comm brand; "smart city" modernism with local resonance. |
+| 12 | [ ] | Inter (single family) | Neutral SaaS standard; zero futurism but maximum legibility — fallback if branding ever needs to calm down. |
+| 13 | [ ] | Poppins + Inter | Friendly geometric; rounded forms echo logo nodes but reads consumer-app, weak robotics signal. |
 
-**How to update:** mark `[s]` to shortlist, move chosen one to `[x]` (only one `[x]` at
-a time), and apply per §"Typography & shape language" (index.html import + auth pages +
-this file). Remove unused font imports from index.html when the decision is final.
+**How to update:** select rows by their `#` number. Mark `[s]` to shortlist, move chosen
+one to `[x]` (only one `[x]` at a time), and apply per §"Typography & shape language"
+(index.html import + auth pages + this file). Remove unused font imports from index.html
+when the decision is final.
 - Border radius: cards 12px (rounded-4 on auth cards), inputs/buttons 10px
 - Buttons: gradient primary, 600 weight, subtle hover lift (translateY(-1px))
 - Spinner: 16px, 2px border, white-on-transparent, 0.7s spin
