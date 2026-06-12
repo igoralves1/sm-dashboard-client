@@ -15,13 +15,13 @@
           <line x1="0" y1="380" x2="500" y2="380"/>
           <line x1="0" y1="520" x2="500" y2="520"/>
           <!-- nodes -->
-          <circle cx="60" cy="80" r="4" fill="rgba(226,74,25,0.4)" stroke="none"/>
-          <circle cx="200" cy="220" r="4" fill="rgba(226,74,25,0.4)" stroke="none"/>
-          <circle cx="350" cy="80" r="4" fill="rgba(226,74,25,0.4)" stroke="none"/>
-          <circle cx="480" cy="380" r="4" fill="rgba(226,74,25,0.4)" stroke="none"/>
-          <circle cx="60" cy="520" r="4" fill="rgba(226,74,25,0.4)" stroke="none"/>
-          <circle cx="350" cy="380" r="6" fill="rgba(226,74,25,0.25)" stroke="rgba(226,74,25,0.5)" stroke-width="1.5"/>
-          <circle cx="200" cy="520" r="6" fill="rgba(226,74,25,0.25)" stroke="rgba(226,74,25,0.5)" stroke-width="1.5"/>
+          <circle cx="60" cy="80" r="4" fill="rgba(255,255,255,0.35)" stroke="none"/>
+          <circle cx="200" cy="220" r="4" fill="rgba(168,216,240,0.4)" stroke="none"/>
+          <circle cx="350" cy="80" r="4" fill="rgba(255,255,255,0.35)" stroke="none"/>
+          <circle cx="480" cy="380" r="4" fill="rgba(168,216,240,0.4)" stroke="none"/>
+          <circle cx="60" cy="520" r="4" fill="rgba(255,255,255,0.35)" stroke="none"/>
+          <circle cx="350" cy="380" r="6" fill="rgba(168,216,240,0.18)" stroke="rgba(168,216,240,0.45)" stroke-width="1.5"/>
+          <circle cx="200" cy="520" r="6" fill="rgba(168,216,240,0.18)" stroke="rgba(168,216,240,0.45)" stroke-width="1.5"/>
         </g>
       </svg>
 
