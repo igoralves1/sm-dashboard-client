@@ -435,9 +435,11 @@ The app was rebranded from **SIMEMAP / HidroForte** to **prana**. All UI referen
 
 **Logo SVG assets:**
 ```
-src/assets/images/pranalogototal.svg   ← primary logo (icon + text paths, 200px on login)
-public/pranalogototal.svg              ← public copy (keep in sync)
+src/assets/images/pranalogototal.svg     ← sidenav/topbar/dashboard logo (icon + text paths)
+src/assets/images/pranafinal_300px.svg   ← login + set-new-password logo (same paths, 300px)
+public/pranalogototal.svg                ← public copy (keep in sync with src/assets version)
 ```
 ViewBox computed from actual path bounds — do not change arbitrarily or clipping will occur.
+All three carry the broadcast animation (session 2026-06-12): 12 SMIL `<animate>` opacity pulses (one per radial-stick `<g>`), staggered top→bottom by stick y-midpoint, `dur="2.6s"`, inverted pulse `values="1;0.25;1;1"` — sticks rest at full opacity, the wave is a dark dip (dim bases washed out on green backgrounds; small swings read as static), negative `begin` offsets so the wave runs on load. Same pattern on `public/prana-favicon.svg` (8 rays) and root `prana-logo-animated.svg` (standalone copy). Edit all together to keep them in sync.
 
 **Auto-refresh:** currently set to **300 seconds (5 min)** — `REFRESH_SECS = 300` in `useTimestreamDashboard.ts`

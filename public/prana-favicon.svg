@@ -2,12 +2,13 @@
   <!-- rounded square background -->
   <rect width="64" height="64" rx="14" fill="#1a3a1a"/>
   <!-- sunburst rays — prana brand palette, centered at 32,32 -->
-  <rect x="29.5" y="6"  width="5" height="13" rx="2.5" fill="#e55a2b" transform="rotate(0   32 32)"/>
-  <rect x="29.5" y="6"  width="5" height="13" rx="2.5" fill="#f0a500" transform="rotate(45  32 32)"/>
-  <rect x="29.5" y="6"  width="5" height="13" rx="2.5" fill="#d6aa01" transform="rotate(90  32 32)"/>
-  <rect x="29.5" y="6"  width="5" height="13" rx="2.5" fill="#5aab3f" transform="rotate(135 32 32)"/>
-  <rect x="29.5" y="6"  width="5" height="13" rx="2.5" fill="#2e7d32" transform="rotate(180 32 32)"/>
-  <rect x="29.5" y="6"  width="5" height="13" rx="2.5" fill="#4caf50" transform="rotate(225 32 32)"/>
-  <rect x="29.5" y="6"  width="5" height="13" rx="2.5" fill="#81c784" transform="rotate(270 32 32)"/>
-  <rect x="29.5" y="6"  width="5" height="13" rx="2.5" fill="#a5d6a7" transform="rotate(315 32 32)"/>
+  <!-- broadcast wave: same pattern as pranalogototal.svg — opacity pulse staggered top→bottom, 2.6s cycle -->
+  <rect x="29.5" y="6"  width="5" height="13" rx="2.5" fill="#e55a2b" transform="rotate(0   32 32)"><animate attributeName="opacity" values="1;0.25;1;1" keyTimes="0;0.1;0.32;1" dur="2.6s" begin="-2.6s" repeatCount="indefinite"/></rect>
+  <rect x="29.5" y="6"  width="5" height="13" rx="2.5" fill="#f0a500" transform="rotate(45  32 32)"><animate attributeName="opacity" values="1;0.25;1;1" keyTimes="0;0.1;0.32;1" dur="2.6s" begin="-2.24s" repeatCount="indefinite"/></rect>
+  <rect x="29.5" y="6"  width="5" height="13" rx="2.5" fill="#d6aa01" transform="rotate(90  32 32)"><animate attributeName="opacity" values="1;0.25;1;1" keyTimes="0;0.1;0.32;1" dur="2.6s" begin="-1.88s" repeatCount="indefinite"/></rect>
+  <rect x="29.5" y="6"  width="5" height="13" rx="2.5" fill="#5aab3f" transform="rotate(135 32 32)"><animate attributeName="opacity" values="1;0.25;1;1" keyTimes="0;0.1;0.32;1" dur="2.6s" begin="-1.52s" repeatCount="indefinite"/></rect>
+  <rect x="29.5" y="6"  width="5" height="13" rx="2.5" fill="#2e7d32" transform="rotate(180 32 32)"><animate attributeName="opacity" values="1;0.25;1;1" keyTimes="0;0.1;0.32;1" dur="2.6s" begin="-1.34s" repeatCount="indefinite"/></rect>
+  <rect x="29.5" y="6"  width="5" height="13" rx="2.5" fill="#4caf50" transform="rotate(225 32 32)"><animate attributeName="opacity" values="1;0.25;1;1" keyTimes="0;0.1;0.32;1" dur="2.6s" begin="-1.7s" repeatCount="indefinite"/></rect>
+  <rect x="29.5" y="6"  width="5" height="13" rx="2.5" fill="#81c784" transform="rotate(270 32 32)"><animate attributeName="opacity" values="1;0.25;1;1" keyTimes="0;0.1;0.32;1" dur="2.6s" begin="-2.06s" repeatCount="indefinite"/></rect>
+  <rect x="29.5" y="6"  width="5" height="13" rx="2.5" fill="#a5d6a7" transform="rotate(315 32 32)"><animate attributeName="opacity" values="1;0.25;1;1" keyTimes="0;0.1;0.32;1" dur="2.6s" begin="-2.42s" repeatCount="indefinite"/></rect>
 </svg>
