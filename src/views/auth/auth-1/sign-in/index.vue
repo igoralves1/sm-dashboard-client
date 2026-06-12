@@ -199,6 +199,7 @@ async function handleLogin() {
 .sm-auth {
   display: flex;
   min-height: 100vh;
+  font-family: 'IBM Plex Sans', sans-serif;
 }
 
 /* ─── Left panel ─────────────────────────────────── */
@@ -235,6 +236,7 @@ async function handleLogin() {
 }
 
 .sm-auth__tagline h1 {
+  font-family: 'Space Grotesk', sans-serif;
   font-size: 2rem;
   font-weight: 700;
   color: #ffffff;
@@ -293,8 +295,9 @@ async function handleLogin() {
 }
 
 .sm-feature__title {
+  font-family: 'Space Grotesk', sans-serif;
   color: #ffffff;
-  font-weight: 600;
+  font-weight: 500;
   font-size: 0.9rem;
   margin-bottom: 2px;
 }
@@ -350,6 +353,7 @@ async function handleLogin() {
 }
 
 .sm-auth__form-header h2 {
+  font-family: 'Space Grotesk', sans-serif;
   font-size: 1.75rem;
   font-weight: 700;
   color: #102a83;
@@ -443,6 +447,7 @@ async function handleLogin() {
 
 /* Primary button */
 .sm-btn-primary {
+  font-family: 'Space Grotesk', sans-serif;
   height: 48px;
   background: linear-gradient(135deg, #009ee0 0%, #303287 100%) !important;
   border: none !important;

@@ -76,3 +76,13 @@ function handleSubmit() {
   router.push({ name: 'reset-password', query: { email: email.value } })
 }
 </script>
+
+<style scoped>
+.auth-box {
+  font-family: 'IBM Plex Sans', sans-serif;
+}
+.auth-box h4,
+.auth-box .btn {
+  font-family: 'Space Grotesk', sans-serif;
+}
+</style>

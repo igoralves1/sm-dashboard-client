@@ -133,7 +133,10 @@ Chart colors centralized in the `useChartTheme` composable — use it, don't har
 - Every view calls `usePageMeta('Page Title')` — sets title, description, favicon
 
 ### Typography & shape language
-- Sans-serif system stack (Bootstrap default)
+- **Headings / buttons / pill titles / form labels (display font): `'Space Grotesk', sans-serif`** (weights 400–700)
+- **Body / inputs / helper / footer text: `'IBM Plex Sans', sans-serif`** (weights 400–600)
+- Loaded via Google Fonts in `index.html` (preconnect + css2 link)
+- Dashboard data-dense views may keep the system stack until migrated
 - Border radius: cards 12px (rounded-4 on auth cards), inputs/buttons 10px
 - Buttons: gradient primary, 600 weight, subtle hover lift (translateY(-1px))
 - Spinner: 16px, 2px border, white-on-transparent, 0.7s spin
