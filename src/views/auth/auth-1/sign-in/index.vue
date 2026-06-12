@@ -273,8 +273,8 @@ async function handleLogin() {
   width: 44px;
   height: 44px;
   border-radius: 10px;
-  background: rgba(226,74,25,0.25);
-  color: #102a83;
+  background: rgba(255,200,60,0.18);
+  color: #ffd35c;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -283,13 +283,13 @@ async function handleLogin() {
 }
 
 .sm-feature__icon--water {
-  background: rgba(144,210,236,0.25);
-  color: #90d2ec;
+  background: rgba(120,220,255,0.18);
+  color: #7eddff;
 }
 
 .sm-feature__icon--tele {
-  background: rgba(214,170,1,0.2);
-  color: #102a83;
+  background: rgba(110,255,180,0.15);
+  color: #6effb4;
 }
 
 .sm-feature__title {
@@ -318,16 +318,16 @@ async function handleLogin() {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #102a83;
-  box-shadow: 0 0 0 0 rgba(214,170,1,0.6);
+  background: #4ade80;
+  box-shadow: 0 0 0 0 rgba(74,222,128,0.6);
   animation: pulse-dot 2s infinite;
   flex-shrink: 0;
 }
 
 @keyframes pulse-dot {
-  0%   { box-shadow: 0 0 0 0 rgba(214,170,1,0.6); }
-  70%  { box-shadow: 0 0 0 8px rgba(214,170,1,0); }
-  100% { box-shadow: 0 0 0 0 rgba(214,170,1,0); }
+  0%   { box-shadow: 0 0 0 0 rgba(74,222,128,0.6); }
+  70%  { box-shadow: 0 0 0 8px rgba(74,222,128,0); }
+  100% { box-shadow: 0 0 0 0 rgba(74,222,128,0); }
 }
 
 /* ─── Right panel ─────────────────────────────────── */
