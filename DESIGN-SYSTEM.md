@@ -150,15 +150,15 @@ Legend: `[x]` = currently applied · `[ ]` = candidate · `[s]` = shortlisted by
 | Sel | Pairing (heading + body) | Character vs our use case |
 |---|---|---|
 | [x] | **Space Grotesk + IBM Plex Sans** | Squared techy letterforms echo the circuit logo; Plex was designed by IBM for industrial/IoT contexts. Balanced innovation signal. |
-| [ ] | Orbitron + Inter | The iconic robotics/sci-fi face; geometric circles match the globe mark. Strongest statement — heading-only, never body. |
+| [s] | Orbitron + Inter | The iconic robotics/sci-fi face; geometric circles match the globe mark. Strongest statement — heading-only, never body. |
 | [ ] | Exo 2 + Inter | Techno-futuristic yet readable at every size; best all-rounder if one pairing must cover hero AND dashboards. |
-| [ ] | Audiowide + Roboto | Loud tech-display energy (racing/electronics vibe). Hero-only; too decorative for UI labels. |
+| [s] | Audiowide + Roboto | Loud tech-display energy (racing/electronics vibe). Hero-only; too decorative for UI labels. |
 | [ ] | Saira (single family) | Engineered semi-condensed grotesque; condensed widths help long PT/FR strings; quiet futurism. |
-| [ ] | Michroma + IBM Plex Sans | Aerospace/NASA-adjacent, very wide caps — premium "mission control" feel; needs smaller sizes, hero-only. |
+| [s] | Michroma + IBM Plex Sans | Aerospace/NASA-adjacent, very wide caps — premium "mission control" feel; needs smaller sizes, hero-only. |
 | [ ] | Oxanium + Inter | Angular gaming-tech; energetic, slightly informal — fits robotics demos more than utility dashboards. |
 | [ ] | Titillium Web (single family) | Born at CERN — genuine scientific heritage; understated, safe, multilingual-proof. |
-| [ ] | Jura + Inter | Thin Eurostile spirit; minimal sci-fi elegance, but light weights risk low contrast on the gradient. |
-| [ ] | Electrolize + Roboto | Instrumentation-panel look — like SCADA HMI text; great for telemetry numbers, single weight only. |
+| [s] | Jura + Inter | Thin Eurostile spirit; minimal sci-fi elegance, but light weights risk low contrast on the gradient. |
+| [s] | Electrolize + Roboto | Instrumentation-panel look — like SCADA HMI text; great for telemetry numbers, single weight only. |
 | [ ] | Tomorrow + Inter | Angular cuts, designed for a Brazilian smart-comm brand; "smart city" modernism with local resonance. |
 | [ ] | Inter (single family) | Neutral SaaS standard; zero futurism but maximum legibility — fallback if branding ever needs to calm down. |
 | [ ] | Poppins + Inter | Friendly geometric; rounded forms echo logo nodes but reads consumer-app, weak robotics signal. |
