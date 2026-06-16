@@ -1,4 +1,4 @@
-# AIoT Intelligent Asset Management Platform
+<h1 align="center">AIoT Intelligent Asset Management Platform</h1>
 
 <p align="center">
   <img src="https://igoralves1.github.io/sm-dashboard-client/pranalogototal.svg" width="200" alt="prana" />
@@ -965,6 +965,8 @@ The `prana` branch is a customization requested by **Prana** — the first clien
 
 ## References
 
+### Web, visualization & D3.js
+
 - [biovisualize.com](https://www.biovisualize.com/) — D3.js visualization patterns and examples
 - [Observable](https://observablehq.com/?utm_source=d3js-org&utm_medium=promo&utm_campaign=try-observable) — Interactive D3.js notebooks and chart examples
 - [Observable — Trending](https://observablehq.com/trending) — Most popular notebooks right now
@@ -974,10 +976,63 @@ The `prana` branch is a customization requested by **Prana** — the first clien
 - [Observable — Resource Center](https://observablehq.com/resource-center) — Tutorials, guides, and learning resources
 - [Qualium Systems — Showcase](https://www.qualium-systems.com/showcase/) — Vue.js and frontend showcase examples
 - [Piktochart — Big Data Visualization](https://piktochart.com/blog/big-data-visualization/) — Best practices and examples for visualizing large datasets
+- [Data Syndrome — Box Plot in D3.js](https://blog.datasyndrome.com/a-simple-box-plot-in-d3-dot-js-44e7083c9a9e) — Box plot implementation reference using D3.js
+
+### Statistical process control & Six Sigma
+
 - [ScienceDirect — Sigma Approach](https://www.sciencedirect.com/topics/computer-science/sigma-approach#chapters-articles) — Academic articles on Six Sigma methodology in computer science
 - [Six Sigma Study Guide — Control Phase](https://sixsigmastudyguide.com/control-phase/) — DMAIC Control phase theory and implementation guide
-- [Data Syndrome — Box Plot in D3.js](https://blog.datasyndrome.com/a-simple-box-plot-in-d3-dot-js-44e7083c9a9e) — Box plot implementation reference using D3.js
+- [Six Sigma Study Guide — Control Charts](https://sixsigmastudyguide.com/control-charts-study-guide/) — Control charts study guide
 - [Deming Institute — Beginner's Guide to Control Charts](https://deming.org/a-beginners-guide-to-control-charts/) — Foundational concepts of SPC control charts
+- [Advantive — SPC 101: Process Behavior](https://www.advantive.com/solutions/spc-software/spc-101/process-behavior/) — Introduction to process behavior in SPC
+
+### Books
+
+- [Understanding Statistical Process Control (Wheeler & Chambers)](https://www.amazon.com/Understanding-Statistical-Process-Control-Chambers/dp/0945320132)
+- [EMP III — Evaluating the Measurement Process](https://www.amazon.com/EMP-III-Evaluating-Measurement-Process/dp/0945320671)
+- [Process Evaluation Handbook (Donald Wheeler)](https://www.amazon.com/Process-Evaluation-Handbook-Donald-Wheeler/dp/0945320558)
+- [Statistical Quality Control (Douglas Montgomery)](https://www.amazon.com/Statistical-Quality-Control-Douglas-Montgomery/dp/1118146816)
+- [Introduction to Statistical Quality Control (Montgomery)](https://www.amazon.com/Introduction-Statistical-Quality-Control-Montgomery/dp/1119723094)
+- [Statistical Method from the Viewpoint of Quality Control (Shewhart)](https://www.amazon.com/Statistical-Viewpoint-Quality-Control-Mathematics/dp/0486652327)
+- [Advanced Topics in Statistical Process Control (Wheeler)](https://www.amazon.com/Advanced-Topics-Statistical-Process-Control/dp/0945320639)
+- [Statistical Process Control and Data Analytics](https://www.amazon.com/Statistical-Process-Control-Data-Analytics/dp/1032569026)
+- [Statistical Process Control Demystified (Keller)](https://www.amazon.com/Statistical-Process-Control-Demystified-Keller-ebook/dp/B005FBHX36)
+- [The Lean Six Sigma Pocket Toolbook](https://www.amazon.com/Lean-Six-Sigma-Pocket-Toolbook/dp/0071441190)
+- [Quality Control for Dummies (Larry Webber)](https://www.amazon.com/Quality-Control-Dummies-Larry-Webber/dp/0470069090)
+- [Quality Management Demystified (Sid Kemp)](https://www.amazon.com/Quality-Management-Demystified-Sid-Kemp/dp/0071449086)
+- [Fundamentals of Industrial Instrumentation and Process Control](https://www.amazon.com/Fundamentals-Industrial-Instrumentation-Process-Control-ebook/dp/B07DR7QMJ4)
+- [Process Control — Engineering Practices for Industrial Systems](https://www.amazon.com/Process-Control-Engineering-Practices-Industrial-ebook/dp/B0B8BSJ3WM)
+- [Amazon — ASIN 0071742492](https://www.amazon.com/dp/0071742492)
+- [Amazon — ASIN 1265143994](https://www.amazon.com/dp/1265143994)
+- [Amazon — ASIN 1260468518](https://www.amazon.com/dp/1260468518)
+- [Amazon — ASIN 9198900846](https://www.amazon.com/dp/9198900846)
+- [Amazon — ASIN B0CWR6SCW3](https://www.amazon.com/dp/B0CWR6SCW3)
+- [Amazon — ASIN B08T7X61CN](https://www.amazon.com/dp/B08T7X61CN)
+
+### Academic & publisher resources
+
+- [Taylor & Francis — Constructing and Using Process Control Charts (Roger Bohn)](https://www.taylorfrancis.com/chapters/edit/10.4324/9781003571872-27/constructing-using-process-control-charts-roger-bohn)
+- [Wiley Online Library — book DOI 10.1002/9781119528425](https://onlinelibrary.wiley.com/doi/book/10.1002/9781119528425)
+- [Elsevier — Practical Process Control (Seal)](https://shop.elsevier.com/books/practical-process-control/seal/978-0-340-70590-2)
+
+### Videos
+
+- [YouTube — Poa5RVUo57g](https://www.youtube.com/watch?v=Poa5RVUo57g)
+- [YouTube — iOJDBpOa3Ko](https://www.youtube.com/watch?v=iOJDBpOa3Ko)
+- [YouTube — vYHXXw-Uupo](https://www.youtube.com/watch?v=vYHXXw-Uupo)
+- [YouTube — 0hJYsa4Gojw](https://www.youtube.com/watch?v=0hJYsa4Gojw)
+- [YouTube — Bh_BvCOG1NA](https://www.youtube.com/watch?v=Bh_BvCOG1NA)
+- [YouTube — yuH35ottILU](https://www.youtube.com/watch?v=yuH35ottILU)
+- [YouTube — jCj_HnOXMdU](https://www.youtube.com/watch?v=jCj_HnOXMdU)
+- [YouTube — doup3IZ6xdU](https://www.youtube.com/watch?v=doup3IZ6xdU)
+- [YouTube — 1dkqSlJFfLo](https://www.youtube.com/watch?v=1dkqSlJFfLo)
+- [YouTube — TBQA3anac0A](https://www.youtube.com/watch?v=TBQA3anac0A)
+- [YouTube — ch0MRQcZSUE](https://www.youtube.com/watch?v=ch0MRQcZSUE)
+- [YouTube — sLXJjQmfUgE](https://www.youtube.com/watch?v=sLXJjQmfUgE)
+- [YouTube — e5g2NmIUdck](https://www.youtube.com/watch?v=e5g2NmIUdck)
+- [YouTube — DZwajTjyPmA](https://www.youtube.com/watch?v=DZwajTjyPmA)
+- [YouTube — mLvizyDFLQ4](https://www.youtube.com/watch?v=mLvizyDFLQ4)
+- [YouTube — uPTdz8mkxi8](https://www.youtube.com/watch?v=uPTdz8mkxi8)
 
 ---
-Last updated: 2026-06-10
+Last updated: 2026-06-16
