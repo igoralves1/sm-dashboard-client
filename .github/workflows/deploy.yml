@@ -1,6 +1,9 @@
 name: Deploy to GitHub Pages
 
 on:
+  push:
+    branches:
+      - simemap
   workflow_dispatch:
 
 permissions:
