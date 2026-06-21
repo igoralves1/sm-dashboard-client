@@ -77,6 +77,14 @@ export const allRoutes = [
         component: () => import('@/views/dashboards/dashboard-sm/index.vue'),
     },
 
+    // Admin routes
+    {
+        path: '/admin/ai-training',
+        name: 'ai-training',
+        meta: { title: 'AI Training' },
+        component: () => import('@/views/admin/ai-training/index.vue'),
+    },
+
     //ecommerce Routes
     {
         path: '',
