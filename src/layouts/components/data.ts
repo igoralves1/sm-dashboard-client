@@ -632,6 +632,7 @@ export const menuItems: MenuItemType[] = [
     { key: 'items', label: 'Menu Items', isTitle: true },
     { key: 'admin', label: 'Admin', isTitle: true },
     { key: 'ai-training', label: 'AI Training', icon: 'tabler:brain', url: '/admin/ai-training' },
+    { key: 'x-8g2t', label: 'X-8G2T', icon: 'tabler:cpu', url: '/admin/x-8g2t' },
     {
         key: 'menu-levels',
         label: 'Menu Levels',
