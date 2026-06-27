@@ -1,0 +1,25 @@
+# =============================================================================
+# sm-dashboard-client — Docker Compose
+#
+# Run from the sm-dashboard-client/ root:
+#   docker compose -f Docker/docker-compose.yml up --build
+#
+# Or from inside Docker/:
+#   docker compose up --build
+# =============================================================================
+
+services:
+  sm-dashboard-client:
+    build:
+      context: ..
+      dockerfile: Docker/Dockerfile
+    image: sm-dashboard-client:latest
+    container_name: sm-dashboard-client
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    env_file:
+      - ../.env
+    volumes:
+      - ..:/app                   # live reload — source changes reflect immediately
+      - /app/node_modules         # isolate container node_modules from host

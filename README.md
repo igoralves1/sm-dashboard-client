@@ -316,10 +316,44 @@ src/
 
 ### Prerequisites
 
-- Node.js 18+
+- Docker (no Node.js required on the host)
 - AWS account with Cognito User Pool and Timestream configured
 
-### Install & Run
+### Running with Docker (recommended)
+
+The app is designed to always run inside a Docker container — Node.js does not need to be installed on the host machine.
+
+**Files:**
+```
+Docker/
+├── Dockerfile          — node:22-alpine, installs deps, runs Vite dev server on :5173
+└── docker-compose.yml  — wires the port, .env file, and live-reload volume mount
+.dockerignore           — excludes node_modules, dist, .env from the build context
+```
+
+**How the container works:**
+1. Starts from `node:22-alpine`
+2. Copies `package*.json` and runs `npm install` (this layer is cached — it only re-runs when dependencies change)
+3. Copies the source
+4. The `docker-compose.yml` volume-mounts the source directory into `/app` so Vite's HMR picks up code changes in real time without rebuilding the image
+5. A second anonymous volume at `/app/node_modules` keeps the container's installed packages isolated from the host
+
+**Start:**
+```bash
+cp .env.example .env   # fill in your AWS values
+docker compose -f Docker/docker-compose.yml up --build
+```
+
+Open **http://localhost:5173/sm-dashboard-client/**
+
+Live reload is active — edit any file in `src/` and the browser refreshes automatically.
+
+**Stop:**
+```bash
+docker compose -f Docker/docker-compose.yml down
+```
+
+### Running without Docker (local Node.js)
 
 ```bash
 git clone https://github.com/igoralves1/sm-dashboard-client.git
