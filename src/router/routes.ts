@@ -84,6 +84,12 @@ export const allRoutes = [
         meta: { title: 'AI Training' },
         component: () => import('@/views/admin/ai-training/index.vue'),
     },
+    {
+        path: '/admin/x-8g2t',
+        name: 'x-8g2t',
+        meta: { title: 'X-8G2T Node Monitor' },
+        component: () => import('@/views/admin/x-8g2t/index.vue'),
+    },
 
     //ecommerce Routes
     {
