@@ -474,6 +474,28 @@
         </div>
       </div>
 
+      <!-- ── Service Topology & Data Flow ────────────────────────────────────── -->
+      <div class="card mb-3">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+            <h6 class="obs-section-title mb-0">Service Topology &amp; Data Flow</h6>
+            <div class="topo-legend">
+              <span class="topo-leg"><span class="topo-leg-sw" style="background:#3fb950;"></span>healthy</span>
+              <span class="topo-leg"><span class="topo-leg-sw" style="background:#58a6ff;"></span>running</span>
+              <span class="topo-leg"><span class="topo-leg-sw" style="background:#fd7e14;"></span>restarting</span>
+              <span class="topo-leg"><span class="topo-leg-sw" style="background:#dc3545;"></span>unhealthy</span>
+              <span class="topo-leg"><span class="topo-leg-sw" style="background:#6c757d;"></span>stopped</span>
+              <span class="topo-leg"><span class="topo-leg-sw topo-leg-sw-dashed"></span>offline</span>
+            </div>
+          </div>
+          <ServiceTopology :containers="containers" :ws-ready="wsReady" />
+          <div class="text-muted mt-2" style="font-size:10px; line-height:1.5;">
+            Border colour = container health from the observability API · flowing dots show data direction between
+            running services · dashed boxes are services not currently deployed on this board.
+          </div>
+        </div>
+      </div>
+
       <!-- ── Raw Data Panel ──────────────────────────────────────────────────── -->
       <div class="raw-data-panel mt-4">
         <button class="raw-data-toggle" @click="showRaw = !showRaw">
@@ -507,6 +529,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import MainLayout from '@/layouts/MainLayout.vue'
+import ServiceTopology from '@/components/charts/ServiceTopology.vue'
 
 // ── Types ───────────────────────────────────────────────────────────────────────
 
@@ -1052,6 +1075,19 @@ const lfbPct = computed(() => {
 .term-error { color: #ff7b72; }
 .term-warn  { color: #e3b341; }
 .term-ok    { color: #3fb950; }
+
+/* ── Topology legend ────────────────────────────────────────────────────────── */
+.topo-legend { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.topo-leg {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 10px; font-weight: 600; color: var(--bs-secondary-color);
+  text-transform: uppercase; letter-spacing: .04em;
+}
+.topo-leg-sw { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+.topo-leg-sw-dashed {
+  background: transparent;
+  border: 1.5px dashed #cbd5e1;
+}
 
 /* ── Raw data panel ─────────────────────────────────────────────────────────── */
 .raw-data-panel { }
