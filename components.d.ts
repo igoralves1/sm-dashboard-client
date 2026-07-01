@@ -74,6 +74,7 @@ declare module 'vue' {
     RefreshCountdown: typeof import('./src/components/charts/RefreshCountdown.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    ServiceTopology: typeof import('./src/components/charts/ServiceTopology.vue')['default']
     SiteMap: typeof import('./src/components/charts/SiteMap.vue')['default']
     TablePagination: typeof import('./src/components/TablePagination.vue')['default']
     TankGauge: typeof import('./src/components/charts/TankGauge.vue')['default']
