@@ -30,7 +30,8 @@ router.beforeEach(async (to, _from, next) => {
   }
 
   if (auth.isAuthenticated && isPublic) {
-    return next({ path: '/dashboard' })
+    const redirect = (to.query.redirect as string) || '/dashboard'
+    return next({ path: redirect })
   }
 
   next()
