@@ -643,7 +643,7 @@
                 <!-- Loss scale reference -->
                 <div class="loss-scale mt-3">
                   <div class="loss-scale-title">Loss Reference Scale</div>
-                  <div class="loss-scale-row" v-for="r in lossScale" :key="r.label">
+                  <div class="loss-scale-row" v-for="r in lossScale" :key="r.range">
                     <div :class="['loss-scale-dot', r.cls]"></div>
                     <span class="loss-scale-range">{{ r.range }}</span>
                     <span class="loss-scale-desc">{{ r.desc }}</span>
@@ -720,7 +720,7 @@ interface Metrics {
   elapsed_seconds?: number
   eta_seconds?: number
   gpu?: { vram_used_gb?: number; vram_total_gb?: number; vram_pct?: number; temperature_c?: number; utilization_pct?: number }
-  history?: { step: number; loss: number }[]
+  history?: { step: number; loss: number; epoch?: number; lr?: number; ts?: string }[]
   dataset_pairs?: number
   updated_at?: string
 }

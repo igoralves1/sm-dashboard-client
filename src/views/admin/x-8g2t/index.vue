@@ -695,7 +695,19 @@ function tempLevel(t: number): string {
 
 // ── KPI cards ────────────────────────────────────────────────────────────────────
 
-const kpiCards = computed(() => {
+interface KpiCard {
+  label: string
+  value: string
+  unit: string
+  sub: string
+  desc: string
+  pct?: number | null
+  barColor: string
+  valueColor: string
+  border?: string
+}
+
+const kpiCards = computed<KpiCard[]>(() => {
   const cpu  = board.value.cpu
   const gpu  = board.value.gpu
   const mem  = board.value.memory
