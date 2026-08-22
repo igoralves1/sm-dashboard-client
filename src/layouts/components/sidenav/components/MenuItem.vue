@@ -36,6 +36,7 @@ const NAV_MAP: Record<string, string> = {
   'Dashboard': 'nav.dashboard', 'Monitoramento': 'nav.monitoring',
   'Dashboards': 'nav.dashboards',
   'HF - Água': 'nav.hf_water',
+  'Energisa': 'nav.energisa',
   // English labels (shown when EN is active — pass-through but still mapped for symmetry)
   'Users': 'nav.users', 'Contacts': 'nav.contacts',
   'Roles': 'nav.roles', 'Permissions': 'nav.permissions',
