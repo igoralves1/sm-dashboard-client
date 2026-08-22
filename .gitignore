@@ -30,3 +30,6 @@ coverage
 *.tsbuildinfo
 .envrc
 .env
+
+# local scratch screenshots
+screenshots-to-delete/
