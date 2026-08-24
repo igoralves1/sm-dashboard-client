@@ -76,6 +76,22 @@ export const allRoutes = [
         },
         component: () => import('@/views/dashboards/dashboard-sm/index.vue'),
     },
+    {
+        path: '/dashboard-energisa',
+        name: 'dashboard-energisa',
+        meta: {
+            title: 'Energisa',
+        },
+        component: () => import('@/views/dashboards/energisa/index.vue'),
+    },
+    {
+        path: '/dashboard-energisa/:deviceId',
+        name: 'dashboard-energisa-device',
+        meta: {
+            title: 'Energisa',
+        },
+        component: () => import('@/views/dashboards/energisa/device.vue'),
+    },
 
     // Admin routes
     {
