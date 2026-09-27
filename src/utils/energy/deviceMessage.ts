@@ -17,6 +17,50 @@
 
 import type { ChannelReading } from '@/services/energisa/types'
 
+export interface GeoPoint {
+  latitude: number
+  longitude: number
+}
+
+/**
+ * Coordinates ride the telemetry payload itself — the device reports them as
+ * top-level `latitude` / `longitude` on its `/eletric/data` and `/data/log`
+ * frames. They are not part of the REST device record.
+ *
+ * Three outcomes, and the distinction matters: `absent` means this particular
+ * frame carried no position, so the last known one still stands; `invalid`
+ * means the device sent something unusable and the stale position must be
+ * dropped rather than left on the map.
+ */
+export type LocationUpdate =
+  | { kind: 'absent' }
+  | { kind: 'invalid' }
+  | { kind: 'valid'; location: GeoPoint }
+
+export function readLocationUpdate(message: unknown): LocationUpdate {
+  if (typeof message !== 'object' || message === null) return { kind: 'absent' }
+
+  const telemetry = message as Record<string, unknown>
+  const hasLat = Object.prototype.hasOwnProperty.call(telemetry, 'latitude')
+  const hasLon = Object.prototype.hasOwnProperty.call(telemetry, 'longitude')
+
+  if (!hasLat && !hasLon) return { kind: 'absent' }
+  if (!hasLat || !hasLon) return { kind: 'invalid' }
+
+  const { latitude, longitude } = telemetry
+  if (typeof latitude !== 'number' || typeof longitude !== 'number') return { kind: 'invalid' }
+
+  const valid =
+    Number.isFinite(latitude) &&
+    Number.isFinite(longitude) &&
+    latitude >= -90 &&
+    latitude <= 90 &&
+    longitude >= -180 &&
+    longitude <= 180
+
+  return valid ? { kind: 'valid', location: { latitude, longitude } } : { kind: 'invalid' }
+}
+
 const num = (v: unknown): number => {
   const n = Number(v)
   return Number.isFinite(n) ? n : 0

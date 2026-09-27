@@ -13,7 +13,7 @@ import { computed, onUnmounted, ref } from 'vue'
 import { getChartsOfBoard, getWaveform, loadDevices } from '@/services/energisa/devices'
 import { subscribeDevice, type Subscription } from '@/services/energisa/pubsub'
 import { isEnergisaConfigured } from '@/services/energisa/config'
-import { mergeChannels, parseDeviceMessage } from '@/utils/energy/deviceMessage'
+import { mergeChannels, parseDeviceMessage, readLocationUpdate } from '@/utils/energy/deviceMessage'
 import { calculateResumes } from '@/utils/energy/calcs'
 import {
   CHART_COLORS,
@@ -56,6 +56,8 @@ export function useEnergisaDevice(deviceId: string) {
   const readings = ref<ConsumptionPoint[]>([])
   const waveform = ref<WaveformSample | null>(null)
   const liveChannels = ref<ChannelReading[]>([])
+  /** Position from MQTT; null until a frame carries valid coordinates. */
+  const liveLocation = ref<{ latitude: number; longitude: number } | null>(null)
 
   const loading = ref(false)
   const loadingWave = ref(false)
@@ -358,6 +360,10 @@ export function useEnergisaDevice(deviceId: string) {
 
       if (device.value.topic) {
         subscription = await subscribeDevice(device.value.topic, (_topic, message) => {
+          const update = readLocationUpdate(message)
+          if (update.kind === 'valid') liveLocation.value = update.location
+          else if (update.kind === 'invalid') liveLocation.value = null
+
           const channels = parseDeviceMessage(message)
           if (channels.length) liveChannels.value = mergeChannels(liveChannels.value, channels)
         })
@@ -413,6 +419,7 @@ export function useEnergisaDevice(deviceId: string) {
     waveSeries,
     live,
     liveChannels,
+    liveLocation,
     loadingTiles: loading_,
     resumes,
     channelEnergy,

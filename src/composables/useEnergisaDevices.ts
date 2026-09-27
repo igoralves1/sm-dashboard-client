@@ -11,7 +11,7 @@ import { computed, onUnmounted, ref, shallowRef } from 'vue'
 import { loadDevices } from '@/services/energisa/devices'
 import { subscribeDevice, type Subscription } from '@/services/energisa/pubsub'
 import { isEnergisaConfigured, missingEnergisaConfig } from '@/services/energisa/config'
-import { mergeChannels, parseDeviceMessage } from '@/utils/energy/deviceMessage'
+import { mergeChannels, parseDeviceMessage, readLocationUpdate } from '@/utils/energy/deviceMessage'
 import type { DeviceSummary, EnergisaDevice } from '@/services/energisa/types'
 
 /** A device is considered online while a message arrived within this window. */
@@ -63,6 +63,12 @@ export function useEnergisaDevices() {
   function applyMessage(deviceId: string, message: any) {
     const device = devices.value.find((d) => d.id === deviceId)
     if (!device) return
+
+    // Position rides the same frames as the electrical values. An `absent`
+    // update leaves the last known position standing; `invalid` clears it.
+    const update = readLocationUpdate(message)
+    if (update.kind === 'valid') device.geo = update.location
+    else if (update.kind === 'invalid') device.geo = undefined
 
     const channels = parseDeviceMessage(message)
     if (!channels.length) return

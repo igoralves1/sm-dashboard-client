@@ -8,6 +8,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    AnalysisNote: typeof import('./src/components/charts/AnalysisNote.vue')['default']
     AuthLogo: typeof import('./src/components/AuthLogo.vue')['default']
     BAlert: typeof import('bootstrap-vue-next/components/BAlert')['BAlert']
     BBadge: typeof import('bootstrap-vue-next/components/BBadge')['BBadge']
@@ -62,6 +63,9 @@ declare module 'vue' {
     CustomApexChart: typeof import('./src/components/CustomApexChart.vue')['default']
     CustomEChart: typeof import('./src/components/CustomEChart.vue')['default']
     DateRangePicker: typeof import('./src/components/charts/DateRangePicker.vue')['default']
+    DeviceLocationMap: typeof import('./src/components/charts/DeviceLocationMap.vue')['default']
+    DevicePhoto: typeof import('./src/components/charts/DevicePhoto.vue')['default']
+    DiagnosticsPanel: typeof import('./src/components/charts/DiagnosticsPanel.vue')['default']
     Dropdown: typeof import('./src/components/Dropdown.vue')['default']
     EnergyDeviceCard: typeof import('./src/components/charts/EnergyDeviceCard.vue')['default']
     EnergyResumeCard: typeof import('./src/components/charts/EnergyResumeCard.vue')['default']
@@ -72,6 +76,7 @@ declare module 'vue' {
     JsVectorMap: typeof import('./src/components/JsVectorMap.vue')['default']
     LevelTimeSeries: typeof import('./src/components/charts/LevelTimeSeries.vue')['default']
     Loader: typeof import('./src/components/Loader.vue')['default']
+    MathFormula: typeof import('./src/components/charts/MathFormula.vue')['default']
     MultiSelect: typeof import('./src/components/MultiSelect.vue')['default']
     PageBreadcrumb: typeof import('./src/components/PageBreadcrumb.vue')['default']
     PasswordStrengthBar: typeof import('./src/components/PasswordStrengthBar.vue')['default']

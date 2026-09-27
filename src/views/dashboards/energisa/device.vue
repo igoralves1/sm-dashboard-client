@@ -30,44 +30,50 @@
         </div>
       </div>
 
+      <div class="row g-2 mb-4">
+        <div class="col-12 col-xxl-8">
       <div class="row g-2 mb-2">
         <div class="col-6 col-lg-3">
-          <div class="card h-100"><div class="card-body py-3">
+          <div class="card h-100"><div class="card-body kpi-body">
             <div class="kpi-label"><span class="dot bg-success"></span>{{ t('energisa.total_power') }}</div>
             <div v-if="grouped" class="kpi-value">{{ fmtUnit(live.totalPower, 'W') }}</div>
-            <div v-else>
-              <div v-for="c in liveChannels" :key="c.channel" class="kpi-sub">
-                <span class="text-muted">C{{ c.channel }}</span> {{ fmtUnit(c.p, 'W') }}
+            <div v-else class="kpi-channels">
+              <div v-for="c in liveChannels" :key="c.channel" class="kpi-channel">
+                <span class="kpi-channel__name">CH{{ c.channel }}:</span>
+                <span class="kpi-channel__value">{{ fmtUnit(c.p, 'W') }}</span>
               </div>
             </div>
           </div></div>
         </div>
 
         <div class="col-6 col-lg-3">
-          <div class="card h-100"><div class="card-body py-3">
+          <div class="card h-100"><div class="card-body kpi-body">
             <div class="kpi-label"><span class="dot bg-warning"></span>{{ t('energisa.mean_voltage') }}</div>
             <div v-if="grouped" class="kpi-value">{{ fmtUnit(live.meanVoltage, 'V') }}</div>
-            <div v-else>
-              <div v-for="c in liveChannels" :key="c.channel" class="kpi-sub">
-                <span class="text-muted">C{{ c.channel }}</span> {{ fmtUnit(c.v, 'V') }}
+            <div v-else class="kpi-channels">
+              <div v-for="c in liveChannels" :key="c.channel" class="kpi-channel">
+                <span class="kpi-channel__name">CH{{ c.channel }}:</span>
+                <span class="kpi-channel__value">{{ fmtUnit(c.v, 'V') }}</span>
               </div>
             </div>
           </div></div>
         </div>
 
         <div class="col-6 col-lg-3">
-          <div class="card h-100"><div class="card-body py-3">
+          <div class="card h-100"><div class="card-body kpi-body">
             <div class="kpi-label"><span class="dot bg-primary"></span>{{ t('energisa.current') }}</div>
             <div v-if="!live.currents.length" class="kpi-value">—</div>
-            <div v-for="c in live.currents" :key="c.channel" class="kpi-sub">
-              <span class="text-muted me-1">C{{ c.channel }}</span>
-              <span class="fw-semibold">{{ beautify(c.value) }} A</span>
+            <div v-else class="kpi-channels">
+              <div v-for="c in live.currents" :key="c.channel" class="kpi-channel">
+                <span class="kpi-channel__name">CH{{ c.channel }}:</span>
+                <span class="kpi-channel__value">{{ beautify(c.value) }} A</span>
+              </div>
             </div>
           </div></div>
         </div>
 
         <div class="col-6 col-lg-3">
-          <div class="card h-100"><div class="card-body py-3">
+          <div class="card h-100"><div class="card-body kpi-body">
             <div class="kpi-label"><span class="dot bg-secondary"></span>{{ t('energisa.consumption_day') }}</div>
             <div class="kpi-value">{{ beautify(live.energyToday) }} kWh</div>
           </div></div>
@@ -75,19 +81,59 @@
       </div>
 
       <!-- Carregamento — TRAFO only -->
-      <div v-if="loadingTiles" class="row g-2 mb-4">
+      <div v-if="loadingTiles" class="row g-2">
         <div class="col-6 col-lg-3">
-          <div class="card h-100"><div class="card-body py-3">
+          <div class="card h-100"><div class="card-body kpi-body">
             <div class="kpi-label"><span class="dot bg-purple"></span>{{ t('energisa.total_loading') }}</div>
             <div class="kpi-value">{{ beautify(loadingTiles.total) }} %</div>
           </div></div>
         </div>
         <div v-for="(value, idx) in loadingTiles.phases" :key="idx" class="col-6 col-lg-3">
-          <div class="card h-100"><div class="card-body py-3">
+          <div class="card h-100"><div class="card-body kpi-body">
             <div class="kpi-label"><span class="dot bg-purple"></span>{{ t('energisa.phase_loading', { n: idx + 1 }) }}</div>
             <div class="kpi-value">{{ beautify(value) }} %</div>
           </div></div>
         </div>
+      </div>
+
+        </div>
+
+        <!-- Position, from the device's own telemetry -->
+        <div class="col-6 col-xxl-2">
+          <div class="card h-100">
+            <div class="card-body kpi-body d-flex flex-column">
+              <div class="kpi-label"><span class="dot bg-info"></span>{{ t('energisa.map_title') }}</div>
+              <div class="media-frame">
+                <DeviceLocationMap
+                  :point="liveLocation"
+                  :title="device?.name ?? ''"
+                  :health="deviceHealth"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Field photo, matched to the device by name -->
+        <div class="col-6 col-xxl-2">
+          <div class="card h-100">
+            <div class="card-body kpi-body d-flex flex-column">
+              <div class="kpi-label"><span class="dot bg-secondary"></span>{{ t('energisa.photo_title') }}</div>
+              <div class="media-frame">
+                <DevicePhoto :name="device?.name" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Condition analysis ──────────────────────────────────────── -->
+      <div class="mb-4">
+        <DiagnosticsPanel
+          :channels="liveChannels"
+          :ratings="device?.ratings ?? null"
+          :temperature="liveTemperature"
+        />
       </div>
 
       <!-- ── Leituras por intervalo ──────────────────────────────────── -->
@@ -213,14 +259,18 @@
             <div class="card-body">
               <div class="d-flex align-items-center justify-content-between mb-2">
                 <h6 class="section-title mb-0">{{ t('energisa.temporal_analysis') }}</h6>
-                <ChannelPicker v-model="channelFilter" />
+                <span v-if="temporalNote" class="pill" :class="`sev-${temporalNote.severity}`">
+                  {{ t(`energisa.diag.sev_${temporalNote.severity}`) }}
+                </span>
               </div>
+              <div class="panel-control"><ChannelPicker v-model="channelFilter" /></div>
               <WaveformChart
                 :channels="waveSeries ?? []"
                 :only="channelFilter"
                 :ratings="device?.ratings ?? null"
                 :height="230"
               />
+              <AnalysisNote :note="temporalNote" />
             </div>
           </div>
         </div>
@@ -230,14 +280,18 @@
             <div class="card-body">
               <div class="d-flex align-items-center justify-content-between mb-2">
                 <h6 class="section-title mb-0">{{ t('energisa.phasor_diagram') }}</h6>
-                <ChannelPicker v-model="channelFilter" />
+                <span v-if="phasorNote" class="pill" :class="`sev-${phasorNote.severity}`">
+                  {{ t(`energisa.diag.sev_${phasorNote.severity}`) }}
+                </span>
               </div>
+              <div class="panel-control"><ChannelPicker v-model="channelFilter" /></div>
               <PhasorDiagram
                 :channels="waveSeries ?? []"
                 :only="channelFilter"
                 :ratings="device?.ratings ?? null"
                 :size="230"
               />
+              <AnalysisNote :note="phasorNote" />
             </div>
           </div>
         </div>
@@ -247,9 +301,13 @@
             <div class="card-body">
               <div class="d-flex align-items-center justify-content-between mb-2">
                 <h6 class="section-title mb-0">{{ t('energisa.harmonic_analysis') }}</h6>
-                <HarmonicModePicker v-model="harmonicMode" />
+                <span v-if="harmonicNote" class="pill" :class="`sev-${harmonicNote.severity}`">
+                  {{ t(`energisa.diag.sev_${harmonicNote.severity}`) }}
+                </span>
               </div>
+              <div class="panel-control"><HarmonicModePicker v-model="harmonicMode" /></div>
               <HarmonicBars :channels="waveSeries ?? []" :mode="harmonicMode" :height="230" />
+              <AnalysisNote :note="harmonicNote" />
             </div>
           </div>
         </div>
@@ -264,6 +322,16 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { Icon } from '@iconify/vue'
 import MainLayout from '@/layouts/MainLayout.vue'
+import DiagnosticsPanel from '@/components/charts/DiagnosticsPanel.vue'
+import DeviceLocationMap from '@/components/charts/DeviceLocationMap.vue'
+import DevicePhoto from '@/components/charts/DevicePhoto.vue'
+import AnalysisNote from '@/components/charts/AnalysisNote.vue'
+import {
+  analyseHarmonics,
+  analysePhasor,
+  analyseTemporal,
+} from '@/utils/energy/waveformAnalysis'
+import { analyse } from '@/utils/energy/diagnostics'
 import { useI18n } from 'vue-i18n'
 import SyncTimeSeries from '@/components/charts/SyncTimeSeries.vue'
 import WaveformChart from '@/components/charts/WaveformChart.vue'
@@ -284,7 +352,7 @@ const {
   device, readings, waveSeries, live, loadingTiles, channelEnergy,
   powerSeries, voltageSeries, currentSeries, energySeries,
   tab, metric, perPhase, grouped, liveChannels, temperatureSeries, axisBounds,
-  rangeStart, rangeEnd, resumes, readingNear, selectedPoint, realtime,
+  rangeStart, rangeEnd, resumes, readingNear, selectedPoint, realtime, liveLocation,
   loading, loadingWave, error, configured, load, loadWaveform, setRange, metricLabel,
 } = useEnergisaDevice(deviceId)
 
@@ -321,6 +389,39 @@ const metricUnit = computed(() => {
   if (tab.value === 'energy') return ' kWh'
   return { S: ' VA', P: ' W', Q: ' var', FP: '', FC: ' %' }[metric.value] ?? ''
 })
+
+/** Most recent board temperature, for the thermal indicator. */
+const liveTemperature = computed(() => {
+  for (let i = temperatureSeries.value[0]?.points.length ?? 0; i-- > 0; ) {
+    const v = temperatureSeries.value[0].points[i][1]
+    if (Number.isFinite(v)) return v
+  }
+  return null
+})
+
+/** Worst-indicator severity, shared by the map marker and the analysis panel. */
+/**
+ * Waveform readings. All three run off the same capture and respect the
+ * phase selector, so the numbers always describe what is on screen.
+ */
+const notedChannels = computed(() =>
+  channelFilter.value
+    ? (waveSeries.value ?? []).filter((c) => c.channel === channelFilter.value)
+    : (waveSeries.value ?? []),
+)
+
+const temporalNote = computed(() => analyseTemporal(notedChannels.value))
+const phasorNote = computed(() => analysePhasor(notedChannels.value))
+const harmonicNote = computed(() => analyseHarmonics(waveSeries.value ?? []))
+
+const deviceHealth = computed(
+  () =>
+    analyse({
+      channels: liveChannels.value,
+      ratings: device.value?.ratings ?? null,
+      temperature: liveTemperature.value,
+    }).healthSeverity,
+)
 
 const cursorLabel = computed(() =>
   cursor.value === null ? '' : new Date(cursor.value).toLocaleString('pt-BR'),
@@ -414,6 +515,45 @@ onMounted(load)
 }
 
 .bg-purple { background: #8b5cf6; }
+.bg-info { background: var(--bs-info, #0dcaf0); }
+.bg-secondary { background: var(--bs-secondary-color); }
+
+/* Map and photo share one frame height so the two cards read as a pair. */
+.media-frame {
+  flex: 1 1 auto;
+  min-height: 132px;
+}
+
+/* One labelled row per channel: "CH1: 18.89 A".
+   The label leads and carries a colon, so a narrow card can never run the
+   unit into the next label the way "18.89ACH1" did. */
+.kpi-channels {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.kpi-channel {
+  display: flex;
+  align-items: baseline;
+  gap: 0.3rem;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+.kpi-channel__name {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--bs-secondary-color);
+  /* Fixed width keeps the numbers aligned in a column under one another. */
+  min-width: 2.9em;
+}
+
+.kpi-channel__value {
+  font-size: 14px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
 
 .kpi-value {
   font-size: 24px;
@@ -462,6 +602,34 @@ onMounted(load)
   padding: 0.3rem 0.85rem;
   margin-right: 0.3rem;
 }
+
+/* The selector sits on its own row beneath the header: the badge is a status
+   readout and the selector a control, so stacking them keeps the two from
+   competing for the same corner. */
+.panel-control {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.5rem;
+}
+
+/* Same pill as the condition indicators, so severity reads identically
+   wherever it appears on the page. */
+.pill {
+  font-size: 9.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+  white-space: nowrap;
+}
+
+.pill.sev-good { color: var(--bs-success); }
+.pill.sev-watch { color: var(--bs-info, #0dcaf0); }
+.pill.sev-warning { color: var(--bs-warning); }
+.pill.sev-critical { color: var(--bs-danger); }
+.pill.sev-unknown { color: var(--bs-secondary-color); }
 
 .point-count {
   font-size: 12.5px;

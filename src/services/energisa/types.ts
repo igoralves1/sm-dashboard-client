@@ -82,6 +82,11 @@ export interface EnergisaDevice {
   channelNumbers: number[]
   ratings: DeviceRatings | null
   temperature?: number
+  /**
+   * Last valid position reported over MQTT. Named `geo` to avoid colliding
+   * with `location`, which is the human-readable "Palmas / Quadra 806S".
+   */
+  geo?: { latitude: number; longitude: number }
   /** True once an MQTT message has arrived recently. */
   online: boolean
   favourite: boolean
