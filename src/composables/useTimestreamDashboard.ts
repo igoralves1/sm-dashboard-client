@@ -16,6 +16,7 @@ const DB               = import.meta.env.VITE_TIMESTREAM_DB           as string
 const TABLE_RT         = import.meta.env.VITE_TIMESTREAM_TABLE_RT     as string
 const TABLE_HOURLY     = import.meta.env.VITE_TIMESTREAM_TABLE_HOURLY as string
 const TABLE_DAILY      = import.meta.env.VITE_TIMESTREAM_TABLE_DAILY  as string
+const TABLE_SENSORS    = import.meta.env.VITE_TIMESTREAM_TABLE_SENSORS as string
 
 // ── Sensor IDs (end_id values in Timestream) ─────────────────────────────────
 const SENSOR_RAP_SIL = import.meta.env.VITE_SENSOR_RAP_SIL as string
@@ -71,34 +72,19 @@ async function query(sql: string): Promise<Record<string, string>[]> {
 }
 
 // ── Calibration formula helpers ───────────────────────────────────────────────
-const SILVANOPOLIS_CUTOFF = '2026-05-05T12:15:00Z'
-const PRODUCTION_CUTOFF   = '2026-05-02T18:35:00Z'
-
-const silvanopolisLevelExpr = `
-  CASE
-    WHEN time < from_iso8601_timestamp('${SILVANOPOLIS_CUTOFF}')
-      THEN (cast(water_level as double) - 600)*100/(2650-600)
-    ELSE
-      (cast(water_level as double) - 796)*100*(5/4.2)/(3760-796)
-  END`
+// Silvanópolis level moved from TABLE_RT (water_level) to TABLE_SENSORS (wtr_level) at this cutoff
+const SENSORS_DATA_CUTOFF = '2026-08-10T00:00:00Z'
 
 const miranorteLevelExpr = `(cast(water_level as double) - 796)*100*(5/4.2)/(3760-796)`
 
-function productionExpr(alias: string, pre: string, post: string) {
-  return `CASE
-    WHEN time < from_iso8601_timestamp('${PRODUCTION_CUTOFF}')
-      THEN ${pre}
-    ELSE ${post}
-  END AS ${alias}`
-}
-
-// PTP calibration formulas (keyed by sensor env var, resolved at runtime)
-const PTP_FORMULAS = () => ({
-  [SENSOR_PTP_01]: { pre: '(measure_value::double)*2/1000',           post: 'measure_value::double/(12.0*1000)' },
-  [SENSOR_PTP_02]: { pre: '(measure_value::double)*2*12/(108*1000)',   post: 'measure_value::double/(108.0*1000)' },
-  [SENSOR_PTP_03]: { pre: 'measure_value::double/1000',                post: 'measure_value::double/(2*12.0*1000)' },
-  [SENSOR_PTP_04]: { pre: 'measure_value::double/1000',                post: 'measure_value::double/(2*12.0*1000)' },
-  [SENSOR_PTP_07]: { pre: '(measure_value::double)*2/1000',            post: 'measure_value::double/(12.0*1000)' },
+// Production: hourly/daily tables store accumulated flux (L_acc); divide per PTP to get m³.
+// Same divisors as FLOW_FORMULAS (PTP_02 = 27 since its 2026-07-29 recalibration).
+const PRODUCTION_DIVISORS = () => ({
+  [SENSOR_PTP_01]: '12.0*1000',
+  [SENSOR_PTP_02]: '27.0*1000',
+  [SENSOR_PTP_03]: '2*12.0*1000',
+  [SENSOR_PTP_04]: '2*12.0*1000',
+  [SENSOR_PTP_07]: '12.0*1000',
 })
 
 const PTP_NAMES = () => ({
@@ -109,9 +95,16 @@ const PTP_NAMES = () => ({
   [SENSOR_PTP_07]: 'PTP_07',
 })
 
+// PTP_02 flow meter recalibrated at this cutoff (÷108 → ÷27)
+const PTP_02_FLOW_CUTOFF = '2026-07-29T12:15:00Z'
+
 const FLOW_FORMULAS = () => ({
   [SENSOR_PTP_01]: 'cast(flux as double)*60/(12*1000)',
-  [SENSOR_PTP_02]: 'cast(flux as double)*60/(108*1000)',
+  [SENSOR_PTP_02]: `CASE
+    WHEN time < from_iso8601_timestamp('${PTP_02_FLOW_CUTOFF}')
+      THEN cast(flux as double)*60/(108*1000)
+    ELSE cast(flux as double)*60/(27*1000)
+  END`,
   [SENSOR_PTP_03]: 'cast(flux as double)*60/(2*12*1000)',
   [SENSOR_PTP_04]: 'cast(flux as double)*60/(2*12*1000)',
   [SENSOR_PTP_07]: 'cast(flux as double)*60/(12*1000)',
@@ -158,6 +151,49 @@ async function fetchLevel(endId: string, expr: string): Promise<DataPoint[]> {
   return rows.map(r => ({ time: new Date(r.time), value: parseFloat(r.water_level) }))
 }
 
+// Silvanópolis: union of old + new table, drop out-of-range readings, 11-point moving average
+async function fetchSilvanopolisLevel(): Promise<DataPoint[]> {
+  const rows = await query(`
+    WITH raw AS (
+      SELECT
+        (cast(water_level as double) - 796)*100*(5/4.8)/(3760-796) AS water_level,
+        time
+      FROM "${DB}"."${TABLE_RT}"
+      WHERE time >= ago(24h)
+        AND time < from_iso8601_timestamp('${SENSORS_DATA_CUTOFF}')
+        AND end_id = '${SENSOR_RAP_SIL}'
+
+      UNION ALL
+
+      SELECT
+        (cast(wtr_level as double) - 796)*100*(5/4.4)/(3760-796) AS water_level,
+        time
+      FROM "${DB}"."${TABLE_SENSORS}"
+      WHERE time >= ago(24h)
+        AND time >= from_iso8601_timestamp('${SENSORS_DATA_CUTOFF}')
+        AND end_id = '${SENSOR_RAP_SIL}'
+        AND wtr_level IS NOT NULL
+    ),
+    clean AS (
+      SELECT
+        CASE WHEN water_level BETWEEN -5 AND 150 THEN water_level ELSE NULL END AS water_level,
+        time
+      FROM raw
+    )
+    SELECT
+      AVG(water_level) OVER (
+        ORDER BY time
+        ROWS BETWEEN 10 PRECEDING AND CURRENT ROW
+      ) AS water_level,
+      time
+    FROM clean
+    ORDER BY time ASC
+  `)
+  return rows
+    .map(r => ({ time: new Date(r.time), value: parseFloat(r.water_level) }))
+    .filter(d => isFinite(d.value))
+}
+
 async function fetchCurrentLevel(endId: string, expr: string): Promise<number> {
   const rows = await query(`
     SELECT ${expr} AS water_level
@@ -170,67 +206,78 @@ async function fetchCurrentLevel(endId: string, expr: string): Promise<number> {
 
 async function fetchFlow(endId: string, ptpName: string): Promise<FlowSeries> {
   const formula = FLOW_FORMULAS()[endId] ?? 'cast(flux as double)*60/(12*1000)'
+  // flux moved from TABLE_RT to TABLE_SENSORS at SENSORS_DATA_CUTOFF
   const rows = await query(`
     SELECT ${formula} AS value, time
     FROM "${DB}"."${TABLE_RT}"
     WHERE time >= ago(24h)
-    AND end_id = '${endId}'
+      AND time < from_iso8601_timestamp('${SENSORS_DATA_CUTOFF}')
+      AND end_id = '${endId}'
+
+    UNION ALL
+
+    SELECT ${formula} AS value, time
+    FROM "${DB}"."${TABLE_SENSORS}"
+    WHERE time >= ago(24h)
+      AND time >= from_iso8601_timestamp('${SENSORS_DATA_CUTOFF}')
+      AND end_id = '${endId}'
+      AND flux IS NOT NULL
+
     ORDER BY time ASC
   `)
   return {
     name: ptpName,
-    values: rows.map(r => ({ time: new Date(r.time), value: parseFloat(r.value) }))
+    values: rows
+      .map(r => ({ time: new Date(r.time), value: parseFloat(r.value) }))
+      .filter(d => isFinite(d.value))
   }
 }
 
-async function fetchProduction24h(): Promise<Record<string, any>[]> {
-  const ptps = Object.entries(PTP_NAMES())
-  const queries = ptps.map(async ([endId, name]) => {
-    const { pre, post } = PTP_FORMULAS()[endId]
-    const rows = await query(`
-      SELECT "hour", time,
-        ${productionExpr(name, pre, post)}
-      FROM "${DB}"."${TABLE_HOURLY}"
-      WHERE "time" >= AGO(1d)
-      AND end_id = '${endId}'
-      AND measure_name = 'L_acc'
-      ORDER BY time DESC LIMIT 24
-    `)
-    return { name, rows: rows.reverse() }
-  })
-  const results = await Promise.all(queries)
-  // Merge by hour index
-  const baseRows = results[0].rows
-  return baseRows.map((row, i) => {
-    const merged: Record<string, any> = { hour: row.hour ?? String(i) }
-    results.forEach(r => { merged[r.name] = parseFloat(r.rows[i]?.[r.name] ?? '0') })
+/** Merge per-PTP rows into one row per timestamp (a missing hour/day stays 0 for that PTP) */
+function mergeProductionRows(
+  results: { name: string; rows: Record<string, string>[] }[],
+  label: (row: Record<string, string>) => Record<string, any>,
+): Record<string, any>[] {
+  const byTime = new Map<string, Record<string, any>>()
+  results.forEach(r => r.rows.forEach(row => {
+    if (!byTime.has(row.time)) byTime.set(row.time, label(row))
+  }))
+  return [...byTime.keys()].sort().map(t => {
+    const merged = byTime.get(t)!
+    results.forEach(r => {
+      const row = r.rows.find(x => x.time === t)
+      merged[r.name] = parseFloat(row?.[r.name] ?? '0')
+    })
     return merged
   })
 }
 
-async function fetchProductionDaily(): Promise<Record<string, any>[]> {
-  const ptps = Object.entries(PTP_NAMES())
-  const queries = ptps.map(async ([endId, name]) => {
-    const { pre, post } = PTP_FORMULAS()[endId]
+async function fetchProduction24h(): Promise<Record<string, any>[]> {
+  const results = await Promise.all(Object.entries(PTP_NAMES()).map(async ([endId, name]) => {
     const rows = await query(`
-      SELECT day, time,
-        ${productionExpr(name, pre, post)}
-      FROM "${DB}"."${TABLE_DAILY}"
-      WHERE "time" >= AGO(7d)
+      SELECT hour, time, L_acc / (${PRODUCTION_DIVISORS()[endId]}) AS ${name}
+      FROM "${DB}"."${TABLE_HOURLY}"
+      WHERE time >= ago(1d)
       AND end_id = '${endId}'
-      AND measure_name = 'L_acc'
-      ORDER BY time DESC LIMIT 7
+      ORDER BY time DESC LIMIT 24
     `)
-    return { name, rows: rows.reverse() }
-  })
-  const results = await Promise.all(queries)
-  const baseRows = results[0].rows
-  return baseRows.map((row, i) => {
-    const d = new Date(row.time)
-    const merged: Record<string, any> = { day: d.getDate().toString() }
-    results.forEach(r => { merged[r.name] = parseFloat(r.rows[i]?.[r.name] ?? '0') })
-    return merged
-  })
+    return { name, rows }
+  }))
+  return mergeProductionRows(results, row => ({ hour: row.hour }))
+}
+
+async function fetchProductionDaily(): Promise<Record<string, any>[]> {
+  const results = await Promise.all(Object.entries(PTP_NAMES()).map(async ([endId, name]) => {
+    const rows = await query(`
+      SELECT day, time, L_acc / (${PRODUCTION_DIVISORS()[endId]}) AS ${name}
+      FROM "${DB}"."${TABLE_DAILY}"
+      WHERE time >= ago(6d)
+      AND end_id = '${endId}'
+      ORDER BY time DESC LIMIT 5
+    `)
+    return { name, rows }
+  }))
+  return mergeProductionRows(results, row => ({ day: row.day }))
 }
 
 // ── Main composable ───────────────────────────────────────────────────────────
@@ -254,17 +301,19 @@ export function useTimestreamDashboard() {
     error.value = null
     try {
       const [
-        silLevel, silSeries, mirLevel, mirSeries,
+        silSeries, mirLevel, mirSeries,
         flowResults, prod24h, prodDaily
       ] = await Promise.all([
-        fetchCurrentLevel(SENSOR_RAP_SIL, silvanopolisLevelExpr),
-        fetchLevel(SENSOR_RAP_SIL, silvanopolisLevelExpr),
+        fetchSilvanopolisLevel(),
         fetchCurrentLevel(SENSOR_RAP_MIR, miranorteLevelExpr),
         fetchLevel(SENSOR_RAP_MIR, miranorteLevelExpr),
         Promise.all(Object.entries(PTP_NAMES()).map(([id, name]) => fetchFlow(id, name))),
         fetchProduction24h(),
         fetchProductionDaily(),
       ])
+
+      // Gauge shows the latest smoothed point of the series
+      const silLevel = silSeries.length ? silSeries[silSeries.length - 1].value : 0
 
       // ── Compute stats ────────────────────────────────────────────────────
       const silLevelStats = computeStats(silSeries.map(d => d.value))
