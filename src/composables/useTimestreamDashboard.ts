@@ -24,7 +24,14 @@ const SENSOR_PTP_01  = import.meta.env.VITE_SENSOR_PTP_01  as string
 const SENSOR_PTP_02  = import.meta.env.VITE_SENSOR_PTP_02  as string
 const SENSOR_PTP_03  = import.meta.env.VITE_SENSOR_PTP_03  as string
 const SENSOR_PTP_04  = import.meta.env.VITE_SENSOR_PTP_04  as string
-const SENSOR_RAP_MIR = import.meta.env.VITE_SENSOR_RAP_MIR as string
+const SENSOR_RAP_MIR = import.meta.env.VITE_SENSOR_RAP_MIR as string   // RAP 500 m³ Miranorte
+const SENSOR_RAP200_MIR   = import.meta.env.VITE_SENSOR_RAP200_MIR   as string
+const SENSOR_RAP150_PALTA = import.meta.env.VITE_SENSOR_RAP150_PALTA as string
+const SENSOR_CAPT_MIR     = import.meta.env.VITE_SENSOR_CAPT_MIR     as string   // Captação Miranorte (TUF-2000 meter)
+const SENSOR_PTP_01_MIR   = import.meta.env.VITE_SENSOR_PTP_01_MIR   as string   // PTP_01 Miranorte
+const SENSOR_PTP_01_PALTA = import.meta.env.VITE_SENSOR_PTP_01_PALTA as string
+const SENSOR_PTP_02_PALTA = import.meta.env.VITE_SENSOR_PTP_02_PALTA as string
+const SENSOR_PTP_04_PALTA = import.meta.env.VITE_SENSOR_PTP_04_PALTA as string
 const SENSOR_PTP_07  = import.meta.env.VITE_SENSOR_PTP_07  as string
 
 let client: TimestreamQueryClient | null = null
@@ -75,7 +82,67 @@ async function query(sql: string): Promise<Record<string, string>[]> {
 // Silvanópolis level moved from TABLE_RT (water_level) to TABLE_SENSORS (wtr_level) at this cutoff
 const SENSORS_DATA_CUTOFF = '2026-08-10T00:00:00Z'
 
-const miranorteLevelExpr = `(cast(water_level as double) - 796)*100*(5/4.2)/(3760-796)`
+// ── Tank level sensors ────────────────────────────────────────────────────────
+// Mirrors the Grafana dashboard variables w_level_* (all read wtr_level from TABLE_SENSORS).
+// Grafana rounds them to 10% to pick the tank image; here we keep full precision.
+export type TankKey = 'RAP_SIL' | 'RAP500_MIR' | 'RAP200_MIR' | 'RAP150_PALTA'
+
+interface TankConfig {
+  endId: string
+  expr: string          // wtr_level → % on TABLE_SENSORS
+  legacyExpr?: string   // water_level → % on TABLE_RT, before SENSORS_DATA_CUTOFF
+  smoothRows: number    // moving average = current row + N preceding
+}
+
+const LEVEL_TANKS = (): Record<TankKey, TankConfig> => ({
+  RAP_SIL: {
+    endId: SENSOR_RAP_SIL,
+    expr:       '(cast(wtr_level as double) - 796)*100*(5/4.4)/(3760-796)',
+    legacyExpr: '(cast(water_level as double) - 796)*100*(5/4.8)/(3760-796)',
+    smoothRows: 10,
+  },
+  RAP500_MIR: {
+    endId: SENSOR_RAP_MIR,
+    expr:       '(cast(wtr_level as double) - 796)*100*(5/4.8)/(3760-796)',
+    legacyExpr: '(cast(water_level as double) - 796)*100*(5/4.8)/(3760-796)',
+    smoothRows: 5,
+  },
+  RAP200_MIR: {
+    endId: SENSOR_RAP200_MIR,
+    expr:       '(cast(wtr_level as double) - 170)*100*(4.75/5)/(4095-0)',
+    legacyExpr: '(cast(water_level as double) - 170)*100*(4.75/5)/(4095-0)',
+    smoothRows: 10,
+  },
+  RAP150_PALTA: {
+    endId: SENSOR_RAP150_PALTA,
+    expr: '(cast(wtr_level as double) - 0)*(3.75/5)*100/(2048-0)',
+    smoothRows: 2,
+  },
+})
+
+// ── Site meters (Miranorte / Ponte Alta): flow from TABLE_SENSORS, production from hourly/daily ──
+interface SiteMeter {
+  name: string
+  endId: string
+  flow: string         // → m³/h
+  flowCol: string      // column that must be non-null for a flow reading
+  production: string   // L_acc → m³
+}
+
+const MIRANORTE_METERS = (): SiteMeter[] => [
+  // Captação: TUF-2000 meter, already m³/h and m³
+  { name: 'Captacao', endId: SENSOR_CAPT_MIR,   flow: 'cast(tuf2000_flow as double)',      flowCol: 'tuf2000_flow', production: 'L_acc' },
+  { name: 'PTP_01',   endId: SENSOR_PTP_01_MIR, flow: 'cast(flux as double)*60/(12*1000)', flowCol: 'flux',         production: 'L_acc / (12.0*1000)' },
+]
+
+const ptpPonteAlta = (name: string, endId: string): SiteMeter =>
+  ({ name, endId, flow: 'cast(flux as double)*60/(30*1000)', flowCol: 'flux', production: 'L_acc / (30.0*1000)' })
+
+const PONTE_ALTA_METERS = (): SiteMeter[] => [
+  ptpPonteAlta('PTP_01', SENSOR_PTP_01_PALTA),
+  ptpPonteAlta('PTP_02', SENSOR_PTP_02_PALTA),
+  ptpPonteAlta('PTP_04', SENSOR_PTP_04_PALTA),
+]
 
 // Production: hourly/daily tables store accumulated flux (L_acc); divide per PTP to get m³.
 // Same divisors as FLOW_FORMULAS (PTP_02 = 27 since its 2026-07-29 recalibration).
@@ -126,6 +193,12 @@ export interface LocationData {
   productionDailyStats: Record<string, SensorStats | null>  // keyed by PTP name
 }
 
+export interface TankData {
+  level: number
+  levelSeries: DataPoint[]
+  levelStats: SensorStats | null
+}
+
 /** Extract per-PTP stats from merged production rows */
 function productionStats(rows: Record<string, any>[]): Record<string, SensorStats | null> {
   if (!rows.length) return {}
@@ -140,38 +213,25 @@ function productionStats(rows: Record<string, any>[]): Record<string, SensorStat
 
 // ── Fetch functions ───────────────────────────────────────────────────────────
 
-async function fetchLevel(endId: string, expr: string): Promise<DataPoint[]> {
-  const rows = await query(`
-    SELECT ${expr} AS water_level, time
-    FROM "${DB}"."${TABLE_RT}"
-    WHERE time >= ago(24h)
-    AND end_id = '${endId}'
-    ORDER BY time ASC
-  `)
-  return rows.map(r => ({ time: new Date(r.time), value: parseFloat(r.water_level) }))
-}
-
-// Silvanópolis: union of old + new table, drop out-of-range readings, 11-point moving average
-async function fetchSilvanopolisLevel(): Promise<DataPoint[]> {
-  const rows = await query(`
-    WITH raw AS (
-      SELECT
-        (cast(water_level as double) - 796)*100*(5/4.8)/(3760-796) AS water_level,
-        time
+// Tank level: old table (if any) + new table, drop out-of-range readings, moving average
+async function fetchTankLevel(key: TankKey): Promise<DataPoint[]> {
+  const { endId, expr, legacyExpr, smoothRows } = LEVEL_TANKS()[key]
+  const legacy = legacyExpr ? `
+      SELECT ${legacyExpr} AS water_level, time
       FROM "${DB}"."${TABLE_RT}"
       WHERE time >= ago(24h)
         AND time < from_iso8601_timestamp('${SENSORS_DATA_CUTOFF}')
-        AND end_id = '${SENSOR_RAP_SIL}'
+        AND end_id = '${endId}'
 
       UNION ALL
-
-      SELECT
-        (cast(wtr_level as double) - 796)*100*(5/4.4)/(3760-796) AS water_level,
-        time
+` : ''
+  const rows = await query(`
+    WITH raw AS (${legacy}
+      SELECT ${expr} AS water_level, time
       FROM "${DB}"."${TABLE_SENSORS}"
       WHERE time >= ago(24h)
         AND time >= from_iso8601_timestamp('${SENSORS_DATA_CUTOFF}')
-        AND end_id = '${SENSOR_RAP_SIL}'
+        AND end_id = '${endId}'
         AND wtr_level IS NOT NULL
     ),
     clean AS (
@@ -183,7 +243,7 @@ async function fetchSilvanopolisLevel(): Promise<DataPoint[]> {
     SELECT
       AVG(water_level) OVER (
         ORDER BY time
-        ROWS BETWEEN 10 PRECEDING AND CURRENT ROW
+        ROWS BETWEEN ${smoothRows} PRECEDING AND CURRENT ROW
       ) AS water_level,
       time
     FROM clean
@@ -192,16 +252,6 @@ async function fetchSilvanopolisLevel(): Promise<DataPoint[]> {
   return rows
     .map(r => ({ time: new Date(r.time), value: parseFloat(r.water_level) }))
     .filter(d => isFinite(d.value))
-}
-
-async function fetchCurrentLevel(endId: string, expr: string): Promise<number> {
-  const rows = await query(`
-    SELECT ${expr} AS water_level
-    FROM "${DB}"."${TABLE_RT}"
-    WHERE end_id = '${endId}'
-    ORDER BY time DESC LIMIT 1
-  `)
-  return rows.length ? parseFloat(rows[0].water_level) : 0
 }
 
 async function fetchFlow(endId: string, ptpName: string): Promise<FlowSeries> {
@@ -252,6 +302,26 @@ function mergeProductionRows(
   })
 }
 
+// Flow per meter (last 24h) from TABLE_SENSORS
+async function fetchSiteFlow(meters: SiteMeter[]): Promise<FlowSeries[]> {
+  return Promise.all(meters.map(async ({ name, endId, flow, flowCol }) => {
+    const rows = await query(`
+      SELECT ${flow} AS value, time
+      FROM "${DB}"."${TABLE_SENSORS}"
+      WHERE time >= ago(24h)
+        AND end_id = '${endId}'
+        AND ${flowCol} IS NOT NULL
+      ORDER BY time ASC
+    `)
+    return {
+      name,
+      values: rows
+        .map(r => ({ time: new Date(r.time), value: parseFloat(r.value) }))
+        .filter(d => isFinite(d.value)),
+    }
+  }))
+}
+
 async function fetchProduction24h(): Promise<Record<string, any>[]> {
   const results = await Promise.all(Object.entries(PTP_NAMES()).map(async ([endId, name]) => {
     const rows = await query(`
@@ -264,6 +334,24 @@ async function fetchProduction24h(): Promise<Record<string, any>[]> {
     return { name, rows }
   }))
   return mergeProductionRows(results, row => ({ hour: row.hour }))
+}
+
+// Production per meter (hourly: last 24 rows, daily: last 7 rows)
+async function fetchSiteProduction(period: 'hourly' | 'daily', meters: SiteMeter[]): Promise<Record<string, any>[]> {
+  const { table, label, window, limit } = period === 'hourly'
+    ? { table: TABLE_HOURLY, label: 'hour', window: '1d', limit: 24 }
+    : { table: TABLE_DAILY,  label: 'day',  window: '7d', limit: 7 }
+  const results = await Promise.all(meters.map(async ({ name, endId, production }) => {
+    const rows = await query(`
+      SELECT ${label}, time, ${production} AS ${name}
+      FROM "${DB}"."${table}"
+      WHERE time >= ago(${window})
+      AND end_id = '${endId}'
+      ORDER BY time DESC LIMIT ${limit}
+    `)
+    return { name, rows }
+  }))
+  return mergeProductionRows(results, row => ({ [label]: row[label] }))
 }
 
 async function fetchProductionDaily(): Promise<Record<string, any>[]> {
@@ -290,6 +378,14 @@ export function useTimestreamDashboard() {
     level: 0, levelSeries: [], flowSeries: [], production24h: [], productionDaily: [],
     levelStats: null, flowStats: {}, production24hStats: {}, productionDailyStats: {}
   })
+  const miranorte200 = ref<TankData>({ level: 0, levelSeries: [], levelStats: null })
+  const miranorteFlow = ref<FlowSeries[]>([])
+  const miranorteProduction24h = ref<Record<string, any>[]>([])
+  const miranorteProductionDaily = ref<Record<string, any>[]>([])
+  const ponteAlta = ref<TankData>({ level: 0, levelSeries: [], levelStats: null })
+  const ponteAltaFlow = ref<FlowSeries[]>([])
+  const ponteAltaProduction24h = ref<Record<string, any>[]>([])
+  const ponteAltaProductionDaily = ref<Record<string, any>[]>([])
   const loading = ref(false)
   const error         = ref<string | null>(null)
   const rateLimited   = ref(false)
@@ -301,23 +397,37 @@ export function useTimestreamDashboard() {
     error.value = null
     try {
       const [
-        silSeries, mirLevel, mirSeries,
+        silSeries, mirSeries, mir200Series, mirFlow, mirProd24h, mirProdDaily, paltaSeries,
+        paltaFlow, paltaProd24h, paltaProdDaily,
         flowResults, prod24h, prodDaily
       ] = await Promise.all([
-        fetchSilvanopolisLevel(),
-        fetchCurrentLevel(SENSOR_RAP_MIR, miranorteLevelExpr),
-        fetchLevel(SENSOR_RAP_MIR, miranorteLevelExpr),
+        fetchTankLevel('RAP_SIL'),
+        fetchTankLevel('RAP500_MIR'),
+        fetchTankLevel('RAP200_MIR'),
+        fetchSiteFlow(MIRANORTE_METERS()),
+        fetchSiteProduction('hourly', MIRANORTE_METERS()),
+        fetchSiteProduction('daily',  MIRANORTE_METERS()),
+        fetchTankLevel('RAP150_PALTA'),
+        fetchSiteFlow(PONTE_ALTA_METERS()),
+        fetchSiteProduction('hourly', PONTE_ALTA_METERS()),
+        fetchSiteProduction('daily',  PONTE_ALTA_METERS()),
         Promise.all(Object.entries(PTP_NAMES()).map(([id, name]) => fetchFlow(id, name))),
         fetchProduction24h(),
         fetchProductionDaily(),
       ])
 
-      // Gauge shows the latest smoothed point of the series
-      const silLevel = silSeries.length ? silSeries[silSeries.length - 1].value : 0
+      // Gauges show the latest smoothed point of each series
+      const latest = (series: DataPoint[]) => series.length ? series[series.length - 1].value : 0
+      const silLevel = latest(silSeries)
+      const mirLevel = latest(mirSeries)
+      const mir200Level = latest(mir200Series)
+      const paltaLevel = latest(paltaSeries)
 
       // ── Compute stats ────────────────────────────────────────────────────
       const silLevelStats = computeStats(silSeries.map(d => d.value))
       const mirLevelStats = computeStats(mirSeries.map(d => d.value))
+      const mir200LevelStats = computeStats(mir200Series.map(d => d.value))
+      const paltaLevelStats = computeStats(paltaSeries.map(d => d.value))
 
       const flowStatsMap: Record<string, SensorStats | null> = {}
       flowResults.forEach(s => {
@@ -349,12 +459,22 @@ export function useTimestreamDashboard() {
         production24hStats:   prod24hStats,
         productionDailyStats: prodDailyStats,
       }
+      miranorte200.value = { level: mir200Level, levelSeries: mir200Series, levelStats: mir200LevelStats }
+      miranorteFlow.value = mirFlow
+      miranorteProduction24h.value = mirProd24h
+      miranorteProductionDaily.value = mirProdDaily
+      ponteAlta.value = { level: paltaLevel, levelSeries: paltaSeries, levelStats: paltaLevelStats }
+      ponteAltaFlow.value = paltaFlow
+      ponteAltaProduction24h.value = paltaProd24h
+      ponteAltaProductionDaily.value = paltaProdDaily
       lastUpdated.value = new Date().toLocaleTimeString()
       appendSnapshot(silvanopolis.value, miranorte.value)
 
       // ── Persist boxplot stats to S3 (fire-and-forget) ───────────────────
       if (silLevelStats) saveBoxPlotRecord(SENSOR_RAP_SIL, 'RAP_Silvanopolis', silLevelStats).catch(() => {})
       if (mirLevelStats) saveBoxPlotRecord(SENSOR_RAP_MIR, 'RAP_Miranorte',    mirLevelStats).catch(() => {})
+      if (mir200LevelStats) saveBoxPlotRecord(SENSOR_RAP200_MIR, 'RAP200_Miranorte', mir200LevelStats).catch(() => {})
+      if (paltaLevelStats) saveBoxPlotRecord(SENSOR_RAP150_PALTA, 'RAP150_PonteAlta', paltaLevelStats).catch(() => {})
       flowResults.forEach(s => {
         const st = flowStatsMap[s.name]
         if (st) saveBoxPlotRecord(s.name, s.name, st).catch(() => {})
@@ -376,6 +496,14 @@ export function useTimestreamDashboard() {
   return {
     silvanopolis,
     miranorte,
+    miranorte200,
+    miranorteFlow,
+    miranorteProduction24h,
+    miranorteProductionDaily,
+    ponteAlta,
+    ponteAltaFlow,
+    ponteAltaProduction24h,
+    ponteAltaProductionDaily,
     loading,
     error,
     rateLimited,

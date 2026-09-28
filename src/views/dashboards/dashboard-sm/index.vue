@@ -291,6 +291,200 @@
       </div>
     </div>
 
+    <div class="row g-3 mb-4">
+      <!-- Tank RAP 200 m³ -->
+      <div class="col-lg-3 col-md-4">
+        <div class="chart-card chart-card--center py-3">
+          <TankGauge
+            :value="miranorte200.level"
+            :size="200"
+            :title="t('monitoring.tank_title_mir200')"
+            :theme="isDark ? 'dark' : 'light'"
+          />
+        </div>
+      </div>
+      <!-- Level time series -->
+      <div class="col-lg-9 col-md-8">
+        <div class="chart-card">
+          <LevelTimeSeries
+            :data="miranorte200.levelSeries"
+            :thresholds="levelThresholds"
+            :title="t('monitoring.level_title_mir200')"
+            :theme="isDark ? 'dark' : 'light'"
+          />
+          <!-- SPC panel -->
+          <div class="spc-panel">
+            <button class="spc-toggle" @click="statsOpenMir200Level = !statsOpenMir200Level">
+              <span class="spc-toggle__icon">▶ {{ t('spc.model_used') }}</span>
+              <span class="spc-chevron" :class="{ open: statsOpenMir200Level }">▾</span>
+            </button>
+            <div v-show="statsOpenMir200Level" class="spc-body">
+              <ControlChart :theme="isDark ? 'dark' : 'light'"
+                :data="miranorte200.levelSeries"
+                :stats="miranorte200.levelStats"
+                unit="%"
+                title="Control Chart — Water Level · RAP 200m³ Miranorte"
+                :height="180"
+                :y-domain="[0, 110]"
+              />
+              <BoxPlot :theme="isDark ? 'dark' : 'light'"
+                :stats="miranorte200.levelStats"
+                unit="%"
+                :label="`${t('spc.box_plot')} · ${t('spc.water_level')} ${t('spc.distribution_24h')}`"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Flow Captação / PTP_01 Miranorte -->
+    <div class="row g-3 mb-4">
+      <div class="col-12">
+        <div class="chart-card">
+          <FlowTimeSeries
+            :data="miranorteFlow"
+            :title="t('monitoring.flow_title_mir')"
+            :colors="{ Captacao: '#73bf69', PTP_01: '#f2495c' }"
+            :theme="isDark ? 'dark' : 'light'"
+          />
+        </div>
+      </div>
+      <!-- Latest flow: Captação ETA / PTP_01 -->
+      <div v-for="stat in miranorteFlowStats" :key="stat.name" class="col-6">
+        <div class="chart-card stat-card">
+          <div class="stat-card__head">
+            <span class="stat-card__marker" :style="{ background: stat.color }"></span>
+            <span class="stat-card__label">{{ stat.label }}</span>
+          </div>
+          <div class="stat-card__value">
+            {{ stat.point ? stat.point.value.toFixed(1) : '—' }}<span class="stat-card__unit">m³/h</span>
+          </div>
+          <div class="stat-card__meta">
+            <span class="stat-card__dot" :class="stat.fresh ? 'is-online' : 'is-stale'"></span>
+            <template v-if="stat.point">
+              {{ stat.fresh ? t('monitoring.last_reading') : t('monitoring.no_recent_data') }}
+              · {{ stat.point.time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
+            </template>
+            <template v-else>{{ t('monitoring.no_recent_data') }}</template>
+          </div>
+        </div>
+      </div>
+      <!-- Production Captação / PTP_01 Miranorte -->
+      <div class="col-lg-6">
+        <div class="chart-card">
+          <ProductionBar
+            :data="miranorteProduction24h"
+            x-field="hour"
+            :title="t('monitoring.production_24h_mir')"
+            :colors="{ Captacao: '#73bf69', PTP_01: '#f2cc0c' }"
+            :theme="isDark ? 'dark' : 'light'"
+          />
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="chart-card">
+          <ProductionBar
+            :data="miranorteProductionDaily"
+            x-field="day"
+            :title="t('monitoring.production_daily_mir')"
+            :colors="{ Captacao: '#73bf69', PTP_01: '#f2cc0c' }"
+            :theme="isDark ? 'dark' : 'light'"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ PONTE ALTA ═══ -->
+    <div class="section-header">
+      <span class="section-header__icon">◈</span>
+      <span class="section-header__title">Ponte Alta</span>
+      <div class="section-header__line"></div>
+    </div>
+
+    <div class="row g-3 mb-4">
+      <!-- Tank RAP 150 m³ -->
+      <div class="col-lg-3 col-md-4">
+        <div class="chart-card chart-card--center py-3">
+          <TankGauge
+            :value="ponteAlta.level"
+            :size="200"
+            :title="t('monitoring.tank_title_palta')"
+            :theme="isDark ? 'dark' : 'light'"
+          />
+        </div>
+      </div>
+      <!-- Level time series -->
+      <div class="col-lg-9 col-md-8">
+        <div class="chart-card">
+          <LevelTimeSeries
+            :data="ponteAlta.levelSeries"
+            :thresholds="levelThresholds"
+            :title="t('monitoring.level_title_palta')"
+            :theme="isDark ? 'dark' : 'light'"
+          />
+          <!-- SPC panel -->
+          <div class="spc-panel">
+            <button class="spc-toggle" @click="statsOpenPaltaLevel = !statsOpenPaltaLevel">
+              <span class="spc-toggle__icon">▶ {{ t('spc.model_used') }}</span>
+              <span class="spc-chevron" :class="{ open: statsOpenPaltaLevel }">▾</span>
+            </button>
+            <div v-show="statsOpenPaltaLevel" class="spc-body">
+              <ControlChart :theme="isDark ? 'dark' : 'light'"
+                :data="ponteAlta.levelSeries"
+                :stats="ponteAlta.levelStats"
+                unit="%"
+                title="Control Chart — Water Level · RAP 150m³ Ponte Alta"
+                :height="180"
+                :y-domain="[0, 110]"
+              />
+              <BoxPlot :theme="isDark ? 'dark' : 'light'"
+                :stats="ponteAlta.levelStats"
+                unit="%"
+                :label="`${t('spc.box_plot')} · ${t('spc.water_level')} ${t('spc.distribution_24h')}`"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Flow / production PTPs Ponte Alta -->
+    <div class="row g-3 mb-4">
+      <div class="col-12">
+        <div class="chart-card">
+          <FlowTimeSeries
+            :data="ponteAltaFlow"
+            :title="t('monitoring.flow_title_palta')"
+            :colors="{ PTP_01: '#5794f2', PTP_02: '#f2cc0c', PTP_04: '#73bf69' }"
+            :theme="isDark ? 'dark' : 'light'"
+          />
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="chart-card">
+          <ProductionBar
+            :data="ponteAltaProduction24h"
+            x-field="hour"
+            :title="t('monitoring.production_24h_palta')"
+            :colors="{ PTP_01: '#5794f2', PTP_02: '#f2cc0c', PTP_04: '#73bf69' }"
+            :theme="isDark ? 'dark' : 'light'"
+          />
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="chart-card">
+          <ProductionBar
+            :data="ponteAltaProductionDaily"
+            x-field="day"
+            :title="t('monitoring.production_daily_palta')"
+            :colors="{ PTP_01: '#5794f2', PTP_02: '#f2cc0c', PTP_04: '#73bf69' }"
+            :theme="isDark ? 'dark' : 'light'"
+          />
+        </div>
+      </div>
+    </div>
+
     <!-- Footer -->
     <div class="dashboard-footer">
       <span>{{ t('monitoring.footer_text') }}</span>
@@ -300,7 +494,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import TankGauge from '@/components/charts/TankGauge.vue'
@@ -323,7 +517,7 @@ const siteMarkers = [
   { lat: -11.15430944152578, lng: -48.172973779141344, label: 'RAP01 Silvanópolis', color: '#4da6ff' },
 ]
 
-const { silvanopolis, miranorte, loading, error, rateLimited, rateLimitMins, lastUpdated, refresh } = useTimestreamDashboard()
+const { silvanopolis, miranorte, miranorte200, miranorteFlow, miranorteProduction24h, miranorteProductionDaily, ponteAlta, ponteAltaFlow, ponteAltaProduction24h, ponteAltaProductionDaily, loading, error, rateLimited, rateLimitMins, lastUpdated, refresh } = useTimestreamDashboard()
 
 // ── Threshold lines (matching Grafana) ──
 const levelThresholds = [
@@ -341,6 +535,24 @@ const statsOpenSilFlow    = ref(false)
 const statsOpenSilProd24h = ref(false)
 const statsOpenSilProdDay = ref(false)
 const statsOpenMirLevel   = ref(false)
+const statsOpenMir200Level = ref(false)
+const statsOpenPaltaLevel  = ref(false)
+
+// A reading older than this is shown as stale (sensors report ~every minute)
+const STAT_STALE_MS = 10 * 60 * 1000
+
+// Latest reading of each Miranorte flow series (Grafana stat panels "Captação ETA" / "PTP_01")
+const miranorteFlowStats = computed(() =>
+  [
+    { name: 'Captacao', label: t('monitoring.stat_captacao_eta'), color: '#73bf69' },
+    { name: 'PTP_01',   label: 'PTP_01',                          color: '#f2495c' },
+  ].map(s => {
+    const values = miranorteFlow.value.find(f => f.name === s.name)?.values ?? []
+    const point = values.length ? values[values.length - 1] : null
+    const fresh = !!point && Date.now() - point.time.getTime() < STAT_STALE_MS
+    return { ...s, point, fresh }
+  })
+)
 
 // ── Auto-refresh every 1 min with countdown ──
 const REFRESH_SECS = 300
@@ -630,6 +842,71 @@ onUnmounted(() => {
   border-radius: 50%;
   flex-shrink: 0;
 }
+
+/* ── Stat card (latest reading) ── */
+.chart-card.stat-card {
+  height: auto;
+  border-radius: 12px;
+  padding: 0.9rem 1.1rem;
+}
+.stat-card__head {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+.stat-card__marker {            /* series colour, same as the chart legend */
+  width: 10px;
+  height: 3px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.stat-card__label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #9aa0b8;
+  letter-spacing: 0.3px;
+}
+.stat-card__value {
+  margin-top: 0.35rem;
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: #ffffff;
+  font-variant-numeric: tabular-nums;
+}
+.stat-card__unit {
+  margin-left: 0.3rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: rgba(255,255,255,0.5);
+}
+.stat-card__meta {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.4rem;
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.5);
+}
+.stat-card__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.stat-card__dot.is-online {
+  background: #4ade80;
+  animation: statPulse 2s infinite;
+}
+.stat-card__dot.is-stale { background: #f58b06; }
+@keyframes statPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(74,222,128,0.6); }
+  100% { box-shadow: 0 0 0 6px rgba(74,222,128,0); }
+}
+.theme-light .stat-card__label { color: #5a6e94; }
+.theme-light .stat-card__value { color: #102a83; }
+.theme-light .stat-card__unit,
+.theme-light .stat-card__meta  { color: #8a969c; }
 
 /* ── Rate limit alert ── */
 .rate-limit-alert {

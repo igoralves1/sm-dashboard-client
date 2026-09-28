@@ -152,10 +152,27 @@ See `.env.example` for the full list of variable names.
 | PTP_02 | `VITE_SENSOR_PTP_02` | Silvanópolis — pump 2 | Flow, Production |
 | PTP_03 | `VITE_SENSOR_PTP_03` | Silvanópolis — pump 3 | Flow, Production |
 | PTP_04 | `VITE_SENSOR_PTP_04` | Silvanópolis — pump 4 | Flow, Production |
-| RAP_Miranorte | `VITE_SENSOR_RAP_MIR` | Miranorte — reservoir | Tank gauge, Level chart |
+| RAP_Miranorte (500 m³) | `VITE_SENSOR_RAP_MIR` | Miranorte — reservoir 500 m³ | Tank gauge, Level chart |
+| RAP200_Miranorte | `VITE_SENSOR_RAP200_MIR` | Miranorte — reservoir 200 m³ | Tank gauge, Level chart |
+| RAP150_PonteAlta | `VITE_SENSOR_RAP150_PALTA` | Ponte Alta — reservoir 150 m³ | Tank gauge, Level chart (3-pt avg) |
+| Captacao_Miranorte | `VITE_SENSOR_CAPT_MIR` | Miranorte — intake (TUF-2000, `tuf2000_flow` already m³/h) | Flow Captação/PTP_01 |
+| PTP_01_Miranorte | `VITE_SENSOR_PTP_01_MIR` | Miranorte — pump 1 (`flux*60/(12*1000)`) | Flow Captação/PTP_01 |
+| PTP_01/02/04 Ponte Alta | `VITE_SENSOR_PTP_0{1,2,4}_PALTA` | Ponte Alta — pumps (`flux*60/(30*1000)`, `L_acc/30000`) | Flow + Production 24h/daily |
 | PTP_07 | `VITE_SENSOR_PTP_07` | Miranorte — pump 7 | Flow, Production |
 
 ---
+
+### Tank level formulas (`LEVEL_TANKS` in useTimestreamDashboard.ts)
+
+Source: Grafana dashboard variables `w_level_*`. All read `wtr_level` from `HidroForteSensorsData` (`VITE_TIMESTREAM_TABLE_SENSORS`).
+App applies clamp −5..150 + 11-point moving average; Grafana's `ROUND(x/10)*10` is only for the tank image.
+
+| Tank | end_id | Formula |
+|---|---|---|
+| RAP_SIL | `smc01ow` | `(wtr_level - 796)*100*(5/4.4)/(3760-796)` |
+| RAP500_MIR | `smcait1` | `(wtr_level - 796)*100*(5/4.8)/(3760-796)` |
+| RAP200_MIR | `smclup1` | `(wtr_level - 170)*100*(4.75/5)/(4095-0)` |
+| RAP150_PALTA | `smclxll` | `(wtr_level - 0)*(3.75/5)*100/(2048-0)` |
 
 ## 5. PTP CALIBRATION FORMULAS
 

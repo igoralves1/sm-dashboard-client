@@ -50,6 +50,13 @@ jobs:
           VITE_SENSOR_PTP_03:            ${{ secrets.VITE_SENSOR_PTP_03 }}
           VITE_SENSOR_PTP_04:            ${{ secrets.VITE_SENSOR_PTP_04 }}
           VITE_SENSOR_RAP_MIR:           ${{ secrets.VITE_SENSOR_RAP_MIR }}
+          VITE_SENSOR_RAP200_MIR:        ${{ secrets.VITE_SENSOR_RAP200_MIR }}
+          VITE_SENSOR_RAP150_PALTA:      ${{ secrets.VITE_SENSOR_RAP150_PALTA }}
+          VITE_SENSOR_CAPT_MIR:          ${{ secrets.VITE_SENSOR_CAPT_MIR }}
+          VITE_SENSOR_PTP_01_MIR:        ${{ secrets.VITE_SENSOR_PTP_01_MIR }}
+          VITE_SENSOR_PTP_01_PALTA:      ${{ secrets.VITE_SENSOR_PTP_01_PALTA }}
+          VITE_SENSOR_PTP_02_PALTA:      ${{ secrets.VITE_SENSOR_PTP_02_PALTA }}
+          VITE_SENSOR_PTP_04_PALTA:      ${{ secrets.VITE_SENSOR_PTP_04_PALTA }}
           VITE_SENSOR_PTP_07:            ${{ secrets.VITE_SENSOR_PTP_07 }}
 
       - name: Setup Pages

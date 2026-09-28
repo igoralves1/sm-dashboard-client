@@ -2,7 +2,7 @@
   <div class="flow-wrapper" :class="theme === 'light' ? 'chart-theme-light' : 'chart-theme-dark'">
     <!-- Header: title + PTP legend -->
     <div class="chart-header">
-      <div class="chart-main-title">{{ t('monitoring.flow_title') }}</div>
+      <div class="chart-main-title">{{ title ?? t('monitoring.flow_title') }}</div>
       <div class="chart-legend">
         <span
           v-for="s in data" :key="s.name"
@@ -42,7 +42,11 @@ import { useI18n } from 'vue-i18n'
 import * as d3 from 'd3'
 
 interface Series { name: string; values: { time: Date; value: number }[] }
-const props = defineProps<{ data: Series[]; height?: number; theme?: 'dark' | 'light' }>()
+const props = defineProps<{
+  data: Series[]; height?: number; theme?: 'dark' | 'light'
+  title?: string
+  colors?: Record<string, string>   // per-series overrides of COLORS
+}>()
 const { t, locale } = useI18n()
 const containerRef = ref<HTMLDivElement | null>(null)
 const tooltipRef   = ref<HTMLDivElement | null>(null)
@@ -87,7 +91,7 @@ const COLORS: Record<string, string> = {
   PTP_01: '#fade2a', PTP_02: '#ff9830', PTP_03: '#5794f2',
   PTP_04: '#73bf69', PTP_07: '#f2495c',
 }
-const colorOf = (name: string) => COLORS[name] ?? '#aaa'
+const colorOf = (name: string) => props.colors?.[name] ?? COLORS[name] ?? '#aaa'
 
 function draw() {
   if (!containerRef.value || !props.data.length) return

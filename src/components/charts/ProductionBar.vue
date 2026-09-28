@@ -102,6 +102,7 @@ const props = defineProps<{
   height?: number
   title?: string
   theme?: 'dark' | 'light'
+  colors?: Record<string, string>   // per-series overrides of COLORS
 }>()
 
 const tc = useChartTheme(() => props.theme)
@@ -152,7 +153,7 @@ const COLORS: Record<string, string> = {
   PTP_01: '#73bf69', PTP_02: '#8ab8ff', PTP_03: '#f2cc0c',
   PTP_04: '#ff9830', PTP_07: '#e02f44',
 }
-const colorOf = (name: string) => COLORS[name] ?? '#aaa'
+const colorOf = (name: string) => props.colors?.[name] ?? COLORS[name] ?? '#aaa'
 
 const ptpKeys = computed(() =>
   props.data.length ? Object.keys(props.data[0]).filter(k => k !== props.xField && k !== 'time') : []
