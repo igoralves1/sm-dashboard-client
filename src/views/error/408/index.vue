@@ -33,7 +33,7 @@
                         </RouterLink>
                       </div>
                       <p class="text-center text-muted mt-5 mb-0">
-                        © 2014 - {{ currentYear }} SIMEMAP — by
+                        © 2014 - {{ currentYear }} {{ appName }} — by
                         <span class="fw-bold">{{ author }}</span>
                       </p>
                     </BCardBody>
@@ -57,7 +57,7 @@
 </template>
 
 <script setup lang="ts">
-import { author, currentYear } from '@/helpers'
+import { author, currentYear, appName } from '@/helpers'
 import AuthLogo from '@/components/AuthLogo.vue'
 import { usePageMeta } from '@/composables/usePageMeta'
 

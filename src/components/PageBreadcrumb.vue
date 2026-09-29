@@ -7,7 +7,7 @@
     <div class="text-end">
       <ol class="breadcrumb m-0 py-0">
         <li class="breadcrumb-item">
-          <RouterLink to="/">SIMEMAP</RouterLink>
+          <RouterLink to="/">{{ appName }}</RouterLink>
           <Icon icon="tabler:chevron-right" class="breadcrumb-arrow ms-1" />
         </li>
         <li v-if="subtitle" class="breadcrumb-item">
@@ -22,6 +22,7 @@
 
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
+import { appName } from '@/helpers'
 
 type PropsType = {
   title: string

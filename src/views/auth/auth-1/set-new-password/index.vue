@@ -1,5 +1,5 @@
 <template>
-  <div class="sm-auth">
+  <div class="sm-auth" :class="`sm-auth--${brand.id}`">
 
     <!-- ── Left panel: branding ── -->
     <div class="sm-auth__left">
@@ -26,7 +26,7 @@
       <div class="sm-auth__left-content">
         <div class="sm-auth__logo">
           <RouterLink to="/">
-            <img :src="pranLogo" alt="SIMEMAP" style="height:200px" />
+            <img :src="brand.logos.onDark" :alt="brand.name" style="height:200px" />
           </RouterLink>
         </div>
 
@@ -134,7 +134,7 @@
         </p>
 
         <div class="sm-auth__footer">
-          © {{ currentYear }} SIMEMAP. All rights reserved.
+          © {{ currentYear }} {{ brand.name }}. {{ t('login.rights') }}
         </div>
       </div>
     </div>
@@ -146,7 +146,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { Icon } from '@iconify/vue'
 import { currentYear } from '@/helpers'
-import pranLogo from '@/assets/images/simemap-logo-white.svg'
+import { brand } from '@/brands/brand'
 import { useAuthStore } from '@/stores/auth.ts'
 import { useI18n } from 'vue-i18n'
 
@@ -473,4 +473,35 @@ async function handleSubmit() {
   .sm-auth__left { padding: 36px 20px; }
   .sm-auth__right { padding: 36px 20px; }
 }
+
+/* ─── prana brand (VITE_BRAND=prana) — colours from the prana branch ─── */
+.sm-auth--prana .sm-auth__left {
+  background: linear-gradient(145deg, #017b56 0%, #2a7a1a 45%, #4a8c10 100%);
+}
+.sm-auth--prana .sm-feature__icon { background: rgba(226,74,25,0.25); color: #e24a19; }
+.sm-auth--prana .sm-feature__icon--water { background: rgba(144,210,236,0.25); color: #90d2ec; }
+.sm-auth--prana .sm-feature__icon--tele { background: rgba(214,170,1,0.2); color: #d6aa01; }
+.sm-auth--prana .sm-status-dot {
+  background: #d6aa01;
+  animation-name: pulse-dot-prana;
+}
+@keyframes pulse-dot-prana {
+  0%   { box-shadow: 0 0 0 0 rgba(214,170,1,0.6); }
+  70%  { box-shadow: 0 0 0 8px rgba(214,170,1,0); }
+  100% { box-shadow: 0 0 0 0 rgba(214,170,1,0); }
+}
+.sm-auth--prana .sm-auth__form-header h2 {
+  font-family: inherit;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #017b56;
+}
+.sm-auth--prana .sm-input:focus { border-color: #e24a19 !important; }
+.sm-auth--prana .sm-btn-primary {
+  font-family: inherit;
+  background: linear-gradient(135deg, #e24a19 0%, #d6aa01 100%) !important;
+  font-weight: 600 !important;
+  font-size: 0.9rem !important;
+}
+.sm-auth--prana .sm-auth__register a { color: #017b56; }
 </style>

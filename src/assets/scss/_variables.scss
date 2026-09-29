@@ -309,8 +309,10 @@ $cyans: (
 // fusv-enable
 
 // scss-docs-start theme-color-variables
-$primary: #102a83; // SIMEMAP wordmark navy
-$secondary: #009ee0; // SIMEMAP icon gradient cyan
+// Brand colours — $brand is injected by vite.config.ts from VITE_BRAND
+$brand: 'simemap' !default;
+$primary: if($brand == 'prana', $teal, #102a83); // prana teal | SIMEMAP wordmark navy
+$secondary: if($brand == 'prana', $blue, #009ee0); // prana blue | SIMEMAP icon gradient cyan
 $success: $green;
 $info: $cyan;
 $warning: $yellow;

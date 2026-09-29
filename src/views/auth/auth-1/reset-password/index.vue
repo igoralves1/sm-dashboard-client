@@ -49,7 +49,7 @@
           </BCard>
 
           <p class="text-center text-muted mt-4 mb-0">
-            © 2018 - {{ currentYear }} SIMEMAP — by SIMEMAP
+            © 2018 - {{ currentYear }} {{ appName }} — by {{ author }}
           </p>
         </BCol>
       </BRow>
@@ -60,7 +60,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { currentYear } from '@/helpers'
+import { appName, author, currentYear } from '@/helpers'
 import { usePageMeta } from '@/composables/usePageMeta.ts'
 import AuthLogo from '@/components/AuthLogo.vue'
 import { useI18n } from 'vue-i18n'

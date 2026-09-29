@@ -38,9 +38,11 @@ import UserProfile from '@/layouts/components/sidenav/components/UserProfile.vue
 import AppMenu from '@/layouts/components/sidenav/components/AppMenu.vue'
 import { useLayout } from '@/stores/layout.ts'
 
-import logo from '@/assets/images/simemap-logo-white.svg'
-import logoSm from '@/assets/images/simemap-globe-white.svg'
-import logoDark from '@/assets/images/simemap-logo.svg'
+import { brand } from '@/brands/brand'
+
+const logo = brand.logos.sidenav
+const logoSm = brand.logos.sidenavSm
+const logoDark = brand.logos.dark
 
 const { layout, setSideNavSize, toggleMobileMenu } = useLayout()
 

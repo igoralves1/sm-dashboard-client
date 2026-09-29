@@ -8,7 +8,7 @@
       menu-class="dropdown-menu-xxl p-0"
     >
       <template #button-content>
-        SIMEMAP AIIoT
+        {{ brand.productName }}
         <Icon icon="tabler:chevron-down" class="ms-1" />
       </template>
 
@@ -17,7 +17,7 @@
           <BCol cols="12">
             <div class="p-3 text-center bg-light bg-opacity-50">
               <h4 class="mb-0 fs-lg fw-semibold">
-                {{ t('megamenu.welcome_pre') }} <span class="text-primary">SIMEMAP AIIoT</span> {{ t('megamenu.welcome_post') }}
+                {{ t('megamenu.welcome_pre') }} <span class="text-primary">{{ brand.productName }}</span> {{ t('megamenu.welcome_post') }}
               </h4>
             </div>
           </BCol>
@@ -43,6 +43,7 @@
 import { Icon } from '@iconify/vue'
 import simplebar from 'simplebar-vue'
 import { useI18n } from 'vue-i18n'
+import { brand } from '@/brands/brand'
 
 const { t } = useI18n()
 

@@ -320,7 +320,7 @@
     "level_title_mir200": "Niveau RAP 200m³ Miranorte",
     "tank_title_palta": "Niveau RAP 150m³ Ponte Alta",
     "level_title_palta": "Niveau RAP 150m³ Ponte Alta",
-    "footer_text": "SIMEMAP · AIIoT · Surveillance en temps réel",
+    "footer_text": "{brand} · AIIoT · Surveillance en temps réel",
     "level_critical": "Critique < 50 %",
     "level_alert": "Alerte 50–80 %",
     "level_normal": "Normal > 80 %",

@@ -1,16 +1,18 @@
+import { brand } from '@/brands/brand'
+
 type CurrencyType = '₹' | '$' | '€'
 
 export const currency: CurrencyType = '$'
 
 export const currentYear = new Date().getFullYear()
 
-export const appFavicon = '/sm-dashboard-client/favicon.svg'
-export const appName = 'SIMEMAP'
-export const appTitle = 'SIMEMAP - Admin Dashboard'
-export const appDescription: string =
-  'SIMEMAP admin dashboard.'
+// Brand-dependent values (VITE_BRAND) — see src/brands/brand.ts
+export const appFavicon = brand.favicon
+export const appName = brand.name
+export const appTitle = brand.appTitle
+export const appDescription: string = brand.appDescription
 
-export const author: string = 'SIMEMAP'
+export const author: string = brand.name
 export const authorWebsite: string = ''
 export const authorContact: string = ''
 

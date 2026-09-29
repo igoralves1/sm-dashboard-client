@@ -12,6 +12,7 @@ import type {
 import { toggleAttribute } from '@/helpers/layout'
 import { useSystemTheme } from '@/composables/useSystemTheme'
 import { ref } from 'vue'
+import { brand } from '@/brands/brand'
 
 const INIT_STATE: LayoutType = {
   skin: 'classic',
@@ -19,11 +20,11 @@ const INIT_STATE: LayoutType = {
   orientation: 'vertical',
   sidenav: {
     size: 'default',
-    color: 'simemap',
+    color: brand.themeColor,
     user: true,
   },
   topBar: {
-    color: 'simemap',
+    color: brand.themeColor,
   },
   position: 'fixed',
   width: 'fluid',
@@ -149,6 +150,6 @@ export const useLayout = defineStore(
     }
   },
   {
-    persist: { key: 'layout-v2' },
+    persist: { key: brand.layoutStorageKey },
   },
 )

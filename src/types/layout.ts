@@ -12,12 +12,12 @@ export type LayoutThemeType = 'light' | 'dark' | 'system'
 export type LayoutOrientationType = 'vertical' | 'horizontal'
 
 export type TopBarType = {
-  color: 'light' | 'dark' | 'gray' | 'gradient' | 'simemap'
+  color: 'light' | 'dark' | 'gray' | 'gradient' | 'simemap' | 'prana'
 }
 
 export type SideNavType = {
   size: 'default' | 'compact' | 'condensed' | 'on-hover' | 'on-hover-active' | 'offcanvas'
-  color: 'light' | 'dark' | 'gray' | 'gradient' | 'image' | 'simemap'
+  color: 'light' | 'dark' | 'gray' | 'gradient' | 'image' | 'simemap' | 'prana'
   user: boolean
 }
 

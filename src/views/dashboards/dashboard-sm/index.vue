@@ -4,7 +4,7 @@
     <!-- ═══ TOP HEADER BAR ═══ -->
     <div class="top-bar">
       <div class="top-bar__left">
-        <img src="@/assets/images/simemap-logo-white.svg" alt="SIMEMAP" class="top-bar__logo" />
+        <img :src="brand.logos.sidenav" :alt="brand.name" class="top-bar__logo" />
         <div class="top-bar__divider"></div>
         <div class="top-bar__meta">
           <span class="top-bar__meta-label">{{ t('monitoring.iot_realtime') }}</span>
@@ -549,7 +549,7 @@
 
     <!-- Footer -->
     <div class="dashboard-footer">
-      <span>{{ t('monitoring.footer_text') }}</span>
+      <span>{{ t('monitoring.footer_text', { brand: brand.name }) }}</span>
     </div>
 
   </div>
@@ -564,6 +564,7 @@ import LevelTimeSeries from '@/components/charts/LevelTimeSeries.vue'
 import FlowTimeSeries from '@/components/charts/FlowTimeSeries.vue'
 import ProductionBar from '@/components/charts/ProductionBar.vue'
 import SpcPanel from '@/components/charts/SpcPanel.vue'
+import { brand } from '@/brands/brand'
 import RefreshCountdown from '@/components/charts/RefreshCountdown.vue'
 import ControlChart from '@/components/charts/ControlChart.vue'
 import BoxPlot from '@/components/charts/BoxPlot.vue'

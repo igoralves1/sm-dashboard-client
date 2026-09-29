@@ -21,7 +21,7 @@
             </div>
 
             <p class="text-center text-muted mt-auto mb-0">
-              © 2014 - {{ currentYear }} SIMEMAP — by
+              © 2014 - {{ currentYear }} {{ appName }} — by
               <span class="fw-bold">{{ author }}</span>
             </p>
           </BCardBody>
@@ -32,7 +32,7 @@
 </template>
 
 <script setup lang="ts">
-import { author, currentYear } from '@/helpers'
+import { author, currentYear, appName } from '@/helpers'
 import { usePageMeta } from '@/composables/usePageMeta'
 import img500 from '@/assets/images/svg/500.svg'
 

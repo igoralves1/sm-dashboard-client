@@ -55,7 +55,7 @@
                   </p>
 
                   <p class="text-center text-muted mt-4 mb-0">
-                    © 2014 - {{ currentYear }} SIMEMAP — by
+                    © 2014 - {{ currentYear }} {{ appName }} — by
                     <span class="fw-semibold">{{ author }}</span>
                   </p>
                 </div>
@@ -78,7 +78,7 @@
 
 <script setup lang="ts">
 import { BCol, BContainer, BRow } from 'bootstrap-vue-next'
-import { author, currentYear } from '@/helpers'
+import { author, currentYear, appName } from '@/helpers'
 import AuthLogo from '@/components/AuthLogo.vue'
 import { Icon } from '@iconify/vue'
 import { usePageMeta } from '@/composables/usePageMeta.ts'

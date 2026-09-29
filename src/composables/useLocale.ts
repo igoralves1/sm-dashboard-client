@@ -3,11 +3,12 @@
  * Priority: 1. localStorage override  2. IP geolocation  3. browser language  4. default EN
  */
 import { ref, watch } from 'vue'
+import { brand } from '@/brands/brand'
 
 export type Locale = 'en' | 'pt' | 'es' | 'fr'
 
-const STORAGE_KEY = 'simemap_locale_v1'
-const GEO_CACHE   = 'simemap_geo_v1'   // shared with session tracker
+const STORAGE_KEY = `${brand.storagePrefix}locale_v1`
+const GEO_CACHE   = `${brand.storagePrefix}geo_v1`   // shared with session tracker
 
 const _locale = ref<Locale>(_loadSaved())
 

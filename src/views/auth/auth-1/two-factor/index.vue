@@ -59,7 +59,7 @@
           </BCard>
 
           <p class="text-center text-muted mt-4 mb-0">
-            © 2014 - {{ currentYear }} SIMEMAP — by <span class="fw-semibold">{{ author }}</span>
+            © 2014 - {{ currentYear }} {{ appName }} — by <span class="fw-semibold">{{ author }}</span>
           </p>
         </BCol>
       </BRow>
@@ -69,7 +69,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { author, currentYear } from '@/helpers'
+import { author, currentYear, appName } from '@/helpers'
 import VOtpInput from 'vue3-otp-input'
 import AuthLogo from '@/components/AuthLogo.vue'
 import { usePageMeta } from '@/composables/usePageMeta.ts'

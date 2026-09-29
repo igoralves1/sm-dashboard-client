@@ -442,3 +442,15 @@ This branch merges all `prana` features but keeps **SIMEMAP** branding:
 - All prana logos/SVGs deleted; prana theme blocks removed from `_theme-classic.scss`
 
 **Auto-refresh:** currently set to **300 seconds (5 min)** — `REFRESH_SECS = 300` in `useTimestreamDashboard.ts`
+
+### Brand switch (`VITE_BRAND` = `simemap` | `prana`, build-time)
+
+One codebase, two brands. Change `VITE_BRAND` in `.env` and restart `npm run dev`.
+- `src/brands/brand.ts` — names, logos, favicon, theme key, storage prefix (single source)
+- `vite.config.ts` — `brandHtml()` sets index.html title/favicon; injects SCSS `$brand`
+- `_variables.scss` — `$primary`/`$secondary` by `$brand`; `_theme-classic.scss` has both
+  `data-menu-color="simemap"` and `"prana"` blocks (layout store picks `brand.themeColor`)
+- Auth pages: `sm-auth--prana` class overrides colours/typography
+- Storage keys: `${brand.storagePrefix}*`; layout persisted under `brand.layoutStorageKey`
+- Deploy: GitHub Actions variable `VITE_BRAND` (defaults to `simemap`)
+

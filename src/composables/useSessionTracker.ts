@@ -1,3 +1,4 @@
+import { brand } from '@/brands/brand'
 /**
  * Behavioral session tracker.
  * Tracks per-page: time spent, mouse position (every 10s), clicks.
@@ -5,8 +6,8 @@
  * Storage key: simemap_sessions_v1 (localStorage, max 200 page sessions)
  */
 
-const STORAGE_KEY  = 'simemap_sessions_v1'
-const GEO_CACHE    = 'simemap_geo_v1'
+const STORAGE_KEY  = `${brand.storagePrefix}sessions_v1`
+const GEO_CACHE    = `${brand.storagePrefix}geo_v1`
 const SAMPLE_MS    = 10_000   // mouse position sample interval
 const MAX_SESSIONS = 200
 

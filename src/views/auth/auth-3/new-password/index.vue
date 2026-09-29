@@ -112,7 +112,7 @@
             </p>
 
             <p class="text-center text-muted mt-auto mb-0">
-              © 2014 - {{ currentYear }} SIMEMAP — by
+              © 2014 - {{ currentYear }} {{ appName }} — by
               <span class="fw-semibold">{{ author }}</span>
             </p>
           </BCardBody>
@@ -124,7 +124,7 @@
 
 <script setup lang="ts">
 import { BCard, BCol, BRow } from 'bootstrap-vue-next'
-import { author, currentYear } from '@/helpers'
+import { author, currentYear, appName } from '@/helpers'
 import { ref } from 'vue'
 import VOtpInput from 'vue3-otp-input'
 import AuthLogo from '@/components/AuthLogo.vue'

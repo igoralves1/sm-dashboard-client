@@ -72,9 +72,11 @@ import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
 
-import logo from '@/assets/images/simemap-logo.svg'
-import logoSm from '@/assets/images/simemap-logo.svg'
-import logoDark from '@/assets/images/simemap-logo.svg'
+import { brand } from '@/brands/brand'
+
+const logo = brand.logos.dark
+const logoSm = brand.logos.dark
+const logoDark = brand.logos.dark
 
 const { layout, setSideNavSize, toggleMobileMenu } = useLayout()
 

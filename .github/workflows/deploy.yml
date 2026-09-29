@@ -34,6 +34,7 @@ jobs:
       - name: Build
         run: npm run build
         env:
+          VITE_BRAND:                    ${{ vars.VITE_BRAND || 'simemap' }}
           VITE_AWS_REGION:               ${{ secrets.VITE_AWS_REGION }}
           VITE_IDENTITY_POOL_ID:         ${{ secrets.VITE_IDENTITY_POOL_ID }}
           VITE_USER_POOL_ID:             ${{ secrets.VITE_USER_POOL_ID }}
