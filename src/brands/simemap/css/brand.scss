@@ -1,0 +1,13 @@
+// ─── SIMEMAP Brand Variables ─────────────────────────────────────────────────
+// Override Bootstrap/theme $primary and $secondary before any other imports.
+
+$primary:   #102a83; // SIMEMAP wordmark navy
+$secondary: #009ee0; // SIMEMAP icon gradient cyan
+
+// Sidebar / topbar
+$leftbar-bg:        $primary;
+$topbar-bg:         $primary;
+
+// App name shown in sidebar / browser title
+$brand-name:        'SIMEMAP';
+$brand-tagline:     'Sistema de Monitoramento e Automação de Processos';

@@ -1,0 +1,13 @@
+// ─── PRANA Brand Variables ────────────────────────────────────────────────────
+// Override Bootstrap/theme $primary and $secondary before any other imports.
+
+$primary:   #017b56; // Prana teal
+$secondary: #1c84c6; // Prana blue
+
+// Sidebar / topbar
+$leftbar-bg:        $primary;
+$topbar-bg:         $primary;
+
+// App name shown in sidebar / browser title
+$brand-name:        'Prana';
+$brand-tagline:     'Predictive Maintenance & Supply Chain';
