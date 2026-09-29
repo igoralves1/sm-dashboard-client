@@ -25,7 +25,6 @@ onMounted(() => {
   if (!mapRef.value) return
 
   map = L.map(mapRef.value, { zoomControl: true, attributionControl: true })
-    .setView([-11.15430944152578, -48.172973779141344], 13)
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
@@ -53,6 +52,10 @@ onMounted(() => {
       .addTo(map!)
       .bindPopup(`<b>${m.label}</b>`)
   })
+
+  // One marker: fixed zoom around it; several: fit them all in view
+  if (markers.length === 1) map.setView([markers[0].lat, markers[0].lng], 13)
+  else map.fitBounds(L.latLngBounds(markers.map(m => [m.lat, m.lng] as [number, number])), { padding: [24, 24], maxZoom: 15 })
 })
 
 onUnmounted(() => { map?.remove(); map = null })

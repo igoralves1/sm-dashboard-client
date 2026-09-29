@@ -34,7 +34,7 @@
     </div>
 
     <!-- Anomaly diagnostics -->
-    <div v-if="computedAlerts.length" class="chart-notes" ref="notesRef">
+    <div v-if="ptpKeys.length" class="chart-notes" ref="notesRef">
       <div
         v-for="(anomaly, i) in computedAlerts" :key="i"
         :class="['chart-alert', `chart-alert--${anomaly.severity}`]"
@@ -50,10 +50,18 @@
           </span>
         </div>
       </div>
+      <!-- Series with no anomaly: explicit "normal" status instead of silence -->
+      <div v-for="key in normalSeries" :key="`ok-${key}`" class="chart-alert chart-alert--info">
+        <span class="alert-icon">✓</span>
+        <div class="alert-body">
+          <span class="alert-ptp">{{ key }}</span>
+          <span class="alert-text">{{ t('monitoring.normal_operation') }}</span>
+        </div>
+      </div>
     </div>
 
     <!-- Statistical model explanation (collapsible) -->
-    <div v-if="computedAlerts.length" class="model-section">
+    <div v-if="ptpKeys.length" class="model-section">
       <button class="model-toggle" @click="showModel = !showModel">
         {{ showModel ? '▾' : '▸' }} {{ t('dashboard.stat_model') }}
       </button>
@@ -173,6 +181,11 @@ const computedAlerts = computed<Anomaly[]>(() => {
   if (!props.data.length || !ptpKeys.value.length) return []
   return detectAnomalies(props.data, props.xField, ptpKeys.value)
 })
+
+// Series without any detected anomaly
+const normalSeries = computed(() =>
+  ptpKeys.value.filter(k => !computedAlerts.value.some(a => a.ptp === k))
+)
 
 // Persist detected anomalies to the shared alert store
 watch(computedAlerts, (anomalies) => {

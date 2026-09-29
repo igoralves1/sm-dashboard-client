@@ -334,6 +334,7 @@
     "no_recent_data": "Pas de données récentes",
     "production_title_fallback": "Production · PTPs · Silvanópolis",
     "prob_normal_op": "Prob. fonctionnement normal :",
+    "normal_operation": "Fonctionnement normal — aucune anomalie détectée",
     "stat_intro_bar": "Les diagnostics ci-dessus sont générés en deux étapes complémentaires. Pour chaque PTP, les paramètres sont calculés indépendamment.",
     "stat_h1_bar": "1 — Détection de pompe arrêtée",
     "stat_p1_bar": "Une valeur x est classée comme pompe arrêtée si :"

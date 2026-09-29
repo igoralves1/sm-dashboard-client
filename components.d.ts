@@ -88,6 +88,7 @@ declare module 'vue' {
     RouterView: typeof import('vue-router')['RouterView']
     ServiceTopology: typeof import('./src/components/charts/ServiceTopology.vue')['default']
     SiteMap: typeof import('./src/components/charts/SiteMap.vue')['default']
+    SpcPanel: typeof import('./src/components/charts/SpcPanel.vue')['default']
     SyncTimeSeries: typeof import('./src/components/charts/SyncTimeSeries.vue')['default']
     TablePagination: typeof import('./src/components/TablePagination.vue')['default']
     TankGauge: typeof import('./src/components/charts/TankGauge.vue')['default']

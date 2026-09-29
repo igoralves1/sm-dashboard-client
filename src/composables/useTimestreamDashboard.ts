@@ -193,16 +193,45 @@ export interface LocationData {
   productionDailyStats: Record<string, SensorStats | null>  // keyed by PTP name
 }
 
+const PRODUCTION_META_KEYS = ['hour', 'day', 'time']
+
+/** Per-series stats for flow time series */
+function flowStats(series: FlowSeries[]): Record<string, SensorStats | null> {
+  return Object.fromEntries(series.map(s => [s.name, computeStats(s.values.map(d => d.value))]))
+}
+
+/** Flow + production of a site whose meters are listed in *_METERS (Miranorte, Ponte Alta) */
+export interface SiteData {
+  flow: FlowSeries[]
+  flowStats: Record<string, SensorStats | null>
+  production24h: Record<string, any>[]
+  production24hStats: Record<string, SensorStats | null>
+  productionDaily: Record<string, any>[]
+  productionDailyStats: Record<string, SensorStats | null>
+}
+
+const emptySite = (): SiteData => ({
+  flow: [], flowStats: {}, production24h: [], production24hStats: {}, productionDaily: [], productionDailyStats: {},
+})
+
+function siteData(flow: FlowSeries[], production24h: Record<string, any>[], productionDaily: Record<string, any>[]): SiteData {
+  return {
+    flow, flowStats: flowStats(flow),
+    production24h, production24hStats: productionStats(production24h),
+    productionDaily, productionDailyStats: productionStats(productionDaily),
+  }
+}
+
 export interface TankData {
   level: number
   levelSeries: DataPoint[]
   levelStats: SensorStats | null
 }
 
-/** Extract per-PTP stats from merged production rows */
+/** Extract per-series stats from merged production rows (every column except the x label / time) */
 function productionStats(rows: Record<string, any>[]): Record<string, SensorStats | null> {
   if (!rows.length) return {}
-  const ptpKeys = Object.keys(rows[0]).filter(k => k.startsWith('PTP'))
+  const ptpKeys = Object.keys(rows[0]).filter(k => !PRODUCTION_META_KEYS.includes(k))
   const result: Record<string, SensorStats | null> = {}
   ptpKeys.forEach(k => {
     const vals = rows.map(r => parseFloat(r[k] ?? '0')).filter(v => isFinite(v) && v > 0)
@@ -290,7 +319,7 @@ function mergeProductionRows(
 ): Record<string, any>[] {
   const byTime = new Map<string, Record<string, any>>()
   results.forEach(r => r.rows.forEach(row => {
-    if (!byTime.has(row.time)) byTime.set(row.time, label(row))
+    if (!byTime.has(row.time)) byTime.set(row.time, { ...label(row), time: row.time })
   }))
   return [...byTime.keys()].sort().map(t => {
     const merged = byTime.get(t)!
@@ -379,13 +408,9 @@ export function useTimestreamDashboard() {
     levelStats: null, flowStats: {}, production24hStats: {}, productionDailyStats: {}
   })
   const miranorte200 = ref<TankData>({ level: 0, levelSeries: [], levelStats: null })
-  const miranorteFlow = ref<FlowSeries[]>([])
-  const miranorteProduction24h = ref<Record<string, any>[]>([])
-  const miranorteProductionDaily = ref<Record<string, any>[]>([])
+  const miranorteSite = ref<SiteData>(emptySite())
   const ponteAlta = ref<TankData>({ level: 0, levelSeries: [], levelStats: null })
-  const ponteAltaFlow = ref<FlowSeries[]>([])
-  const ponteAltaProduction24h = ref<Record<string, any>[]>([])
-  const ponteAltaProductionDaily = ref<Record<string, any>[]>([])
+  const ponteAltaSite = ref<SiteData>(emptySite())
   const loading = ref(false)
   const error         = ref<string | null>(null)
   const rateLimited   = ref(false)
@@ -460,13 +485,9 @@ export function useTimestreamDashboard() {
         productionDailyStats: prodDailyStats,
       }
       miranorte200.value = { level: mir200Level, levelSeries: mir200Series, levelStats: mir200LevelStats }
-      miranorteFlow.value = mirFlow
-      miranorteProduction24h.value = mirProd24h
-      miranorteProductionDaily.value = mirProdDaily
+      miranorteSite.value = siteData(mirFlow, mirProd24h, mirProdDaily)
       ponteAlta.value = { level: paltaLevel, levelSeries: paltaSeries, levelStats: paltaLevelStats }
-      ponteAltaFlow.value = paltaFlow
-      ponteAltaProduction24h.value = paltaProd24h
-      ponteAltaProductionDaily.value = paltaProdDaily
+      ponteAltaSite.value = siteData(paltaFlow, paltaProd24h, paltaProdDaily)
       lastUpdated.value = new Date().toLocaleTimeString()
       appendSnapshot(silvanopolis.value, miranorte.value)
 
@@ -497,13 +518,9 @@ export function useTimestreamDashboard() {
     silvanopolis,
     miranorte,
     miranorte200,
-    miranorteFlow,
-    miranorteProduction24h,
-    miranorteProductionDaily,
+    miranorteSite,
     ponteAlta,
-    ponteAltaFlow,
-    ponteAltaProduction24h,
-    ponteAltaProductionDaily,
+    ponteAltaSite,
     loading,
     error,
     rateLimited,

@@ -334,6 +334,7 @@
     "no_recent_data": "Sem dados recentes",
     "production_title_fallback": "Produção · PTPs · Silvanópolis",
     "prob_normal_op": "Prob. em operação normal:",
+    "normal_operation": "Operação normal — nenhuma anomalia detectada",
     "stat_intro_bar": "Os diagnósticos acima são gerados por dois estágios complementares. Para cada PTP, os parâmetros são calculados independentemente usando apenas os valores daquela série.",
     "stat_h1_bar": "1 — Detecção de bomba desligada",
     "stat_p1_bar": "Um valor x é classificado como bomba desligada se:"

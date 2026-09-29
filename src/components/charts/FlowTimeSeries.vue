@@ -46,6 +46,8 @@ const props = defineProps<{
   data: Series[]; height?: number; theme?: 'dark' | 'light'
   title?: string
   colors?: Record<string, string>   // per-series overrides of COLORS
+  // Grafana-style threshold steps: each colour applies from `value` up to the next step
+  thresholds?: { value: number; color: string }[]
 }>()
 const { t, locale } = useI18n()
 const containerRef = ref<HTMLDivElement | null>(null)
@@ -131,6 +133,23 @@ function draw() {
   g.append('g').call(d3.axisLeft(y).tickSize(-W).tickFormat(() => ''))
     .call(gr => gr.select('.domain').remove())
     .call(gr => gr.selectAll('.tick line').attr('stroke', tc.value.grid).attr('stroke-dasharray', '2,2'))
+
+  // Threshold bands + dashed boundaries
+  const steps = [...(props.thresholds ?? [])].sort((a, b) => a.value - b.value)
+  const yTop = y.domain()[1]
+  steps.forEach((st, i) => {
+    const from = Math.max(st.value, 0)
+    const to   = Math.min(steps[i + 1]?.value ?? yTop, yTop)
+    if (to <= from) return
+    g.append('rect')
+      .attr('x', 0).attr('width', W)
+      .attr('y', y(to)).attr('height', y(from) - y(to))
+      .attr('fill', st.color).attr('opacity', 0.08)
+    if (st.value > 0)
+      g.append('line')
+        .attr('x1', 0).attr('x2', W).attr('y1', y(st.value)).attr('y2', y(st.value))
+        .attr('stroke', st.color).attr('stroke-width', 1).attr('stroke-dasharray', '6,3').attr('opacity', 0.8)
+  })
 
   // Lines
   const line = d3.line<{ time: Date; value: number }>()
