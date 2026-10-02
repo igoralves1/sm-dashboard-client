@@ -96,6 +96,9 @@ declare module 'vue' {
     TextDifferentView: typeof import('./src/components/TextDifferentView.vue')['default']
     TouchSpinInput: typeof import('./src/components/TouchSpinInput.vue')['default']
     UICard: typeof import('./src/components/UICard.vue')['default']
+    WaterHealthPanel: typeof import('./src/components/charts/WaterHealthPanel.vue')['default']
+    WaterIndicatorCard: typeof import('./src/components/charts/WaterIndicatorCard.vue')['default']
+    WaterNotes: typeof import('./src/components/charts/WaterNotes.vue')['default']
     WaveformChart: typeof import('./src/components/charts/WaveformChart.vue')['default']
   }
   export interface GlobalDirectives {

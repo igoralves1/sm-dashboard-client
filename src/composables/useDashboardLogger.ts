@@ -21,16 +21,34 @@ function load(): DataLog {
   return { snapshots: [] }
 }
 
+// localStorage holds ~5 MB per origin and is shared with locale, layout and alerts.
+// Each snapshot carries the full 24 h series (~1 MB), so the log keeps only the newest
+// snapshots that fit this budget — never the whole quota.
+const MAX_BYTES = 2_000_000
+
+/**
+ * Persist the log without ever throwing: logging must not break a dashboard refresh.
+ * Drops the oldest snapshots until it fits the budget and the browser quota.
+ */
 function save(log: DataLog) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(log))
-  } catch (e: any) {
-    // localStorage quota exceeded — drop oldest half and retry
-    if (e?.name === 'QuotaExceededError') {
-      log.snapshots = log.snapshots.slice(Math.floor(log.snapshots.length / 2))
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(log))
+  let json = JSON.stringify(log)
+  while (json.length > MAX_BYTES && log.snapshots.length > 1) {
+    log.snapshots.shift()
+    json = JSON.stringify(log)
+  }
+  while (true) {
+    try {
+      localStorage.setItem(STORAGE_KEY, json)
+      return
+    } catch {
+      if (!log.snapshots.length) break
+      log.snapshots.shift()   // quota exceeded (other keys use space too) — drop oldest and retry
+      json = JSON.stringify(log)
     }
   }
+  // Not even an empty log fits: free the space rather than keep a stale, oversized entry.
+  try { localStorage.removeItem(STORAGE_KEY) } catch {}
+  console.warn('[dashboard-logger] snapshot not saved: localStorage is full')
 }
 
 export function appendSnapshot(silvanopolis: LocationData, miranorte: LocationData) {

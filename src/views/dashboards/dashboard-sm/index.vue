@@ -568,8 +568,11 @@ import { brand } from '@/brands/brand'
 import RefreshCountdown from '@/components/charts/RefreshCountdown.vue'
 import ControlChart from '@/components/charts/ControlChart.vue'
 import BoxPlot from '@/components/charts/BoxPlot.vue'
-import { useTimestreamDashboard, type SiteData } from '@/composables/useTimestreamDashboard'
-import type { SensorStats } from '@/composables/useStatistics'
+import { useTimestreamDashboard } from '@/composables/useTimestreamDashboard'
+import {
+  LEVEL_THRESHOLDS, FLOW_THRESHOLDS_MIR, FLOW_THRESHOLDS_PALTA,
+  MARKERS_SIL, MARKERS_MIR, MARKERS_PALTA, flowSpc, productionSpc, latestPoint,
+} from '@/helpers/hidroforte'
 import { exportLog, getSnapshotCount } from '@/composables/useDashboardLogger'
 import { useAlertStore } from '@/composables/useAlertStore'
 import SiteMap from '@/components/charts/SiteMap.vue'
@@ -578,35 +581,13 @@ const router = useRouter()
 const { t }  = useI18n()
 const { initFromS3, startPolling, stopPolling } = useAlertStore()
 
-const siteMarkers = [
-  { lat: -11.15430944152578, lng: -48.172973779141344, label: 'RAP01 Silvanópolis', color: '#4da6ff' },
-]
-
-// Positions reported by the devices (latitude/longitude in HidroForteSensorsData)
-const MARKER_TANK = '#4da6ff'
-const MARKER_PUMP = '#fade2a'
-const siteMarkersMir = [
-  { lat: -9.54321, lng: -48.59452, label: 'RAP 500m³ Miranorte', color: MARKER_TANK },
-  { lat: -9.54893, lng: -48.59648, label: 'RAP 200m³ Miranorte', color: MARKER_TANK },
-  { lat: -9.52700, lng: -48.59578, label: 'Captação ETA Miranorte', color: MARKER_PUMP },
-  { lat: -9.52687, lng: -48.59598, label: 'PTP_01 Miranorte', color: MARKER_PUMP },
-]
-const siteMarkersPalta = [
-  { lat: -10.75449, lng: -47.53521, label: 'RAP 150m³ Ponte Alta', color: MARKER_TANK },
-  { lat: -10.74517, lng: -47.53517, label: 'PTP_01 Ponte Alta', color: MARKER_PUMP },
-  { lat: -10.75371, lng: -47.53620, label: 'PTP_02 Ponte Alta', color: MARKER_PUMP },
-  { lat: -10.75363, lng: -47.53624, label: 'PTP_04 Ponte Alta', color: MARKER_PUMP },
-]
+const siteMarkers = MARKERS_SIL
+const siteMarkersMir = MARKERS_MIR
+const siteMarkersPalta = MARKERS_PALTA
 
 const { silvanopolis, miranorte, miranorte200, miranorteSite, ponteAlta, ponteAltaSite, loading, error, rateLimited, rateLimitMins, lastUpdated, refresh } = useTimestreamDashboard()
 
-// ── Threshold lines (matching Grafana) ──
-const levelThresholds = [
-  { value: 25,  color: '#e84040', dash: '6,3' },
-  { value: 50,  color: '#f4954e', dash: '6,3' },
-  { value: 75,  color: '#f4954e', dash: '6,3' },
-  { value: 100, color: '#73bf69', dash: '6,3' },
-]
+const levelThresholds = LEVEL_THRESHOLDS
 
 const isDark = ref(true)
 
@@ -619,33 +600,8 @@ const statsOpenMirLevel   = ref(false)
 const statsOpenMir200Level = ref(false)
 const statsOpenPaltaLevel  = ref(false)
 
-// Flow threshold steps (Grafana-style: colour from value upward) — red / yellow / green
-const flowThresholdsMir = [
-  { value: 0,   color: '#e84040' },
-  { value: 50,  color: '#fade2a' },
-  { value: 100, color: '#73bf69' },
-]
-const flowThresholdsPalta = [
-  { value: 0,  color: '#e84040' },
-  { value: 10, color: '#fade2a' },
-  { value: 30, color: '#73bf69' },
-]
-
-// SPC panel inputs: one entry per series with its values over time + stats
-const flowSpc = (site: SiteData) =>
-  site.flow.map(f => ({ name: f.name, values: f.values, stats: site.flowStats[f.name] ?? null }))
-
-const productionSpc = (rows: Record<string, any>[], stats: Record<string, SensorStats | null>) =>
-  Object.keys(stats).map(name => ({
-    name,
-    stats: stats[name],
-    values: rows
-      .map(r => ({ time: new Date(r.time), value: Number(r[name]) }))
-      .filter(d => isFinite(d.value) && !isNaN(d.time.getTime())),
-  }))
-
-// A reading older than this is shown as stale (sensors report ~every minute)
-const STAT_STALE_MS = 10 * 60 * 1000
+const flowThresholdsMir = FLOW_THRESHOLDS_MIR
+const flowThresholdsPalta = FLOW_THRESHOLDS_PALTA
 
 // Latest reading of each Miranorte flow series (Grafana stat panels "Captação ETA" / "PTP_01")
 const miranorteLatestFlow = computed(() =>
@@ -654,9 +610,7 @@ const miranorteLatestFlow = computed(() =>
     { name: 'PTP_01',   label: 'PTP_01',                          color: '#f2495c' },
   ].map(s => {
     const values = miranorteSite.value.flow.find(f => f.name === s.name)?.values ?? []
-    const point = values.length ? values[values.length - 1] : null
-    const fresh = !!point && Date.now() - point.time.getTime() < STAT_STALE_MS
-    return { ...s, point, fresh }
+    return { ...s, ...latestPoint(values) }
   })
 )
 

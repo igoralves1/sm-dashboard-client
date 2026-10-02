@@ -121,6 +121,12 @@ RefreshCountdown.vue   ← D3 arc countdown timer (60s cycle)
 ```
 src/composables/useTimestreamDashboard.ts   ← ALL Timestream queries + PTP formulas + refresh
 src/composables/useDashboardLogger.ts       ← Snapshot logger + JSON export button
+src/helpers/hidroforte.ts                   ← shared site config: thresholds, markers, colours, SPC helpers
+src/utils/water/diagnostics.ts              ← water health model (7 indicators, bands, formulas, health index)
+src/utils/water/references.ts               ← regulatory/standards sources behind the water thresholds
+src/views/dashboards/hidroforte/index.vue   ← Painéis > Hidroforte (Energisa-style page, per-site tabs)
+src/components/charts/WaterHealthPanel.vue  ← site health index + methodology (like DiagnosticsPanel)
+src/components/charts/WaterNotes.vue        ← "Notas e considerações" at the end of each chart card
 ```
 
 ### Assets

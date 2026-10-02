@@ -585,6 +585,25 @@ watch(() => props.theme, draw)
 .tt-value { color: #fff; font-weight: 600; white-space: nowrap; }
 
 /* ── Light theme ── */
+/* Alerts on white: neutral card + coloured left accent (no salmon/green/orange fills) */
+.chart-theme-light .chart-notes { border-top-color: #e4eaf4; }
+.chart-theme-light .chart-alert {
+  background: #ffffff;
+  border: 1px solid #dce6f0;
+  border-left-width: 3px;
+}
+.chart-theme-light .chart-alert--critical { border-left-color: #c62828; }
+.chart-theme-light .chart-alert--warning  { border-left-color: #b35c00; }
+.chart-theme-light .chart-alert--info     { border-left-color: #37872d; }
+.chart-theme-light .chart-alert--critical .alert-icon,
+.chart-theme-light .chart-alert--critical .alert-ptp { color: #c62828; }
+.chart-theme-light .chart-alert--warning .alert-icon,
+.chart-theme-light .chart-alert--warning .alert-ptp  { color: #b35c00; }
+.chart-theme-light .chart-alert--info .alert-icon,
+.chart-theme-light .chart-alert--info .alert-ptp     { color: #37872d; }
+.chart-theme-light .alert-prob--critical { background: #fdecec; color: #c62828; }
+.chart-theme-light .alert-prob--warning  { background: #fff4e5; color: #b35c00; }
+.chart-theme-light .alert-prob--info     { background: #eaf6e8; color: #2e7d32; }
 .chart-theme-light .chart-header {
   background: #ffffff;
   border-bottom-color: #dce6f0;

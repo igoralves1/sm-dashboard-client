@@ -27,6 +27,11 @@ import { useI18n } from 'vue-i18n'
 import * as d3 from 'd3'
 import { zScore, pValue, sigmaZone, ZONE_COLORS, type SensorStats } from '@/composables/useStatistics'
 
+// Same zones, darker shades for the white dashboard (#fade2a yellow is invisible on white)
+const ZONE_COLORS_LIGHT: typeof ZONE_COLORS = { 0: '#37872d', 1: '#a07800', 2: '#b35c00', 3: '#c62828' }
+const zoneColor = (zone: keyof typeof ZONE_COLORS, theme?: string) =>
+  (theme === 'light' ? ZONE_COLORS_LIGHT : ZONE_COLORS)[zone]
+
 interface DataPoint { time: Date; value: number }
 
 const props = defineProps<{
@@ -106,11 +111,20 @@ function draw() {
 
   // ── Sigma band fills + lines ──────────────────────────────────────────────
   if (st) {
-    const bands = props.theme === 'light' ? [] : [
-      { lo: st.sigma2.lower, hi: st.sigma3.upper, fill: 'rgba(232,64,64,0.06)' },
-      { lo: st.sigma1.lower, hi: st.sigma2.upper, fill: 'rgba(245,139,6,0.07)' },
-      { lo: st.sigma1.lower, hi: st.sigma1.upper, fill: 'rgba(115,191,105,0.07)' },
-    ]
+    const light = props.theme === 'light'
+
+    // Zone fills. Dark: tinted zones (green ±1σ, orange 1–2σ, red beyond 2σ).
+    // Light (white dashboard): no warm fills — only a faint brand-blue ±1σ band;
+    // the dashed σ/UCL/LCL lines carry the meaning.
+    const bands = light
+      ? [{ lo: st.sigma1.lower, hi: st.sigma1.upper, fill: 'rgba(0,158,224,0.06)' }]
+      : [
+          { lo: st.sigma2.upper, hi: st.sigma3.upper, fill: 'rgba(232,64,64,0.06)' },
+          { lo: st.sigma3.lower, hi: st.sigma2.lower, fill: 'rgba(232,64,64,0.06)' },
+          { lo: st.sigma1.upper, hi: st.sigma2.upper, fill: 'rgba(245,139,6,0.07)' },
+          { lo: st.sigma2.lower, hi: st.sigma1.lower, fill: 'rgba(245,139,6,0.07)' },
+          { lo: st.sigma1.lower, hi: st.sigma1.upper, fill: 'rgba(115,191,105,0.07)' },
+        ]
     bands.forEach(b => {
       const lo = Math.max(b.lo, yMin)
       const hi = Math.min(b.hi, yMax)
@@ -121,25 +135,18 @@ function draw() {
         .attr('fill', b.fill)
     })
 
-    // Also 3σ lower half
-    const lo3 = Math.max(st.sigma3.lower, yMin)
-    const hi3 = Math.min(st.sigma2.lower, yMax)
-    if (hi3 > lo3) {
-      g.append('rect')
-        .attr('x', 0).attr('width', W)
-        .attr('y', y(hi3)).attr('height', y(lo3) - y(hi3))
-        .attr('fill', 'rgba(232,64,64,0.06)')
-    }
-
-    // Sigma lines
+    // Sigma lines — darker shades on white for contrast
+    const C = light
+      ? { mean: '#5a6e94', s1: '#37872d', s2: '#b35c00', lim: '#c62828' }
+      : { mean: '#aaaaaa', s1: '#73bf69', s2: '#f58b06', lim: '#e84040' }
     const lines = [
-      { v: st.mean,          color: '#aaaaaa', dash: '',      label: 'μ',   width: 1.5 },
-      { v: st.sigma1.upper,  color: '#73bf69', dash: '4,3',   label: '+1σ', width: 1 },
-      { v: st.sigma1.lower,  color: '#73bf69', dash: '4,3',   label: '−1σ', width: 1 },
-      { v: st.sigma2.upper,  color: '#f58b06', dash: '4,3',   label: '+2σ', width: 1 },
-      { v: st.sigma2.lower,  color: '#f58b06', dash: '4,3',   label: '−2σ', width: 1 },
-      { v: st.ucl,           color: '#e84040', dash: '6,3',   label: 'UCL', width: 1.5 },
-      { v: st.lcl,           color: '#e84040', dash: '6,3',   label: 'LCL', width: 1.5 },
+      { v: st.mean,          color: C.mean, dash: '',      label: 'μ',   width: 1.5 },
+      { v: st.sigma1.upper,  color: C.s1,   dash: '4,3',   label: '+1σ', width: 1 },
+      { v: st.sigma1.lower,  color: C.s1,   dash: '4,3',   label: '−1σ', width: 1 },
+      { v: st.sigma2.upper,  color: C.s2,   dash: '4,3',   label: '+2σ', width: 1 },
+      { v: st.sigma2.lower,  color: C.s2,   dash: '4,3',   label: '−2σ', width: 1 },
+      { v: st.ucl,           color: C.lim,  dash: '6,3',   label: 'UCL', width: 1.5 },
+      { v: st.lcl,           color: C.lim,  dash: '6,3',   label: 'LCL', width: 1.5 },
     ]
     lines.forEach(l => {
       if (l.v < yMin || l.v > yMax) return
@@ -149,11 +156,12 @@ function draw() {
         .attr('stroke', l.color)
         .attr('stroke-width', l.width)
         .attr('stroke-dasharray', l.dash)
-        .attr('opacity', 0.75)
+        .attr('opacity', light ? 0.9 : 0.75)
       // Label on right edge
       g.append('text')
         .attr('x', W + 3).attr('y', y(l.v) + 3.5)
-        .attr('font-size', '8px').attr('fill', l.color)
+        .attr('font-size', light ? '9px' : '8px').attr('font-weight', light ? 600 : 400)
+        .attr('fill', l.color)
         .text(l.label)
     })
   }
@@ -175,7 +183,7 @@ function draw() {
     .attr('fill', 'none')
     .attr('stroke', tc.value.dataLine)
     .attr('stroke-width', 1.5)
-    .attr('opacity', 0.5)
+    .attr('opacity', props.theme === 'light' ? 0.85 : 0.5)
     .attr('d', line)
 
   // ── Colored dots by sigma zone ─────────────────────────────────────────────
@@ -191,7 +199,7 @@ function draw() {
       g.append('circle')
         .attr('cx', x(d.time)).attr('cy', y(d.value))
         .attr('r', zone >= 3 ? 4 : zone >= 2 ? 3 : 2)
-        .attr('fill', ZONE_COLORS[zone])
+        .attr('fill', zoneColor(zone, props.theme))
         .attr('opacity', zone === 0 ? 0.35 : 0.9)
     })
   }
@@ -273,7 +281,7 @@ function draw() {
       const z  = zScore(pt.value, st.mean, st.std)
       const pv = pValue(z)
       const zone = sigmaZone(z)
-      dotColor = ZONE_COLORS[zone]
+      dotColor = zoneColor(zone, props.theme)
       statsText = `z = ${z.toFixed(2)}  ·  p = ${(pv * 100).toFixed(2)}%`
     }
 

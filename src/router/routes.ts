@@ -77,6 +77,14 @@ export const allRoutes = [
         component: () => import('@/views/dashboards/dashboard-sm/index.vue'),
     },
     {
+        path: '/hidroforte',
+        name: 'hidroforte',
+        meta: {
+            title: 'Hidroforte',
+        },
+        component: () => import('@/views/dashboards/hidroforte/index.vue'),
+    },
+    {
         path: '/dashboard-energisa',
         name: 'dashboard-energisa',
         meta: {

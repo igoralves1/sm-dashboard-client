@@ -28,9 +28,10 @@ export const menuItems: MenuItemType[] = [
         key: 'dashboards',
         label: 'Dashboards',
         icon: 'tabler:layout-dashboard',
-        badge: { variant: 'success', text: '2' },
+        badge: { variant: 'success', text: '3' },
         children: [
             { key: 'dashboard-sm', label: 'HF - Água', url: '/dashboard-sm' },
+            { key: 'hidroforte', label: 'Hidroforte', url: '/hidroforte' },
             { key: 'dashboard-energisa', label: 'Energisa', url: '/dashboard-energisa' },
         ],
     },

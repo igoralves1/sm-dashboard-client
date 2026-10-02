@@ -1,6 +1,6 @@
 <template>
   <!-- Collapsible "statistical model used": control chart + box plot (with interpretation) per series -->
-  <div class="spc-panel">
+  <div class="spc-panel" :class="{ 'spc-panel--light': theme === 'light' }">
     <button class="spc-toggle" @click="open = !open">
       <span class="spc-toggle__icon">▶ {{ t('spc.model_used') }}</span>
       <span class="spc-chevron" :class="{ open }">▾</span>
@@ -101,17 +101,20 @@ const open = ref(false)
   border-radius: 6px;
 }
 
-:global(.theme-light .spc-panel) { border-top: 1px solid #e4eaf4; }
-:global(.theme-light .spc-toggle__icon) {
-  color: #8498bf;
+/* ── Light (white dashboard) — DESIGN-SYSTEM light tokens ── */
+.spc-panel--light { border-top: 1px solid #e4eaf4; }
+.spc-panel--light .spc-toggle__icon {
+  color: #5a6e94;
   font-size: 0.7rem;
   font-weight: 700;
 }
-:global(.theme-light .spc-toggle:hover .spc-toggle__icon) { color: #009ee0; }
-:global(.theme-light .spc-chevron) { color: #8498bf; }
-:global(.theme-light .spc-flow-col) {
-  background: linear-gradient(135deg, #f6f9fd, #eef3fb);
+.spc-panel--light .spc-toggle:hover .spc-toggle__icon,
+.spc-panel--light .spc-toggle:hover .spc-chevron { color: #009ee0; }
+.spc-panel--light .spc-chevron { color: #8a969c; }
+.spc-panel--light .spc-flow-col {
+  background: #f6f9fd;
   border: 1px solid #dce6f0;
   border-radius: 8px;
+  padding: 10px 12px;
 }
 </style>

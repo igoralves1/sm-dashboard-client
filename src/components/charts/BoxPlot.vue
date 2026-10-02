@@ -74,6 +74,10 @@ const tc = useChartTheme(() => props.theme)
 
 interface InterpLine { icon: string; color: string; text: string }
 
+// Neutral text colours follow the theme (#aaa is unreadable on the white dashboard)
+const neutral = computed(() => (props.theme === 'light' ? '#343a40' : '#aaa'))
+const muted   = computed(() => (props.theme === 'light' ? '#8a969c' : '#555'))
+
 const sortedStatsStrip = computed(() => {
   const st = props.stats
   if (!st) return []
@@ -81,21 +85,21 @@ const sortedStatsStrip = computed(() => {
   // Positional entries — sort by numeric value so strip always matches chart left→right
   const positional = [
     { k: t('spc.stats.lcl'),    numV: st.lcl,    color: '#e84040' },
-    { k: t('spc.stats.min'),    numV: st.whiskerLow,  color: '#aaa' },
-    { k: t('spc.stats.q1'),     numV: st.q1,          color: '#aaa' },
-    { k: 'μ',                   numV: st.mean,        color: '#aaaaaa' },
+    { k: t('spc.stats.min'),    numV: st.whiskerLow,  color: neutral.value },
+    { k: t('spc.stats.q1'),     numV: st.q1,          color: neutral.value },
+    { k: 'μ',                   numV: st.mean,        color: neutral.value },
     { k: t('spc.stats.median'), numV: st.median,      color: tc.value.median },
-    { k: t('spc.stats.q3'),     numV: st.q3,          color: '#aaa' },
-    { k: t('spc.stats.max'),    numV: st.whiskerHigh, color: '#aaa' },
+    { k: t('spc.stats.q3'),     numV: st.q3,          color: neutral.value },
+    { k: t('spc.stats.max'),    numV: st.whiskerHigh, color: neutral.value },
     { k: t('spc.stats.ucl'),    numV: st.ucl,    color: '#e84040' },
   ].sort((a, b) => a.numV - b.numV)
    .map(e => ({ k: e.k, v: e.numV.toFixed(dec + 1), color: e.color, divider: false }))
 
   // Derived stats (no positional meaning) — appended after divider
   const derived = [
-    { k: t('spc.stats.std'),      v: st.std.toFixed(dec + 1), color: '#aaa', divider: true },
-    { k: t('spc.stats.iqr'),      v: st.iqr.toFixed(dec + 1), color: '#aaa', divider: false },
-    { k: t('spc.stats.n'),        v: String(st.n),        color: '#aaa', divider: false },
+    { k: t('spc.stats.std'),      v: st.std.toFixed(dec + 1), color: neutral.value, divider: true },
+    { k: t('spc.stats.iqr'),      v: st.iqr.toFixed(dec + 1), color: neutral.value, divider: false },
+    { k: t('spc.stats.n'),        v: String(st.n),        color: neutral.value, divider: false },
     ...(st.outliers.length ? [{ k: t('spc.stats.outliers'), v: String(st.outliers.length), color: '#e84040', divider: false }] : []),
   ]
 
@@ -127,7 +131,7 @@ const interpretation = computed<InterpLine[]>(() => {
   const skew    = st.mean - st.median
   const skewPct = st.std > 0 ? Math.abs(skew) / st.std : 0
   if (skewPct < 0.2) {
-    lines.push({ icon: '◈', color: '#aaaaaa', text: t('spc.interp.symmetric',    { mean: st.mean.toFixed(dec) + u, median: st.median.toFixed(dec) + u }) })
+    lines.push({ icon: '◈', color: neutral.value, text: t('spc.interp.symmetric',    { mean: st.mean.toFixed(dec) + u, median: st.median.toFixed(dec) + u }) })
   } else if (skew > 0) {
     lines.push({ icon: '◈', color: '#f58b06', text: t('spc.interp.right_skewed', { mean: st.mean.toFixed(dec) + u, median: st.median.toFixed(dec) + u }) })
   } else {
@@ -147,7 +151,7 @@ const interpretation = computed<InterpLine[]>(() => {
 
   // 5. Sample size
   if (st.n < 30) {
-    lines.push({ icon: 'ℹ', color: '#555', text: t('spc.interp.small_sample', { n: st.n }) })
+    lines.push({ icon: 'ℹ', color: muted.value, text: t('spc.interp.small_sample', { n: st.n }) })
   }
 
   return lines
@@ -243,7 +247,7 @@ function draw() {
     { v: st.q1,           label: 'Q1',  color: '#4a90d9', dash: '',    width: 0 },
     { v: st.q3,           label: 'Q3',  color: '#4a90d9', dash: '',    width: 0 },
     { v: st.median,       label: 'Med', color: tc.value.median, dash: '',    width: 0 },
-    { v: st.mean,         label: 'μ',   color: '#aaaaaa', dash: '',    width: 0 },
+    { v: st.mean,         label: 'μ',   color: neutral.value, dash: '',    width: 0 },
   ]
 
   // ── Tooltip helpers ───────────────────────────────────────────────────────
@@ -633,6 +637,16 @@ watch(() => props.theme, () => requestAnimationFrame(draw))
 }
 
 /* ── Light theme ── */
+.chart-theme-light .bp-empty { color: #8a969c; }
+.chart-theme-light .bp-stats-strip { border-top-color: #e4eaf4; }
+.chart-theme-light .bp-stat--divider { border-left-color: #dce6f0; }
+.chart-theme-light .bp-stat__k { color: #8a969c; }
+.chart-theme-light .bp-stat__v { color: #343a40; }
+.chart-theme-light .bp-interp { border-top-color: #e4eaf4; }
+.chart-theme-light .bp-interp__toggle { color: #5a6e94; font-weight: 700; }
+.chart-theme-light .bp-interp__toggle:hover { color: #009ee0; }
+.chart-theme-light .bp-interp__findings { border-top-color: #eef2f8; }
+.chart-theme-light .bp-interp__line { color: #4a5572; }
 .chart-theme-light .bp-tip {
   background: #ffffff;
   border-color: #dce6f0;
