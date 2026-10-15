@@ -59,6 +59,16 @@ jobs:
           VITE_SENSOR_PTP_02_PALTA:      ${{ secrets.VITE_SENSOR_PTP_02_PALTA }}
           VITE_SENSOR_PTP_04_PALTA:      ${{ secrets.VITE_SENSOR_PTP_04_PALTA }}
           VITE_SENSOR_PTP_07:            ${{ secrets.VITE_SENSOR_PTP_07 }}
+          VITE_ENERGISA_USER_POOL_ID:    ${{ secrets.VITE_ENERGISA_USER_POOL_ID }}
+          VITE_ENERGISA_CLIENT_ID:       ${{ secrets.VITE_ENERGISA_CLIENT_ID }}
+          VITE_ENERGISA_IDENTITY_POOL_ID: ${{ secrets.VITE_ENERGISA_IDENTITY_POOL_ID }}
+          VITE_ENERGISA_PUBSUB_ENDPOINT: ${{ secrets.VITE_ENERGISA_PUBSUB_ENDPOINT }}
+          VITE_ENERGISA_TENANTS_API:     ${{ secrets.VITE_ENERGISA_TENANTS_API }}
+          VITE_ENERGISA_DEVICES_API:     ${{ secrets.VITE_ENERGISA_DEVICES_API }}
+          VITE_ENERGISA_API:             ${{ secrets.VITE_ENERGISA_API }}
+          VITE_ENERGISA_ORG_ID:          ${{ secrets.VITE_ENERGISA_ORG_ID }}
+          VITE_ENERGISA_USER:            ${{ secrets.VITE_ENERGISA_USER }}
+          VITE_ENERGISA_PASSWORD:        ${{ secrets.VITE_ENERGISA_PASSWORD }}
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
